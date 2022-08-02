@@ -1,0 +1,270 @@
+package com.xz.location.controller;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+import com.xz.location.dao.ServerMapper;
+import com.xz.location.pojo.Led;
+import com.xz.location.pojo.Server;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.*;
+
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@Controller
+@RequestMapping("/map")
+
+public class MapController {
+    @Autowired
+    private ServerMapper serverMapper;
+
+    private Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm").serializeNulls().create();
+
+
+    @RequestMapping(value = "cluster", method = RequestMethod.GET, produces = "text/html;charset=UTF-8")
+    public String cluster(@RequestParam(value = "assets", required = false, defaultValue = "led") String assets,
+                          @RequestParam(value = "street", required = false, defaultValue = "") String street, ModelMap model) {
+        Map<String, Object> param = new HashMap<>();
+        param.put("start", 0);
+        param.put("limit", 999999);
+        param.put("street", street);
+        param.put("coordinate", "fixed");
+        ArrayList<HashMap> json = new ArrayList<>();
+        if ("led".equals(assets)) {
+            List<Led> leds = serverMapper.selectLed(param);
+            for (Led led : leds) {
+                double[] lnglat = {led.getLongitude(), led.getLatitude()};
+                HashMap<String, Object> map = new HashMap(3);
+                map.put("lnglat", lnglat);
+                map.put("name", led.getLocation());
+                json.add(map);
+            }
+
+        }
+        if ("server".equals(assets)) {
+            List<Server> servers = serverMapper.selectServer(param);
+            for (Server server : servers) {
+                double[] lnglat = {server.getLongitude(), server.getLatitude()};
+                HashMap<String, Object> map = new HashMap(3);
+                map.put("lnglat", lnglat);
+                map.put("name", server.getOwner());
+                json.add(map);
+            }
+        }
+
+        model.addAttribute("assets", gson.toJson(json));
+        return "map/cluster";
+    }
+
+    @RequestMapping(value = "massmarks", method = RequestMethod.GET, produces = "text/html;charset=UTF-8")
+    public String massmarks(@RequestParam(value = "assets", required = false, defaultValue = "led") String assets,
+                            @RequestParam(value = "street", required = false, defaultValue = "") String street, ModelMap model) {
+        Map<String, Object> param = new HashMap<>();
+        param.put("start", 0);
+        param.put("limit", 999999);
+        param.put("street", street);
+        param.put("coordinate", "fixed");
+        ArrayList<HashMap> json = new ArrayList<>();
+        if ("led".equals(assets)) {
+            List<Led> leds = serverMapper.selectLed(param);
+            for (Led led : leds) {
+                double[] lnglat = {led.getLongitude(), led.getLatitude()};
+                HashMap<String, Object> map = new HashMap(3);
+                map.put("lnglat", lnglat);
+                map.put("name", led.getLocation());
+                map.put("id", led.getLocationID());
+                map.put("style", 0);
+                json.add(map);
+            }
+
+        }
+        if ("server".equals(assets)) {
+            List<Server> servers = serverMapper.selectServer(param);
+            for (Server server : servers) {
+                double[] lnglat = {server.getLongitude(), server.getLatitude()};
+                HashMap<String, Object> map = new HashMap(3);
+                map.put("lnglat", lnglat);
+                map.put("name", server.getOwner());
+                map.put("id", server.getLocationID());
+                map.put("style", 0);
+                json.add(map);
+            }
+        }
+
+        model.addAttribute("assets", gson.toJson(json));
+        return "map/massmarks";
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "getAssetsList", method = RequestMethod.GET, produces = "text/html;charset=UTF-8")
+    public String getAssetsList(@RequestParam(value = "assets", required = false, defaultValue = "led") String assets) {
+        Map<String, Object> param = new HashMap<>();
+        param.put("start", 0);
+        param.put("limit", 999999);
+        param.put("coordinate", "fixed");//已有坐标的资产
+        ArrayList<HashMap> json = new ArrayList<>();
+        if ("led".equals(assets)) {
+            List<Led> leds = serverMapper.selectLed(param);
+            for (Led led : leds) {
+                double[] lnglat = {led.getLongitude(), led.getLatitude()};
+                HashMap<String, Object> map = new HashMap(3);
+                map.put("lnglat", lnglat);
+                map.put("name", led.getLocation());
+                map.put("id", led.getLocationID());
+                map.put("style", 0);
+                json.add(map);
+            }
+
+        }
+        if ("server".equals(assets)) {
+            List<Server> servers = serverMapper.selectServer(param);
+            for (Server server : servers) {
+                double[] lnglat = {server.getLongitude(), server.getLatitude()};
+                HashMap<String, Object> map = new HashMap(3);
+                map.put("lnglat", lnglat);
+                map.put("name", server.getOwner());
+                map.put("id", server.getLocationID());
+                map.put("style", 1);
+                json.add(map);
+            }
+        }
+
+        return gson.toJson(json);
+    }
+
+    /*@Deprecated
+    @ResponseBody
+    @RequestMapping(value = "getStreet", method = RequestMethod.GET, produces = "text/javascript;charset=UTF-8")
+    public String getStreet(@RequestParam(value = "assets", required = false, defaultValue = "led") String assets, @RequestParam(value = "draw", required = false) Integer draw) {
+        Map<String, Object> param = new HashMap<>();
+        List<HashMap<String, Object>> streets = null;
+        if ("led".equals(assets))
+            streets = serverMapper.selectStreetByLed(param);
+        if ("server".equals(assets))
+            streets = serverMapper.selectStreetByServer(param);
+        List<String> labels = new ArrayList<>();
+
+        String elements = "{" +
+                "        name: \"黄埔区街道\"," +
+                "        position: [%f, %f]," +
+                "        zooms: [10, 20]," +
+                "        opacity: 1," +
+                "        zIndex: 10," +
+                "        icon: {" +
+                "            type: \"image\"," +
+                "            image: \"https://a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png\"," +
+               *//* "            image: \"https://a.amap.com/jsapi_demos/static/images/poi-marker.png\"," +
+                "            clipOrigin: [14, 92]," +
+                "            clipSize: [50, 68]," +*//*
+                "            size: [25, 34]," +
+                "            anchor: \"bottom-center\"," +
+                "            angel: 0," +
+                "            retina: true" +
+                "        }," +
+                "        text: {" +
+                "            content: \"%s(%d)\"," +
+                "            direction: \"left\"," +
+                "            offset: [0, -5]," +
+                "            style: {" +
+                "                fontSize: 15," +
+                "                fontWeight: \"normal\"," +
+                "                fillColor: \"#333\"," +
+                "                strokeColor: \"#fff\"," +
+                "                strokeWidth: 2," +
+                "            }" +
+                "        }" +
+                "    }";
+        for (HashMap<String, Object> label : streets) {
+            labels.add(String.format(elements, label.get("longitude"), label.get("latitude"), label.get("streetName"), label.get("cc")));
+        }
+
+        return "var LabelsData = [" + String.join(",", labels) + "]";
+    }*/
+
+    @ResponseBody
+    @RequestMapping(value = "getStreet2", method = RequestMethod.GET, produces = "text/javascript;charset=UTF-8")
+    public String getStreet2(@RequestParam(value = "assets", required = false, defaultValue = "led") String assets) {
+        Map<String, Object> param = new HashMap<>();
+        List<HashMap<String, Object>> streets = null;
+        if ("led".equals(assets))
+            streets = serverMapper.selectStreetByLed(param);
+        if ("server".equals(assets))
+            streets = serverMapper.selectStreetByServer(param);
+        List<String> labels = new ArrayList<>();
+
+        String elements = "{\"name\": \"黄埔led_%d\"," +
+                "\"position\": [%f, %f]," +
+                "\"zooms\": [10, 20]," +
+                "\"opacity\": 1," +
+                "\"zIndex\": 8," +
+                //"\"icon\"," +
+                "\"text\": {" +
+                "\"content\":\"%s(%d)\"," +
+                "\"direction\": \"right\"," +
+                "\"offset\": [-20, -5]," +
+                "\"style\": textStyle" +
+                "}}";
+        for (HashMap<String, Object> label : streets) {
+            labels.add(String.format(elements, label.get("streetID"), label.get("longitude"), label.get("latitude"), label.get("streetName"), label.get("cc")));
+        }
+
+        return "var streetLabel = [" + String.join(",", labels) + "]";
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "getStreet3", method = RequestMethod.GET, produces = "text/javascript;charset=UTF-8")
+    public String getStreet3(@RequestParam(value = "assets", required = false, defaultValue = "led") String assets) {
+        Map<String, Object> param = new HashMap<>();
+        List<HashMap<String, Object>> streets = null;
+        if ("led".equals(assets))
+            streets = serverMapper.selectStreetByLed(param);
+        if ("server".equals(assets))
+            streets = serverMapper.selectStreetByServer(param);
+        List<String> labels = new ArrayList<>();
+
+        String elements = "{\"name\": \"黄埔led_%d\"," +
+                "\"position\": [%f, %f]," +
+                "\"zooms\": [10, 20]," +
+                "\"opacity\": 1," +
+                "\"zIndex\": 8," +
+                //"\"icon\"," +
+                "\"text\": {" +
+                "\"content\":\"%s(%d)\"," +
+                "\"direction\": \"right\"," +
+                "\"offset\": [-20, -5]," +
+                "\"style\":\"\"" + //在jsp 的html重新设定
+                "}}";
+        for (HashMap<String, Object> label : streets) {
+            labels.add(String.format(elements, label.get("streetID"), label.get("longitude"), label.get("latitude"), label.get("streetName"), label.get("cc")));
+        }
+
+        return "[" + String.join(",", labels) + "]";
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "getAssets", method = RequestMethod.GET, produces = "text/html;charset=UTF-8")
+    public String getAssets(@RequestParam(value = "assets", required = false, defaultValue = "led") String assets, @RequestParam(value = "locationID") Integer locationID) {
+        Map<String, Object> param = new HashMap<>();
+        param.put("locationID", locationID);
+        if ("led".equals(assets)) {
+            List<Led> leds = serverMapper.selectLed(param);
+            if (leds.size() == 1)
+                return gson.toJson(leds.get(0));
+        }
+        if ("server".equals(assets)) {
+            List<Server> servers = serverMapper.selectServer(param);
+            if (servers.size() == 1)
+                return gson.toJson(servers.get(0));
+        }
+        return "{}";
+    }
+}

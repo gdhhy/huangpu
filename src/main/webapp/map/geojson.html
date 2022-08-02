@@ -1,0 +1,70 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+    <style>
+        html,
+        body,
+        #container {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+    <title>GeoJSON</title>
+    <link rel="stylesheet" href="//a.amap.com/jsapi_demos/static/demo-center/css/demo-center.css" />
+    <script src="https://webapi.amap.com/maps?v=1.4.15&key=592ac591c3ad221629d4e47448a81436"></script>
+
+    <script src="https://a.amap.com/jsapi_demos/static/demo-center/js/demoutils.js"></script>
+</head>
+<body>
+<div id="container"></div>
+<script type="text/javascript">
+    var map = new AMap.Map('container', {
+        viewMode: '2D', // 默认使用 2D 模式，如果希望使用带有俯仰角的 3D 模式，请设置 viewMode: '3D',
+        center: [113.51417533122003,23.239678207777793],
+        zoom: 12
+    });
+
+    ajax('huangpu.json', function(err, geoJSON) {
+        if (!err) {
+            var geojson = new AMap.GeoJSON({
+                geoJSON: geoJSON,
+                // 还可以自定义getMarker和getPolyline
+                getPolygon: function(geojson, lnglats) {
+                    console.log('颜色',geojson.properties._parentProperities.color);
+                    console.log('街道',geojson.properties._parentProperities.name);
+
+                    var color=geojson.properties._parentProperities.color;
+                    if(!color) color='pink';
+                    // 计算面积
+                    var area = AMap.GeometryUtil.ringArea(lnglats[0])
+
+                    return new AMap.Polygon({
+                        path: lnglats,
+                        text:geojson.properties._parentProperities.name,
+                        fillOpacity: 0.3,// 面积越大透明度越高
+                        strokeColor: 'white',
+                        fillColor: color
+                    });
+                },
+                getMarker: function (geojson, lnglats) {
+                    console.log('点',lnglats)
+                },
+                getPolyline: function (geojson, lnglats) {
+                    console.log('线',lnglats);
+                }
+
+            });
+
+            geojson.setMap(map);
+
+            log.success('GeoJSON 数据加载完成')
+        } else {
+            log.error('GeoJSON 服务请求失败')
+        }
+    })
+</script>
+</body>
+</html>
