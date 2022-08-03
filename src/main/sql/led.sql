@@ -53,9 +53,17 @@ create table server
     link        varchar(255) comment '法人',   -- 共同=>link  legalPerson
     linkPhone   varchar(255) comment '法人电话', -- 共同=>linkPhone  LegalPhone
     safeGrade   int comment '等保级别',
-    fixPosition int comment '已定位（即是经纬度已解析）'
+    fixPosition int comment '已定位（即是经纬度已解析）',
+    color        varchar(255),
+    status       int,
+    imageID      int
 ) engine = MyISAM;
-
+ALTER table server
+    add COLUMN color varchar(255);
+ALTER table server
+    add COLUMN status int;
+ALTER table server
+    add COLUMN imageID int;
 create table street
 (
     streetID    int auto_increment primary key,

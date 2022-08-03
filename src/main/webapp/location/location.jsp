@@ -45,7 +45,7 @@
                     {"data": "owner", "sClass": "center"},//4
                     {"data": "street", "sClass": "center"},
                     {"data": "link", "sClass": "center"},
-                    {"data": "locationID", "sClass": "center"},
+                    {"data": "color", "sClass": "center"},
                     {"data": "locationID", "sClass": "center"}//8
                 ],
 
@@ -74,10 +74,10 @@
                     {
                         "orderable": false, "searchable": false, className: 'text-center', "targets": 7, title: '状态',
                         render: function (data, type, row, meta) {
-                            return '<select id="skin-colorpicker"  class="hide">' +
-                                ' <option data-skin="no-skin" value="#438EB9">#438EB9</option> ' +
-                                '<option data-skin="skin-1" value="red">red</option> ' +
-                                '<option data-skin="skin-2" value="#C6487E">#C6487E</option> ' +
+                            return '<select id="skin-colorpicker"  class="hide" data-id="{0}" data-color="{1}">'.format(row["locationID"], data) +
+                                '<option data-skin="no-skin" value="#438EB9">#438EB9</option>' +
+                                '<option data-skin="skin-1" value="red">red</option>' +
+                                '<option data-skin="skin-2" value="#C6487E">#C6487E</option>' +
                                 '<option data-skin="skin-3" value="green">green</option> ' +
                                 '</select>';
                         }
@@ -134,9 +134,51 @@
             $('#dynamic-table tr').find('a:eq(1)').click(function () {
                 $.cookie("data-locationID", $(this).attr("data-locationID"));
             });
-            $('#dynamic-table tr').find('#skin-colorpicker').ace_colorpicker().on('change', function() {
-              /*  alert(this.value);
-                alert(this.selectedIndex);*/
+            $('#dynamic-table tr').find('#skin-colorpicker').each(function () {
+                $(this).val($(this).attr("data-color"))
+            });
+            $('#dynamic-table tr').find('#skin-colorpicker').ace_colorpicker().on('change', function () {
+                var submitData = {locationID: $(this).attr("data-id"), color: this.value};
+                $.ajax({
+                    type: "POST",
+                    url: "/location/saveLedJson.jspa",
+                    data: JSON.stringify(submitData),
+                    //contentType: "application/x-www-form-urlencoded; charset=UTF-8",//http://www.cnblogs.com/yoyotl/p/5853206.html
+                    contentType: "application/json; charset=utf-8",
+                    cache: false,
+                    success: function (response, textStatus) {
+                        var result = JSON.parse(response);
+                        if (!result.succeed) {
+                            $("#errorText").html(result.errmsg);
+                            $("#dialog-error").removeClass('hide').dialog({
+                                modal: true,
+                                width: 600,
+                                title: result.title,
+                                buttons: [{
+                                    text: "确定", "class": "btn btn-primary btn-xs", click: function () {
+                                        $(this).dialog("close");
+                                        myTable.ajax.reload(null, false);//null为callback,false是是否回到第一页
+                                    }
+                                }]
+                            });
+                        } else {
+                            myTable.ajax.reload(null, false);//null为callback,false是是否回到第一页
+                        }
+                    },
+                    error: function (response, textStatus) {/*能够接收404,500等错误*/
+                        $("#errorText").html(response.responseText);
+                        $("#dialog-error").removeClass('hide').dialog({
+                            modal: true,
+                            width: 600,
+                            title: "请求状态码：" + response.status,//404，500等
+                            buttons: [{
+                                text: "确定", "class": "btn btn-primary btn-xs", click: function () {
+                                    $(this).dialog("close");
+                                }
+                            }]
+                        });
+                    }
+                });
             });
             $('#dynamic-table tr').find('.hasLink').click(function () {
                 if ($(this).attr("data-Url").indexOf('javascript:') >= 0) {
@@ -150,8 +192,8 @@
         });
 
         $('.form-search :text').keydown(function (event) {
-            if (event.keyCode === 13)
-                search();
+            if (event.keyCode === 13) return ;
+                //search();
         });
 
         function search() {
@@ -159,6 +201,10 @@
             // var searchParam = "?threeThirty=" + $('#three_thirty').is(':checked');
             var searchParam = "";
             $('.form-search select').each(function () {
+                if ($(this).val())
+                    searchParam += "&" + $(this).attr("name") + "=" + $(this).val();
+            });
+            $('.form-search :text').each(function () {
                 if ($(this).val())
                     searchParam += "&" + $(this).attr("name") + "=" + $(this).val();
             });
@@ -440,6 +486,8 @@
                     <option value="fixed">已确定</option>
                     <option value="unfixed">未定</option>
                 </select> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <label>地址 ：</label>
+                <input type="text" placeholder="地址 ..."  name="address" autocomplete="off"/>
                 <button type="button" class="btn btn-sm btn-success">
                     查询
                     <i class="ace-icon fa fa-search icon-on-right bigger-110"></i>

@@ -13,8 +13,9 @@ public class Location implements Serializable {
     private String owner;
     private String street;//OK
     private boolean fixPosition;
-    private int status;
-    private int color;
+    private String status;
+    private String color;
+    private int imageID;
 
     public int getLocationID() {
         return locationID;
@@ -96,19 +97,27 @@ public class Location implements Serializable {
         this.fixPosition = fixPosition;
     }
 
-    public int getStatus() {
+    public String getStatus() {
         return status;
     }
 
-    public void setStatus(int status) {
+    public void setStatus(String status) {
         this.status = status;
     }
 
-    public int getColor() {
+    public String getColor() {
         return color;
     }
 
-    public void setColor(int color) {
+    public void setColor(String color) {
         this.color = color;
+    }
+
+    public int getImageID() {
+        return imageID;
+    }
+
+    public void setImageID(int imageID) {
+        this.imageID = imageID;
     }
 }

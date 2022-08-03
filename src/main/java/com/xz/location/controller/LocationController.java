@@ -32,12 +32,13 @@ public class LocationController {
     @RequestMapping(value = "listAssets", method = RequestMethod.GET, produces = "text/html;charset=UTF-8")
     public String listAssets(@RequestParam(value = "assets", required = false, defaultValue = "led") String assets,
                              @RequestParam(value = "street", required = false, defaultValue = "") String street,
+                             @RequestParam(value = "address", required = false, defaultValue = "") String address,
                              @RequestParam(value = "coordinate", required = false, defaultValue = "all") String coordinate,
                              @RequestParam(value = "draw", required = false) Integer draw,
                              @RequestParam(value = "start", required = false, defaultValue = "0") int start,
                              @RequestParam(value = "length", required = false, defaultValue = "100") int limit) {
-        if ("led".equals(assets)) return listLed(draw, street, coordinate, start, limit);
-        if ("server".equals(assets)) return listServer(draw, street, coordinate, start, limit);
+        if ("led".equals(assets)) return listLed(draw, street, address, coordinate, start, limit);
+        if ("server".equals(assets)) return listServer(draw, street, address, coordinate, start, limit);
         return "";
     }
 
@@ -45,6 +46,7 @@ public class LocationController {
     @RequestMapping(value = "listServer", method = RequestMethod.GET, produces = "text/html;charset=UTF-8")
     public String listServer(@RequestParam(value = "draw", required = false) Integer draw,
                              @RequestParam(value = "street", required = false, defaultValue = "") String street,
+                             @RequestParam(value = "address", required = false, defaultValue = "") String address,
                              @RequestParam(value = "coordinate", required = false, defaultValue = "") String coordinate,
                              @RequestParam(value = "start", required = false, defaultValue = "0") int start,
                              @RequestParam(value = "length", required = false, defaultValue = "100") int limit) {
@@ -52,6 +54,7 @@ public class LocationController {
         param.put("start", start);
         param.put("limit", limit);
         param.put("street", street);
+        param.put("address", address);
         param.put("coordinate", coordinate);
 
         int count = serverMapper.selectServerCount(param);
@@ -119,6 +122,7 @@ public class LocationController {
     @RequestMapping(value = "listLed", method = RequestMethod.GET, produces = "text/html;charset=UTF-8")
     public String listLed(@RequestParam(value = "draw", required = false) Integer draw,
                           @RequestParam(value = "street", required = false, defaultValue = "") String street,
+                          @RequestParam(value = "address", required = false, defaultValue = "") String address,
                           @RequestParam(value = "coordinate", required = false, defaultValue = "") String coordinate,
                           @RequestParam(value = "start", required = false, defaultValue = "0") int start,
                           @RequestParam(value = "length", required = false, defaultValue = "100") int limit) {
@@ -126,6 +130,7 @@ public class LocationController {
         param.put("start", start);
         param.put("limit", limit);
         param.put("street", street);
+        param.put("address", address);
         param.put("coordinate", coordinate);
 
         int count = serverMapper.selectLedCount(param);
@@ -184,6 +189,32 @@ public class LocationController {
     @Transactional
     @RequestMapping(value = "/saveLed", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
     public String saveLed(@ModelAttribute("led") Led postLed) {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Map<String, Object> map = new HashMap<>();
+        if (principal instanceof UserDetails) {
+            int result;
+            map.put("title", "保存LED配置");
+            if (postLed.getLocationID() > 0)
+                result = serverMapper.updateLed(postLed);
+            else
+                result = serverMapper.insertLed(postLed);
+            map.put("succeed", result > 0);
+        } else {
+            map.put("title", "保存LED配置");
+            map.put("succeed", false);
+            map.put("message", "没登录用户信息，请重新登录！");
+        }
+
+        return gson.toJson(map);
+    }
+
+    @ResponseBody
+    @Transactional
+    @RequestMapping(value = "/saveLedJson", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
+    public String saveLedJson(@RequestBody String postJson) {
+        Type ledType = new TypeToken<Led>() {
+        }.getType();
+        Led postLed = gson.fromJson(postJson, ledType);
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Map<String, Object> map = new HashMap<>();
         if (principal instanceof UserDetails) {

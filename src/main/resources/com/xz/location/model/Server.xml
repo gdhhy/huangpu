@@ -18,7 +18,9 @@
         <result property="link" column="link" jdbcType="VARCHAR"/>
         <result property="linkPhone" column="linkPhone" jdbcType="VARCHAR"/>
         <result property="safeGrade" column="safeGrade" jdbcType="INTEGER"/>
-
+        <result property="color" column="color" jdbcType="VARCHAR"/>
+        <result property="status" column="status" jdbcType="VARCHAR"/>
+        <result property="imageID" column="imageID" jdbcType="INTEGER"/>
     </resultMap>
     <resultMap id="LedResult" type="com.xz.location.pojo.Led">
         <result column="locationID" jdbcType="INTEGER" property="locationID"/>
@@ -45,27 +47,30 @@
         <result property="policePhone" column="policePhone" jdbcType="VARCHAR"/>
         <result property="policeApp" column="policeApp" jdbcType="INTEGER"/>
         <result property="memo" column="memo" jdbcType="VARCHAR"/>
+        <result property="color" column="color" jdbcType="VARCHAR"/>
+        <result property="status" column="status" jdbcType="VARCHAR"/>
+        <result property="imageID" column="imageID" jdbcType="INTEGER"/>
     </resultMap>
     <sql id="queryWhere">
         <where>
             <if test="param.locationID!=null">AND locationID = #{param.locationID:INTEGER}</if>
             <if test="@com.xz.util.Ognl@isNotEmpty(param.street)">AND street = #{param.street:VARCHAR}</if>
-            <if test="param.coordinate=='fixed'">AND longitude>0.001 and latitude>0.001</if>
+            <if test="param.coordinate=='fixed'">AND longitude>0.001 AND latitude>0.001</if>
             <if test="param.coordinate=='unfixed'">AND (longitude &lt; 0.001 OR latitude &lt; 0.001)</if>
+            <if test="@com.xz.util.Ognl@isNotEmpty(param.address)">AND address LIKE '%${param.address}%'</if>
         </where>
     </sql>
     <sql id="queryWhere2">
         <where>
             <if test="param.locationID!=null">AND locationID = #{param.locationID:INTEGER}</if>
             <if test="@com.xz.util.Ognl@isNotEmpty(param.street)">AND street = #{param.street:VARCHAR}</if>
-            <if test="param.coordinate=='fixed'">AND longitude>0.001 and latitude>0.001</if>
+            <if test="param.coordinate=='fixed'">AND longitude>0.001 AND latitude>0.001</if>
             <if test="param.coordinate=='unfixed'">AND (longitude &lt; 0.001 OR latitude &lt; 0.001)</if>
+            <if test="@com.xz.util.Ognl@isNotEmpty(param.address)">AND address LIKE '%${param.address}%'</if>
         </where>
     </sql>
     <select id="selectServer" parameterType="java.util.Map" resultMap="ServerResult">
-        SELECT
-        locationID,longitude,latitude,owner,webName,www,ipFrom,ipTo,address,street,link,linkPhone,safeGrade
-        FROM server
+        SELECT locationID,longitude,latitude,owner,webName,www,ipFrom,ipTo,address,street,link,linkPhone,safeGrade,color,status,imageID FROM server
         <include refid="queryWhere"/>
         ORDER BY locationID desc
         <choose>
@@ -88,8 +93,8 @@
         update server
         <set>
             <if test="@com.xz.util.Ognl@isNotEmpty(pojo.address)">address = #{pojo.address:VARCHAR},</if>
-            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.longitude)">longitude = #{pojo.longitude:DOUBLE},</if>
-            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.latitude)">latitude = #{pojo.latitude:DOUBLE},</if>
+            <if test="pojo.longitude>0">longitude = #{pojo.longitude:DOUBLE},</if>
+            <if test="pojo.latitude>0">latitude = #{pojo.latitude:DOUBLE},</if>
             <if test="@com.xz.util.Ognl@isNotEmpty(pojo.owner)">owner = #{pojo.owner:VARCHAR},</if>
             <if test="@com.xz.util.Ognl@isNotEmpty(pojo.street)">street = #{pojo.street:VARCHAR},</if>
             <if test="@com.xz.util.Ognl@isNotEmpty(pojo.link)">link = #{pojo.link:VARCHAR},</if>
@@ -98,10 +103,10 @@
             <if test="@com.xz.util.Ognl@isNotEmpty(pojo.www)">www = #{pojo.www:VARCHAR},</if>
             <if test="@com.xz.util.Ognl@isNotEmpty(pojo.ipFrom)">ipFrom = #{pojo.ipFrom:VARCHAR},</if>
             <if test="@com.xz.util.Ognl@isNotEmpty(pojo.ipTo)">ipTo = #{pojo.ipTo:VARCHAR},</if>
-            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.safeGrade)">safeGrade = #{pojo.safeGrade:INTEGER},</if>
+            <if test="pojo.safeGrade>0">safeGrade = #{pojo.safeGrade:INTEGER},</if>
             <if test="@com.xz.util.Ognl@isNotEmpty(pojo.color)">color = #{pojo.color:VARCHAR},</if>
             <if test="@com.xz.util.Ognl@isNotEmpty(pojo.status)">status = #{pojo.status:VARCHAR},</if>
-            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.imageID)">imageID = #{pojo.imageID:INTEGER},</if>
+            <if test="pojo.imageID>0">imageID = #{pojo.imageID:INTEGER},</if>
         </set>
         where locationID = #{pojo.locationID:INTEGER}
     </update>
@@ -121,7 +126,7 @@
     <select id="selectLed" parameterType="java.util.Map" resultMap="LedResult">
         SELECT
         locationID,location,address,longitude,latitude,size,sysClass,commMode,controlMode,strongCipher,license,link,linkPhone,recordUnit,approvalUnit,owner,street,leader,
-        leaderPhone,police,policePhone,policeApp,memo
+        leaderPhone,police,policePhone,policeApp,memo,color,status,imageID
         FROM led
         <include refid="queryWhere"/>
         ORDER BY locationID desc
@@ -145,8 +150,8 @@
         update led
         <set>
             <if test="@com.xz.util.Ognl@isNotEmpty(pojo.address)">address = #{pojo.address:VARCHAR},</if>
-            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.longitude)">longitude = #{pojo.longitude:DOUBLE},</if>
-            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.latitude)">latitude = #{pojo.latitude:DOUBLE},</if>
+            <if test="pojo.longitude>0">longitude = #{pojo.longitude:DOUBLE},</if>
+            <if test="pojo.latitude>0">latitude = #{pojo.latitude:DOUBLE},</if>
             <if test="@com.xz.util.Ognl@isNotEmpty(pojo.owner)">owner = #{pojo.owner:VARCHAR},</if>
             <if test="@com.xz.util.Ognl@isNotEmpty(pojo.street)">street = #{pojo.street:VARCHAR},</if>
             <if test="@com.xz.util.Ognl@isNotEmpty(pojo.link)">link = #{pojo.link:VARCHAR},</if>
@@ -157,18 +162,18 @@
             <if test="@com.xz.util.Ognl@isNotEmpty(pojo.commMode)">commMode = #{pojo.commMode:VARCHAR},</if>
             <if test="@com.xz.util.Ognl@isNotEmpty(pojo.controlMode)">controlMode = #{pojo.controlMode:VARCHAR},</if>
             <if test="@com.xz.util.Ognl@isNotEmpty(pojo.strongCipher)">strongCipher = #{pojo.strongCipher:INTEGER},</if>
-            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.license)">license = #{pojo.license:INTEGER},</if>
+            <if test="pojo.license>0">license = #{pojo.license:INTEGER},</if>
             <if test="@com.xz.util.Ognl@isNotEmpty(pojo.recordUnit)">recordUnit = #{pojo.recordUnit:VARCHAR},</if>
             <if test="@com.xz.util.Ognl@isNotEmpty(pojo.approvalUnit)">approvalUnit = #{pojo.approvalUnit:VARCHAR},</if>
             <if test="@com.xz.util.Ognl@isNotEmpty(pojo.leader)">leader = #{pojo.leader:VARCHAR},</if>
             <if test="@com.xz.util.Ognl@isNotEmpty(pojo.leaderPhone)">leaderPhone = #{pojo.leaderPhone:VARCHAR},</if>
             <if test="@com.xz.util.Ognl@isNotEmpty(pojo.police)">police = #{pojo.police:VARCHAR},</if>
             <if test="@com.xz.util.Ognl@isNotEmpty(pojo.policePhone)">policePhone = #{pojo.policePhone:VARCHAR},</if>
-            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.policeApp)">policeApp = #{pojo.policeApp:INTEGER},</if>
+            <if test="pojo.policeApp>0">policeApp = #{pojo.policeApp:INTEGER},</if>
             <if test="@com.xz.util.Ognl@isNotEmpty(pojo.memo)">memo = #{pojo.memo:VARCHAR},</if>
             <if test="@com.xz.util.Ognl@isNotEmpty(pojo.color)">color = #{pojo.color:VARCHAR},</if>
             <if test="@com.xz.util.Ognl@isNotEmpty(pojo.status)">status = #{pojo.status:VARCHAR},</if>
-            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.imageID)">imageID = #{pojo.imageID:INTEGER},</if>
+            <if test="pojo.imageID>0">imageID = #{pojo.imageID:INTEGER},</if>
         </set>
         where locationID = #{pojo.locationID:INTEGER}
     </update>
@@ -187,7 +192,7 @@
         WHERE locationID = #{locationID:INTEGER}
     </delete>
     <select id="selectStreetByLed" parameterType="java.util.Map" resultType="java.util.HashMap">
-        select A.streetID,A.streetName, A.latitude, A.longitude, B.cc
+        select A.streetID, A.streetName, A.latitude, A.longitude, B.cc
         from street A,
              (select street, count(street) cc from led group by street) B
         where A.streetName = B.street
@@ -195,9 +200,9 @@
           and A.longitude > 0
     </select>
     <select id="selectStreetByServer" parameterType="java.util.Map" resultType="java.util.HashMap">
-        select A.streetID,A.streetName, A.latitude, A.longitude, B.cc
+        select A.streetID, A.streetName, A.latitude, A.longitude, B.cc
         from street A,
-             (select left(street,2) street, count(street) cc from server group by street) B
+             (select left(street, 2) street, count(street) cc from server group by street) B
         where A.streetName = B.street
           and A.latitude > 0
           and A.longitude > 0
