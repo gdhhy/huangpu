@@ -14,6 +14,7 @@ import com.xz.location.GPSUtil;
 import com.xz.location.dao.ServerMapper;
 import com.xz.location.pojo.Led;
 import com.xz.location.pojo.Server;
+import com.xz.location.pojo.UploadFile;
 import com.xz.rbac.web.DeployRunning;
 import com.xz.upload.pojo.FileBucket;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -56,7 +57,7 @@ public class FileUploadController {
     private Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
 
     /**
-     * 海报上传
+     * 上传地图数据文件
      *
      * @return
      */
@@ -136,6 +137,73 @@ public class FileUploadController {
                     resultMap.put("success", false);
                     resultMap.put("error", "文件曾被上传，上传时间：" + DateUtil.format(sources.get(0).getUploadTime(), "yyyy-MM-dd HH:mm"));
                 }
+            } catch (IOException e) {
+                resultMap.put("error", e.getMessage());
+            }
+
+            resultMap.putIfAbsent("success", false);
+        }
+
+        return gson.toJson(resultMap);
+    }
+
+    /**
+     * 上传地图数据文件
+     *
+     * @return
+     */
+    @ResponseBody
+    @RequestMapping(value = "/uploadImage", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
+    public String uploadImage(@Valid FileBucket fileBucket, BindingResult result) {
+        Map<String, Object> resultMap = new HashMap<>();
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UserDetails ud;
+        if (principal instanceof UserDetails) {
+            ud = (UserDetails) principal;
+        } else {
+            resultMap.put("success", false);
+            resultMap.put("error", "未登录！");
+
+            return gson.toJson(resultMap);
+        }
+
+        if (result.hasErrors()) {
+            List<Map<String, Object>> files = new ArrayList<>();
+            Map<String, Object> file = new HashMap<>();
+            file.put("error", "validation errors");
+            files.add(file);
+
+            resultMap.put("success", false);
+            resultMap.put("error", files);
+        } else {
+            System.out.println("Fetching file");
+            String ext = fileBucket.getFile().getOriginalFilename().substring(fileBucket.getFile().getOriginalFilename().indexOf("."));
+
+            logger.debug(fileBucket.getFile().getOriginalFilename());
+            String sourceSource = fileBucket.getFile().getOriginalFilename().substring(0, fileBucket.getFile().getOriginalFilename().indexOf("."));
+            String server_save_filename = sourceSource + "_" + (new Date()).getTime() + ext;
+            logger.debug("server_save_filename:" + server_save_filename);
+            try {
+                File saveFile = new File(UPLOAD_LOCATION + server_save_filename);
+                FileCopyUtils.copy(fileBucket.getFile().getBytes(), saveFile);
+                FileInputStream in = new FileInputStream(saveFile);
+                in.close();
+
+                UploadFile uploadFile = new UploadFile();
+                uploadFile.setFilename(fileBucket.getFile().getOriginalFilename());
+
+                uploadFile.setPath(UPLOAD_LOCATION);
+                uploadFile.setServerFilename(server_save_filename);
+                uploadFile.setServerPath(relative_directory);
+                uploadFile.setSize(saveFile.length());
+                uploadFile.setUploadTime(new Timestamp(System.currentTimeMillis()));
+
+                uploadFile.setUsername(ud.getUsername());
+
+
+                resultMap.put("success", true);
+                resultMap.put("url", uploadFile.getServerPath() + File.separator + uploadFile.getServerFilename());
+
             } catch (IOException e) {
                 resultMap.put("error", e.getMessage());
             }

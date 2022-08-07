@@ -16,6 +16,10 @@
 <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
 
 <link href="https://cdn.datatables.net/responsive/2.3.0/css/responsive.dataTables.min.css" rel="stylesheet">
+<%--<script src="../components/dropzone/dist/dropzone.js"></script>
+<link rel="stylesheet" href="../components/dropzone/dist/dropzone.css"/>--%>
+<script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css"/>
 <script type="text/javascript">
     function showPic(e, sUrl) {
         var x, y;
@@ -31,6 +35,8 @@
         document.getElementById("Layer1").innerHTML = "";
         document.getElementById("Layer1").style.display = "none";
     }
+
+    Dropzone.autoDiscover = false;
 
     jQuery(function ($) {
         var myTable = $('#dynamic-table')
@@ -92,10 +98,10 @@
                                 '<a class="hasLink" title="上传图片" href="#" data-Url="javascript:uploadImage(\'{0}\',{1});">'.format($('#assets option:selected').val(), row["locationID"]) +
                                 '<i class="ace-icon glyphicon glyphicon-picture purple bigger-120"></i>' +
                                 '</a> ' +
-                                '<a class="hasLink" title="设置经纬度" href="#" data-Url="javascript:longLatAssets(\'{0}\',{1});">'.format($('#assets option:selected').val(), row["locationID"]) +
-                                '<i class="ace-icon glyphicon glyphicon-map-marker blue bigger-120"></i>' +
-                                '</a> ' +
-                                '<a class="hasLink" title="编辑" href="#" data-Url="javascript:editAssets(\'{0}\',{1});">'.format($('#assets option:selected').val(), row["locationID"]) +
+                                /*    '<a class="hasLink" title="设置经纬度" href="#" data-Url="javascript:longLatAssets(\'{0}\',{1});">'.format($('#assets option:selected').val(), row["locationID"]) +
+                                    '<i class="ace-icon glyphicon glyphicon-map-marker blue bigger-120"></i>' +
+                                    '</a> ' +*/
+                                '<a class="hasLink" title="编辑" href="#" data-Url="javascript:longLatAssets(\'{0}\',{1});">'.format($('#assets option:selected').val(), row["locationID"]) +
                                 '<i class="ace-icon glyphicon glyphicon-edit green bigger-120"></i>' +
                                 '</a> ' +
                                 '<a class="hasLink" title="删除" href="#" data-Url="javascript:deleteLed({0},\'{1}\');">'.format(row["locationID"], row["filename"]) +
@@ -192,8 +198,8 @@
         });
 
         $('.form-search :text').keydown(function (event) {
-            if (event.keyCode === 13) return ;
-                //search();
+            if (event.keyCode === 13) return;
+            //search();
         });
 
         function search() {
@@ -391,6 +397,8 @@
             $('#location').val(loc.location);
             $('#longitude').val(loc.longitude);
             $('#latitude').val(loc.latitude);
+            $('#owner').val(loc.owner);
+            $('#link').val(loc.link);
             runTimes = 0;
             markers = [];
             /* if (loc.location === null || loc.location === '') runTimes++;
@@ -401,10 +409,10 @@
             $("#dialog-edit").removeClass('hide').dialog({
                 resizable: false,
                 //icon:'fa fa-key',
-                width: 500,
-                height: 740,
+                width: 860,
+                height: 580,
                 modal: true,
-                title: "编辑经纬度",
+                title: "编辑资产信息",
                 buttons: [
                     {
                         html: "<i class='ace-icon fa fa-floppy-o bigger-110'></i>&nbsp;保存",
@@ -423,6 +431,143 @@
                 title_html: true
             });
         }
+
+        $("#dropzone").dropzone({
+            url: '/upload/uploadImage.jspa',
+            autoProcessQueue: false,// 如果为false，文件将被添加到队列中，但不会自动处理队列。
+            uploadMultiple: false, // 是否在一个请求中发送多个文件。
+            parallelUploads: 1, // 并行处理多少个文件上传
+            maxFiles: 1, // 用于限制此Dropzone将处理的最大文件数
+            maxFilesize: 10,
+            acceptedFiles: ".jpg,.gif,.png",
+            dictDefaultMessage: "拖拉图片文件到这里或者点击",
+            dictFallbackMessage: "你的浏览器不支持拖拉文件来上传",
+            dictMaxFilesExceeded: "文件数量过多",
+            dictFileTooBig: "可添加的最大文件大小为{{maxFilesize}}Mb，当前文件大小为{{filesize}}Mb "
+        });
+
+
+        /* let myDropzone = new Dropzone("#dropzone");
+         myDropzone.on("addedfile", file => {
+             console.log(`File added:啊水水`);
+         });*/
+
+
+        /*     var dropz = new Dropzone('#dropzone', {
+                 url: '/upload/uploadImage.jspa',
+                 autoProcessQueue: false,// 如果为false，文件将被添加到队列中，但不会自动处理队列。
+                 uploadMultiple: true, // 是否在一个请求中发送多个文件。
+                 parallelUploads: 3, // 并行处理多少个文件上传
+                 maxFiles: 1, // 用于限制此Dropzone将处理的最大文件数
+                 maxFilesize: 10,
+                 acceptedFiles: ".jpg,.gif,.png",
+                 dictDefaultMessage: "拖拉图片文件到这里或者点击",
+                 dictFallbackMessage: "你的浏览器不支持拖拉文件来上传",
+                 dictMaxFilesExceeded: "文件数量过多",
+                 dictFileTooBig: "可添加的最大文件大小为{{maxFilesize}}Mb，当前文件大小为{{filesize}}Mb ",
+                 init: function () { // dropzone初始化时调用您可以在此处添加事件侦听器
+                     var myDropzone = this;
+                     this.on("addedfile", function (file) {
+                         /!* var removeButton = Dropzone.createElement("<button class='btn btn-sm btn-block'>移除</button>");
+                          removeButton.addEventListener("click",function(e) {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              myDropzone.removeFile(file);
+                          });
+                          file.previewElement.appendChild(removeButton);*!/
+                     });
+                 },
+                 sendingmultiple: function (file, xhr, formData) {// 在每个文件发送之前调用。获取xhr对象和formData对象作为第二和第三个参数，可以修改它们（例如添加CSRF令牌）或添加其他数据。
+                     $.each(submitParams, function (key, value) {
+                         // formData.set(key, value);
+                     });
+                 },
+                 successmultiple: function (file, response) {// 该文件已成功上传。获取服务器响应作为第二个参数。
+                 },
+                 completemultiple: function (file, data) {
+                 }
+             });*/
+
+        //ACE
+        /* Dropzone.autoDiscover = false;
+
+         var myDropzone = new Dropzone('#dropzone', {
+             previewTemplate: $('#preview-template').html(),
+
+             thumbnailHeight: 120,
+             thumbnailWidth: 120,
+             maxFilesize: 0.5,
+
+             //addRemoveLinks : true,
+             //dictRemoveFile: 'Remove',
+
+             dictDefaultMessage:
+                 '<span class="bigger-150 bolder"><i class="ace-icon fa fa-caret-right red"></i> Drop files</span> to upload \
+                 <span class="smaller-80 grey">(or click)</span> <br /> \
+                 <i class="upload-icon ace-icon fa fa-cloud-upload blue fa-3x"></i>'
+             ,
+
+             thumbnail: function (file, dataUrl) {
+                 if (file.previewElement) {
+                     $(file.previewElement).removeClass("dz-file-preview");
+                     var images = $(file.previewElement).find("[data-dz-thumbnail]").each(function () {
+                         var thumbnailElement = this;
+                         thumbnailElement.alt = file.name;
+                         thumbnailElement.src = dataUrl;
+                     });
+                     setTimeout(function () {
+                         $(file.previewElement).addClass("dz-image-preview");
+                     }, 1);
+                 }
+             }
+
+         });
+
+
+         //simulating upload progress
+         var minSteps = 6,
+             maxSteps = 60,
+             timeBetweenSteps = 100,
+             bytesPerStep = 100000;
+
+         myDropzone.uploadFiles = function (files) {
+             var self = this;
+
+             for (var i = 0; i < files.length; i++) {
+                 var file = files[i];
+                 totalSteps = Math.round(Math.min(maxSteps, Math.max(minSteps, file.size / bytesPerStep)));
+
+                 for (var step = 0; step < totalSteps; step++) {
+                     var duration = timeBetweenSteps * (step + 1);
+                     setTimeout(function (file, totalSteps, step) {
+                         return function () {
+                             file.upload = {
+                                 progress: 100 * (step + 1) / totalSteps,
+                                 total: file.size,
+                                 bytesSent: (step + 1) * file.size / totalSteps
+                             };
+
+                             self.emit('uploadprogress', file, file.upload.progress, file.upload.bytesSent);
+                             if (file.upload.progress == 100) {
+                                 file.status = Dropzone.SUCCESS;
+                                 self.emit("success", file, 'success', null);
+                                 self.emit("complete", file);
+                                 self.processQueue();
+                             }
+                         };
+                     }(file, totalSteps, step), duration);
+                 }
+             }
+         }
+
+
+         //remove dropzone instance when leaving this page in ajax mode
+         $(document).one('ajaxloadstart.page', function (e) {
+             try {
+                 myDropzone.destroy();
+             } catch (e) {
+             }
+         });*/
 
     })
 </script>
@@ -487,7 +632,7 @@
                     <option value="unfixed">未定</option>
                 </select> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 <label>地址 ：</label>
-                <input type="text" placeholder="地址 ..."  name="address" autocomplete="off"/>
+                <input type="text" placeholder="地址 ..." name="address" autocomplete="off"/>
                 <button type="button" class="btn btn-sm btn-success">
                     查询
                     <i class="ace-icon fa fa-search icon-on-right bigger-110"></i>
@@ -547,49 +692,85 @@
 </div>
 
 <div id="dialog-edit" class="hide">
-    <div class="col-xs-12" style="padding-top: 10px">
+    <div class="col-xs-6" style="padding-top: 10px">
         <!-- PAGE CONTENT BEGINS -->
         <form class="form-horizontal" role="form" id="ledForm">
-            <div class="form-group" style="margin-bottom: 3px;margin-top: 3px">
-                <label class="col-xs-2 control-label no-padding-right" for="location"> 位置</label>
-                <div class="col-xs-8">
-                    <input type="text" id="location" name="location" style="width: 100%" placeholder="位置"/>
-                </div>
-                <div class="col-xs-1">
-                    <button type="button" class="btn btn-info btn-minier" id="byLocation" title="位置 -> 经纬度">
-                        <i class="ace-icon  fa fa-map-pin icon-on-right bigger-110"></i>
-                    </button>
+            <div class="row">
+                <div class="form-group" style="margin-bottom: 3px;margin-top: 3px">
+                    <label class="col-xs-2 control-label no-padding-right" for="latitude">单位名称</label>
+                    <div class="col-xs-10">
+                        <input type="text" id="owner" name="owner" style="width: 100%" placeholder="单位名称"/>
+                    </div>
                 </div>
             </div>
-            <div class="form-group" style="margin-bottom: 3px;margin-top: 3px">
-                <label class="col-xs-2 control-label no-padding-right" for="address"> 地址</label>
-                <div class="col-xs-8">
-                    <input type="text" id="address" readonly name="address" style="width: 100%" placeholder="地址"/>
-                </div>
-                <div class="col-xs-1 pull-left">
-                    <button type="button" class="btn btn-info btn-minier" id="byAddress" title="地址 -> 经纬度">
-                        <i class="ace-icon  fa fa-map-pin icon-on-right bigger-110"></i>
-                    </button>
+            <div class="row">
+                <div class="form-group" style="margin-bottom: 3px;margin-top: 3px">
+                    <label class="col-xs-2 control-label no-padding-right" for="link">联系人</label>
+                    <div class="col-xs-10">
+                        <input type="text" id="link" name="link" style="width: 100%" placeholder="联系人"/>
+                    </div>
                 </div>
             </div>
-            <div class="form-group" style="margin-bottom: 3px;margin-top: 3px">
-                <label class="col-xs-2 control-label no-padding-right" for="longitude"> 经度 </label>
-                <div class="col-xs-10">
-                    <input type="text" id="longitude" name="longitude" placeholder="经度"/>
+            <div class="row">
+                <div class="form-group" style="margin-bottom: 3px;margin-top: 3px">
+                    <label class="col-xs-2 control-label no-padding-right" for="location"> 位置</label>
+                    <div class="col-xs-8">
+                        <input type="text" id="location" name="location" style="width: 100%" placeholder="位置"/>
+                    </div>
+                    <div class="col-xs-1">
+                        <button type="button" class="btn btn-info btn-minier" id="byLocation" title="位置 -> 经纬度">
+                            <i class="ace-icon  fa fa-map-pin icon-on-right bigger-110"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
-            <div class="form-group" style="margin-bottom: 3px;margin-top: 3px">
-                <label class="col-xs-2 control-label no-padding-right" for="latitude"> 纬度 </label>
-                <div class="col-xs-10">
-                    <input type="text" id="latitude" name="latitude" placeholder="纬度"/>
+            <div class="row">
+                <div class="form-group" style="margin-bottom: 3px;margin-top: 3px">
+                    <label class="col-xs-2 control-label no-padding-right" for="address"> 地址</label>
+                    <div class="col-xs-8">
+                        <input type="text" id="address" readonly name="address" style="width: 100%" placeholder="地址"/>
+                    </div>
+                    <div class="col-xs-1 pull-left">
+                        <button type="button" class="btn btn-info btn-minier" id="byAddress" title="地址 -> 经纬度">
+                            <i class="ace-icon  fa fa-map-pin icon-on-right bigger-110"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
-            <label class=" control-label no-padding-right " style="height: 20px" for="address" id="amap"> </label>
+            <div class="row">
+                <div class="form-group" style="margin-bottom: 3px;margin-top: 3px">
+                    <label class="col-xs-2 control-label no-padding-right" for="longitude"> 经度 </label>
+                    <div class="col-xs-4">
+                        <input type="text" id="longitude" name="longitude" style="width: 100%" placeholder="经度"/>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group" style="margin-bottom: 3px;margin-top: 3px">
+                    <label class="col-xs-2 control-label no-padding-right" for="latitude"> 纬度 </label>
+                    <div class="col-xs-4">
+                        <input type="text" id="latitude" name="latitude" style="width: 100%" placeholder="纬度"/>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group" style="margin-bottom: 3px;margin-top: 3px">
+                    <label class="col-xs-2 control-label no-padding-right" for="dropzone">文件</label>
+                    <div class="col-xs-9 dropzone " id="dropzone" style="margin: 10px 10px 10px 10px">
+                        <div class="am-text-success dz-message">
+                            将文件拖拽到此处<br>或点此打开文件管理器选择文件
+                        </div>
+                    </div>
+                </div>
+            </div>
             <input type="hidden" id="locationID" name="locationID">
         </form>
-        <div class="space-0"></div>
+    </div>
+
+    <div class="col-xs-6">
         <label class=" control-label no-padding-right" for="address"> 位置参考：红色是已保存的位置</label>
         <div id="container" class="map"><img id="img"/></div>
+        <label class=" control-label no-padding-right " style="height: 20px" for="address" id="amap"> </label>
     </div>
 </div>
 <div id="dialog-error" class="hide alert" title="提示">

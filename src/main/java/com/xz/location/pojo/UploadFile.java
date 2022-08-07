@@ -4,13 +4,14 @@ import java.sql.Timestamp;
 
 public class UploadFile {
     private int fileID;// '唯一标识'
-    private String contentType;// ''
+    //private String contentType;// ''
     private String filename;// '文件名'
     private String path;// '路径'
     private long size;// '文件尺寸'
     private Timestamp uploadTime;// '上传时间'
     private String serverPath;// '服务器保存路径'
     private String serverFilename;// '服务器保存文件名'
+    private String username;// '服务器保存文件名'
 
     public int getFileID() {
         return fileID;
@@ -20,13 +21,7 @@ public class UploadFile {
         this.fileID = fileID;
     }
 
-    public String getContentType() {
-        return contentType;
-    }
 
-    public void setContentType(String contentType) {
-        this.contentType = contentType;
-    }
 
     public String getFilename() {
         return filename;
@@ -74,5 +69,13 @@ public class UploadFile {
 
     public void setServerFilename(String serverFilename) {
         this.serverFilename = serverFilename;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 }

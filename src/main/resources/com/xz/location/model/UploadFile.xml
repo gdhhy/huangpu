@@ -5,19 +5,13 @@
     <!--<cache eviction="LRU" readOnly="false" flushInterval="60000" size="10000"/>-->
     <resultMap id="FileResult" type="com.xz.location.pojo.UploadFile">
         <result column="fileID" jdbcType="INTEGER" property="fileID"/>
-        <result column="sourceID" jdbcType="INTEGER" property="sourceID"/>
-        <result column="longitude" jdbcType="DOUBLE" property="longitude"/>
-        <result column="latitude" jdbcType="DOUBLE" property="latitude"/>
-        <result column="owner" jdbcType="VARCHAR" property="owner"/>
-        <result column="webName" jdbcType="VARCHAR" property="webName"/>
-        <result column="www" jdbcType="VARCHAR" property="www"/>
-        <result property="ipFrom" column="ipFrom" jdbcType="VARCHAR"/>
-        <result property="ipTo" column="ipTo" jdbcType="VARCHAR"/>
-        <result property="address" column="address" jdbcType="VARCHAR"/>
-        <result property="street" column="street" jdbcType="VARCHAR"/>
-        <result property="link" column="link" jdbcType="VARCHAR"/>
-        <result property="linkPhone" column="linkPhone" jdbcType="VARCHAR"/>
-        <result property="safeGrade" column="safeGrade" jdbcType="INTEGER"/>
+        <result column="filename" jdbcType="VARCHAR" property="filename"/>
+        <result column="path" jdbcType="VARCHAR" property="path"/>
+        <result column="username" jdbcType="VARCHAR" property="username"/>
+        <result column="size" jdbcType="INTEGER" property="size"/>
+        <result column="uploadTime"  javaType="java.sql.Timestamp" jdbcType="TIMESTAMP" property="uploadTime"/>
+        <result column="serverPath" jdbcType="VARCHAR" property="serverPath"/>
+        <result property="serverFilename" column="serverFilename" jdbcType="VARCHAR"/>
     </resultMap>
     <sql id="queryWhere">
         <where>
@@ -25,7 +19,7 @@
         </where>
     </sql>
     <select id="selectUploadFile" parameterType="java.util.Map" resultMap="FileResult">
-        SELECT fileID,filename,path,contentType,size,uploadTime,serverPath,serverFilename FROM UploadFile
+        SELECT fileID,filename,path,username,size,uploadTime,serverPath,serverFilename FROM uploadfile
         <include refid="queryWhere"/>
         ORDER BY fileID desc
         <choose>
@@ -41,35 +35,17 @@
         </choose>
     </select>
     <select id="selectUploadFileCount" parameterType="java.util.Map" resultType="int">
-        SELECT count(fileID) FROM UploadFile
+        SELECT count(fileID) FROM uploadfile
         <include refid="queryWhere"/>
     </select>
-  <!--  <update id="updateUploadFile" flushCache="true">
-        update UploadFile
-        <set>
-            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.address)">address = #{pojo.address:VARCHAR},</if>
-            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.longitude)">longitude = #{pojo.longitude:DOUBLE},</if>
-            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.latitude)">latitude = #{pojo.latitude:DOUBLE},</if>
-            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.owner)">owner = #{pojo.owner:VARCHAR},</if>
-            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.street)">street = #{pojo.street:VARCHAR},</if>
-            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.link)">link = #{pojo.link:VARCHAR},</if>
-            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.linkPhone)">linkPhone = #{pojo.linkPhone:VARCHAR},</if>
-            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.webName)">webName = #{pojo.webName:VARCHAR},</if>
-            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.www)">www = #{pojo.www:VARCHAR},</if>
-            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.ipFrom)">ipFrom = #{pojo.ipFrom:VARCHAR},</if>
-            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.ipTo)">ipTo = #{pojo.ipTo:VARCHAR},</if>
-            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.safeGrade)">safeGrade = #{pojo.safeGrade:INTEGER},</if>
-        </set>
-        where fileID = #{pojo.fileID:INTEGER}
-    </update>-->
     <insert id="insertUploadFile" flushCache="true" useGeneratedKeys="true" keyProperty="pojo.fileID">
-        INSERT INTO UploadFile (fileID, filename, path, contentType, size, uploadTime, serverPath, serverFilename)
-        VALUES (#{pojo.fileID:INTEGER}, #{pojo.filename:VARCHAR}, #{pojo.path:VARCHAR}, #{pojo.contentType:VARCHAR}, #{pojo.size:INTEGER},
+        INSERT INTO uploadfile (fileID, filename, path, username, size, uploadTime, serverPath, serverFilename)
+        VALUES (#{pojo.fileID:INTEGER}, #{pojo.filename:VARCHAR}, #{pojo.path:VARCHAR}, #{pojo.username:VARCHAR}, #{pojo.size:INTEGER},
                 #{pojo.uploadTime:TIMESTAMP},#{pojo.serverPath:VARCHAR},#{pojo.serverFilename:VARCHAR})
     </insert>
     <delete id="deleteUploadFile" parameterType="int">
         DELETE
-        FROM UploadFile
+        FROM uploadfile
         WHERE fileID = #{fileID:INTEGER}
     </delete>
 
