@@ -16,7 +16,7 @@
 
     <bean id="reviewDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
         <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
-        <property name="url" value="jdbc:mysql://192.168.6.100:3307/led?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;serverTimezone=GMT%2B8"/>
+        <property name="url" value="jdbc:mysql://127.0.0.1:3306/led?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;serverTimezone=GMT%2B8"/>
         <property name="password" value="Huang3102,"/>
         <property name="username" value="root"/>
         <property name="validationQuery" value="select 1"/>
@@ -47,6 +47,10 @@
     <bean id="serverMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">
         <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
         <property name="mapperInterface" value="com.xz.location.dao.ServerMapper"/>
+    </bean>
+    <bean id="uploadFileMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">
+        <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+        <property name="mapperInterface" value="com.xz.location.dao.UploadFileMapper"/>
     </bean>
 
 

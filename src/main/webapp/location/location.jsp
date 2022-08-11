@@ -410,7 +410,7 @@
                 resizable: false,
                 //icon:'fa fa-key',
                 width: 860,
-                height: 580,
+                height: 600,
                 modal: true,
                 title: "编辑资产信息",
                 buttons: [
@@ -433,7 +433,17 @@
         }
 
         $("#dropzone").dropzone({
-            url: '/upload/uploadImage.jspa',
+            url: '/upload/uploadImage.jspa',thumbnail: function(file, dataUrl) {
+                if (file.previewElement) {
+                    $(file.previewElement).removeClass("dz-file-preview");
+                    var images = $(file.previewElement).find("[data-dz-thumbnail]").each(function() {
+                        var thumbnailElement = this;
+                        thumbnailElement.alt = file.name;
+                        thumbnailElement.src = dataUrl;
+                    });
+                    setTimeout(function() { $(file.previewElement).addClass("dz-image-preview"); }, 1);
+                }
+            },/*,
             autoProcessQueue: false,// 如果为false，文件将被添加到队列中，但不会自动处理队列。
             uploadMultiple: false, // 是否在一个请求中发送多个文件。
             parallelUploads: 1, // 并行处理多少个文件上传
@@ -443,7 +453,7 @@
             dictDefaultMessage: "拖拉图片文件到这里或者点击",
             dictFallbackMessage: "你的浏览器不支持拖拉文件来上传",
             dictMaxFilesExceeded: "文件数量过多",
-            dictFileTooBig: "可添加的最大文件大小为{{maxFilesize}}Mb，当前文件大小为{{filesize}}Mb "
+            dictFileTooBig: "可添加的最大文件大小为{{maxFilesize}}Mb，当前文件大小为{{filesize}}Mb "*/
         });
 
 
@@ -755,7 +765,7 @@
             </div>
             <div class="row">
                 <div class="form-group" style="margin-bottom: 3px;margin-top: 3px">
-                    <label class="col-xs-2 control-label no-padding-right" for="dropzone">文件</label>
+                    <label class="col-xs-2 control-label no-padding-right" for="dropzone">图片</label>
                     <div class="col-xs-9 dropzone " id="dropzone" style="margin: 10px 10px 10px 10px">
                         <div class="am-text-success dz-message">
                             将文件拖拽到此处<br>或点此打开文件管理器选择文件

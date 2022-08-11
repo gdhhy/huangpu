@@ -11,7 +11,7 @@ public class UploadFile {
     private Timestamp uploadTime;// '上传时间'
     private String serverPath;// '服务器保存路径'
     private String serverFilename;// '服务器保存文件名'
-    private String username;// '服务器保存文件名'
+    private String username;// '上传用户名'
 
     public int getFileID() {
         return fileID;
