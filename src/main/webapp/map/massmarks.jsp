@@ -118,7 +118,7 @@
     <h4>资产类型</h4>
     <div id="coordinate">
         <div class="input-item"><input id="led" name="language" type="radio" checked="checked"><span class="input-text">LED</span></div>
-        <div class="input-item"><input id="server" name="language" type="radio"><span class="input-text">服务器</span></div>
+        <div class="input-item"><input id="idc" name="language" type="radio"><span class="input-text">IDC</span></div>
     </div>
 </div>
 <div class="input-card">
@@ -404,7 +404,7 @@
                                 '<p>业主：<span style="color: #0288d1;font-weight:bold;">{owner}</span></p>' +
                                 '<p>街道：<span style="color: #0288d1;font-weight:bold;">{street}</span></p>';
                             var title = '<span style="font-size:11px;color:#123139;">{0}</span>'.format(json.location);
-                            if (type === 'server') {
+                            if (type === 'idc') {
                                 hh =
                                     '<p>网站名称：<span style="color: #0288d1;font-weight:bold;">{webName}</span></p>' +
                                     '<p>官网：<span style="color: #0288d1;font-weight:bold;">{www}</span></p>' +

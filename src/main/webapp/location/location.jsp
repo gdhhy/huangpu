@@ -20,6 +20,14 @@
 <link rel="stylesheet" href="../components/dropzone/dist/dropzone.css"/>--%>
 <script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
 <link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css"/>
+<style>
+    table.dataTable tbody tr.deletedClass {
+        background-color: #d7d5d5;
+    }
+
+    table.dataTable tbody tr.myodd {
+        background-color: #bce8f1;
+    }</style>
 <script type="text/javascript">
     function showPic(e, sUrl) {
         var x, y;
@@ -28,6 +36,16 @@
         document.getElementById("Layer1").style.left = x + 2 + 'px';
         document.getElementById("Layer1").style.top = y + 2 + 'px';
         document.getElementById("Layer1").innerHTML = "<img border='0' src=\"" + sUrl + "\">";
+        document.getElementById("Layer1").style.display = "";
+    }
+
+    function showPic2(e, sUrl) {
+        var x, y;
+        x = e.clientX;
+        y = e.clientY;
+        document.getElementById("Layer1").style.left = x + 2 + 'px';
+        document.getElementById("Layer1").style.top = y + 2 + 'px';
+        document.getElementById("Layer1").innerHTML = "<img border='0' style='object-fit: cover;width:300px' src=\"" + sUrl + "\">";
         document.getElementById("Layer1").style.display = "";
     }
 
@@ -48,11 +66,12 @@
                     {"data": "location", "sClass": "center", defaultContent: ''},
                     {"data": "address", "sClass": "center"},
                     {"data": "longitude", "sClass": "center"},
-                    {"data": "owner", "sClass": "center"},//4
+                    {"data": "imageUrl", "sClass": "center", defaultContent: ''},//4
+                    {"data": "owner", "sClass": "center"},
                     {"data": "street", "sClass": "center"},
                     {"data": "link", "sClass": "center"},
                     {"data": "color", "sClass": "center"},
-                    {"data": "locationID", "sClass": "center"}//8
+                    {"data": "locationID", "sClass": "center"}//9
                 ],
 
                 'columnDefs': [
@@ -67,18 +86,21 @@
                                 return "<a href=\"\" onmouseout=\"hiddenPic();\" onmousemove=\"showPic(event,'https://restapi.amap.com/v3/staticmap?markers=mid,0xFF0000,:{0},{1}&key=b772bf606b75644e7c2f3dcda3639896&radius&size=300*200');\">{2},{3}</a>".format(data, row.latitude, data, row.latitude);
                         }
                     },
-                    /*  {
-                          "orderable": false, 'targets': 4, 'searchable': false, title: '维度', render: function (data, type, row, meta) {
-                              if (data > 23.41208 || data < 23.030213) {
-                                  return "<span style='color:red'>{0}</span>".format(data);
-                              } else return data;
-                          }
-                      },*/
-                    {"orderable": false, "searchable": false, className: 'text-center', "targets": 4, title: '权属单位'},
-                    {"orderable": false, "searchable": false, className: 'text-center', "targets": 5, title: '辖区', width: 70},
-                    {"orderable": false, "searchable": false, className: 'text-center', "targets": 6, title: '联系人'},
                     {
-                        "orderable": false, "searchable": false, className: 'text-center', "targets": 7, title: '状态',
+                        "orderable": false, "searchable": false, className: 'text-center', "targets": 4, title: '图片', width: 40,
+                        render: function (data, type, row, meta) {
+                            if (data !== '' && data !== null) {
+                                return "<a href=\"\" onmouseout=\"hiddenPic();\" onmousemove=\"showPic2(event,'/upload/{0}');\">".format(data) +
+                                    '<i class="ace-icon glyphicon glyphicon-picture purple bigger-120"></i></a>';
+                            }
+                            return "";
+                        }
+                    },
+                    {"orderable": false, "searchable": false, className: 'text-center', "targets": 5, title: '权属单位'},
+                    {"orderable": false, "searchable": false, className: 'text-center', "targets": 6, title: '辖区', width: 60},
+                    {"orderable": false, "searchable": false, className: 'text-center', "targets": 7, title: '联系人', width: 60},
+                    {
+                        "orderable": false, "searchable": false, className: 'text-center', "targets": 8, title: '状态', width: 40,
                         render: function (data, type, row, meta) {
                             return '<select id="skin-colorpicker"  class="hide" data-id="{0}" data-color="{1}">'.format(row["locationID"], data) +
                                 '<option data-skin="no-skin" value="#438EB9">#438EB9</option>' +
@@ -89,29 +111,29 @@
                         }
                     },
                     {
-                        "orderable": false, 'searchable': false, 'targets': 8, title: '操作', width: 140,
+                        "orderable": false, 'searchable': false, 'targets': 9, title: '操作', width: 110,
                         render: function (data, type, row, meta) {
+                            let deleteHtml = row["deleted"] === 0 ? '<a class="hasLink" title="删除" href="#" data-Url="javascript:deleteAssets(\'{0}\',{1},\'{2}\',\'{3}\',\'{4}\');">'
+                                    .format($('#selectedAssetsType').val(), row["locationID"], row["location"], row["address"], $('#assets option:selected').text()) +
+                                '<i class="ace-icon glyphicon glyphicon-trash bigger-120"></i></a>' : "";
+
                             return '<div class="hidden-sm hidden-xs action-buttons">' +
-                                '<a class="hasLink" title="新增" href="#" data-Url="javascript:addAssets(\'{0}\',{1});">'.format($('#assets option:selected').val(), row["locationID"]) +
+                                '<a class="hasLink" title="新增" href="#" data-Url="javascript:addAssets(\'{0}\',{1});">'.format($('#selectedAssetsType').val(), row["locationID"]) +
                                 '<i class="ace-icon glyphicon glyphicon-plus red bigger-120"></i>' +
                                 '</a> ' +
-                                '<a class="hasLink" title="上传图片" href="#" data-Url="javascript:uploadImage(\'{0}\',{1});">'.format($('#assets option:selected').val(), row["locationID"]) +
-                                '<i class="ace-icon glyphicon glyphicon-picture purple bigger-120"></i>' +
-                                '</a> ' +
-                                /*    '<a class="hasLink" title="设置经纬度" href="#" data-Url="javascript:longLatAssets(\'{0}\',{1});">'.format($('#assets option:selected').val(), row["locationID"]) +
-                                    '<i class="ace-icon glyphicon glyphicon-map-marker blue bigger-120"></i>' +
-                                    '</a> ' +*/
-                                '<a class="hasLink" title="编辑" href="#" data-Url="javascript:longLatAssets(\'{0}\',{1});">'.format($('#assets option:selected').val(), row["locationID"]) +
+                                '<a class="hasLink" title="编辑" href="#" data-Url="javascript:editAssets(\'{0}\',{1});">'.format($('#selectedAssetsType').val(), row["locationID"]) +
                                 '<i class="ace-icon glyphicon glyphicon-edit green bigger-120"></i>' +
                                 '</a> ' +
-                                '<a class="hasLink" title="删除" href="#" data-Url="javascript:deleteLed({0},\'{1}\');">'.format(row["locationID"], row["filename"]) +
-                                '<i class="ace-icon glyphicon glyphicon-trash bigger-120"></i>' +
-                                '</a>' +
+                                deleteHtml +
                                 '</div>';
                         }
                     }
 
                 ],
+                "createdRow": function (row, data, dataIndex) {
+                    if (data["deleted"] === 1)
+                        $(row).addClass('deletedClass');
+                },
                 "aLengthMenu": [[15, 100], ["15", "100"]],//二组数组，第一组数量，第二组说明文字;
                 "aaSorting": [],//"aaSorting": [[ 4, "desc" ]],//设置第5个元素为默认排序
                 language: {
@@ -141,13 +163,13 @@
                 $.cookie("data-locationID", $(this).attr("data-locationID"));
             });
             $('#dynamic-table tr').find('#skin-colorpicker').each(function () {
-                $(this).val($(this).attr("data-color"))
+                $(this).val($(this).attr("data-color"));
             });
             $('#dynamic-table tr').find('#skin-colorpicker').ace_colorpicker().on('change', function () {
-                var submitData = {locationID: $(this).attr("data-id"), color: this.value};
+                var submitData = {locationID: $(this).attr("data-id"), color: this.value, assets:  $('#selectedAssetsType').val()};
                 $.ajax({
                     type: "POST",
-                    url: "/location/saveLedJson.jspa",
+                    url: "/location/saveColor.jspa",
                     data: JSON.stringify(submitData),
                     //contentType: "application/x-www-form-urlencoded; charset=UTF-8",//http://www.cnblogs.com/yoyotl/p/5853206.html
                     contentType: "application/json; charset=utf-8",
@@ -203,19 +225,19 @@
         });
 
         function search() {
-            var url = "/location/listAssets.jspa";
-            // var searchParam = "?threeThirty=" + $('#three_thirty').is(':checked');
-            var searchParam = "";
+           // console.log($('#assets option:selected').val());
+            $('#selectedAssetsType').val($('#assets option:selected').val());
+
+            var url = "/location/listAssets.jspa?showDeleted=" + $('#showDeleted').is(':checked');
             $('.form-search select').each(function () {
                 if ($(this).val())
-                    searchParam += "&" + $(this).attr("name") + "=" + $(this).val();
+                    url += "&" + $(this).attr("name") + "=" + $(this).val();
             });
             $('.form-search :text').each(function () {
                 if ($(this).val())
-                    searchParam += "&" + $(this).attr("name") + "=" + $(this).val();
+                    url += "&" + $(this).attr("name") + "=" + $(this).val();
             });
-            if (searchParam !== "")
-                url = "/location/listAssets.jspa" + searchParam.replace('&', '?');//只替换第一个
+
             myTable.ajax.url(encodeURI(url)).load();
         }
 
@@ -280,17 +302,70 @@
             }
         });
 
-        function longLatAssets(assetsType, locationID) {
+        function editAssets(assetsType, locationID) {
             if (assetsType === 'led')
                 $.getJSON("/location/getLed.jspa?locationID=" + locationID, function (ret) {
                     saveUrl = "/location/saveLed.jspa";
                     showLedDialog(ret);
                 });
-            else
-                $.getJSON("/location/getServer.jspa?locationID=" + locationID, function (ret) {
-                    saveUrl = "/location/saveServer.jspa";
+            else if (assetsType === 'idc')
+                $.getJSON("/location/getIdc.jspa?locationID=" + locationID, function (ret) {
+                    saveUrl = "/location/saveIdc.jspa";
                     showLedDialog(ret);
                 });
+        }
+
+        function deleteAssets(assetsType, locationID, location, address, assetsText) {
+            if (locationID === undefined) return;
+            $('#assetsText').text(assetsText);
+            $('#locationForDelete').text(location);
+            $('#addressForDelete').text(address);
+            $("#dialog-delete").removeClass('hide').dialog({
+                resizable: false,
+                modal: true,
+                title: "删除确认",
+                //title_html: true,
+                buttons: [
+                    {
+                        html: "<i class='ace-icon fa fa-trash bigger-110'></i>&nbsp;确定",
+                        "class": "btn btn-danger btn-minier",
+                        click: function () {
+                            $.ajax({
+                                type: "POST",
+                                url: "/location/deleteAssets.jspa?assets={0}&locationID={1}".format(assetsType, locationID),
+                                //contentType: "application/x-www-form-urlencoded; charset=UTF-8",//http://www.cnblogs.com/yoyotl/p/5853206.html
+                                cache: false,
+                                success: function (response, textStatus) {
+                                    var result = JSON.parse(response);
+                                    if (result.succeed) {
+                                        myTable.ajax.reload();
+                                    } else
+                                        bootbox.alert({message: "请求结果：" + result.succeed + "\n" + result.message});
+                                    /*showDialog("请求结果：" + result.succeed, result.message);*/
+                                    $('#dialog-delete').dialog('close');
+                                },
+                                error: function (response, textStatus) {/*能够接收404,500等错误*/
+                                    //showDialog("请求状态码：" + response.status, response.responseText);
+                                    console.log(response.responseText);
+                                    bootbox.alert({
+                                        message: response.responseText, callback: function () {
+                                            $('#dialog-delete').dialog('close');
+                                        }
+                                    });
+                                }
+                            });
+
+                        }
+                    },
+                    {
+                        html: "<i class='ace-icon fa fa-times bigger-110'></i>&nbsp; 取消",
+                        "class": "btn btn-minier",
+                        click: function () {
+                            $(this).dialog("close");
+                        }
+                    }
+                ]
+            });
         }
 
         var markers = [];
@@ -383,14 +458,6 @@
         });
 
         function showLedDialog(loc) {
-            /*  var map = new AMap.Map("container", {
-                  resizeEnable: true
-              });
-              //为地图注册click事件获取鼠标点击出的经纬度坐标
-              map.on('click', function (e) {
-                  // document.getElementById("lnglat").value = e.lnglat.getLng() + ',' + e.lnglat.getLat()
-              });*/
-
             $('#amap').html("");
             $('#locationID').val(loc.locationID);
             $('#address').val(loc.address);
@@ -399,6 +466,8 @@
             $('#latitude').val(loc.latitude);
             $('#owner').val(loc.owner);
             $('#link').val(loc.link);
+            $("#imageID").val(loc.imageID);
+            $("#imageUrl").val(loc.filename);
             runTimes = 0;
             markers = [];
             /* if (loc.location === null || loc.location === '') runTimes++;
@@ -410,7 +479,7 @@
                 resizable: false,
                 //icon:'fa fa-key',
                 width: 860,
-                height: 600,
+                height: 620,
                 modal: true,
                 title: "编辑资产信息",
                 buttons: [
@@ -428,158 +497,87 @@
                             $('#dialog-edit').dialog('close');
                         }
                     }],
-                title_html: true
+                title_html: true,
+                close: function (event, ui) {
+                    if (dz) {
+                        dz.removeAllFiles(true);
+                        dz.destroy();
+                    }
+                }
+            });
+
+            //    var dz = $("div#dropzone").dropzone({
+            var dz = new Dropzone("div#dropzone", {//https://blog.csdn.net/jinxhj2010/article/details/107683026
+                url: '/upload/uploadImage.jspa',
+                autoProcessQueue: true,// 如果为false，文件将被添加到队列中，但不会自动处理队列。
+                uploadMultiple: false, // 是否在一个请求中发送多个文件。
+                parallelUploads: 3, // 并行处理多少个文件上传
+                maxFiles: 1, // 用于限制此Dropzone将处理的最大文件数
+                maxFilesize: 20,
+                acceptedFiles: ".jpg,.jpeg,.png",
+                /*addRemoveLinks: true,
+                 dictRemoveFile: '删除',*/
+                dictDefaultMessage: "拖拉图片文件到这里或者点击",
+                dictFallbackMessage: "你的浏览器不支持拖拉文件来上传",
+                dictMaxFilesExceeded: "文件数量过多",
+                dictFileTooBig: "可添加的最大文件大小为{{maxFilesize}}Mb，当前文件大小为{{filesize}}Mb ",
+                thumbnail: function (file, dataUrl) {
+                    if (file.previewElement) {
+                        $(file.previewElement).removeClass("dz-file-preview");
+                        var images = $(file.previewElement).find("[data-dz-thumbnail]").each(function () {
+                            var thumbnailElement = this;
+                            thumbnailElement.alt = file.name;
+                            thumbnailElement.src = dataUrl;
+                        });
+                        setTimeout(function () {
+                            $(file.previewElement).addClass("dz-image-preview");
+                        }, 1);
+                    }
+                },
+                init: function () { // dropzone初始化时调用您可以在此处添加事件侦听器
+                    let myDropzone = this;
+                    myDropzone.removeAllFiles();//gzhhy发现的，负责会保留上一次加载的图片
+                    this.on("addedfile", function (file) {
+                        var removeButton = Dropzone.createElement("<button class='btn btn-sm btn-block'>移除</button>");
+                        removeButton.addEventListener("click", function (e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            myDropzone.removeFile(file);
+                            //todo 从服务器删除
+                            $("#imageID").val(0);
+                            $("#imageUrl").val('');
+                        });
+                        file.previewElement.appendChild(removeButton);
+                    });
+
+                    this.on("success", function (file, responseText) {
+                        // Handle the responseText here. For example, add the text to the preview element:
+                        $("#imageID").val(responseText.fileID);
+                        $("#imageUrl").val(responseText.filename);
+                    });
+
+                    //https://github.com/dropzone/dropzone/wiki/FAQ
+                    if (loc.imageID > 0) {
+                        var url = "/upload/" + loc.imageUrl;
+
+                        // If you only have access to the original image sizes on your server,
+                        // and want to resize them in the browser:
+                        var file = $.parseJSON(loc.extJson);
+                        //console.log(file.size);
+                        let mockFile = {name: file.filename, size: file.size};//todo 读服务器
+                        myDropzone.files.push(mockFile);//gzhhy发现的，负责会保留上一次加载的图片
+                        myDropzone.displayExistingFile(mockFile, url);
+
+                        // If you use the maxFiles option, make sure you adjust it to the
+                        // correct amount:
+                        let fileCountOnServer = 2; // The number of files already uploaded
+                        myDropzone.options.maxFiles = 1;
+                    }
+                }
             });
         }
 
-        $("#dropzone").dropzone({
-            url: '/upload/uploadImage.jspa',thumbnail: function(file, dataUrl) {
-                if (file.previewElement) {
-                    $(file.previewElement).removeClass("dz-file-preview");
-                    var images = $(file.previewElement).find("[data-dz-thumbnail]").each(function() {
-                        var thumbnailElement = this;
-                        thumbnailElement.alt = file.name;
-                        thumbnailElement.src = dataUrl;
-                    });
-                    setTimeout(function() { $(file.previewElement).addClass("dz-image-preview"); }, 1);
-                }
-            },/*,
-            autoProcessQueue: false,// 如果为false，文件将被添加到队列中，但不会自动处理队列。
-            uploadMultiple: false, // 是否在一个请求中发送多个文件。
-            parallelUploads: 1, // 并行处理多少个文件上传
-            maxFiles: 1, // 用于限制此Dropzone将处理的最大文件数
-            maxFilesize: 10,
-            acceptedFiles: ".jpg,.gif,.png",
-            dictDefaultMessage: "拖拉图片文件到这里或者点击",
-            dictFallbackMessage: "你的浏览器不支持拖拉文件来上传",
-            dictMaxFilesExceeded: "文件数量过多",
-            dictFileTooBig: "可添加的最大文件大小为{{maxFilesize}}Mb，当前文件大小为{{filesize}}Mb "*/
-        });
-
-
-        /* let myDropzone = new Dropzone("#dropzone");
-         myDropzone.on("addedfile", file => {
-             console.log(`File added:啊水水`);
-         });*/
-
-
-        /*     var dropz = new Dropzone('#dropzone', {
-                 url: '/upload/uploadImage.jspa',
-                 autoProcessQueue: false,// 如果为false，文件将被添加到队列中，但不会自动处理队列。
-                 uploadMultiple: true, // 是否在一个请求中发送多个文件。
-                 parallelUploads: 3, // 并行处理多少个文件上传
-                 maxFiles: 1, // 用于限制此Dropzone将处理的最大文件数
-                 maxFilesize: 10,
-                 acceptedFiles: ".jpg,.gif,.png",
-                 dictDefaultMessage: "拖拉图片文件到这里或者点击",
-                 dictFallbackMessage: "你的浏览器不支持拖拉文件来上传",
-                 dictMaxFilesExceeded: "文件数量过多",
-                 dictFileTooBig: "可添加的最大文件大小为{{maxFilesize}}Mb，当前文件大小为{{filesize}}Mb ",
-                 init: function () { // dropzone初始化时调用您可以在此处添加事件侦听器
-                     var myDropzone = this;
-                     this.on("addedfile", function (file) {
-                         /!* var removeButton = Dropzone.createElement("<button class='btn btn-sm btn-block'>移除</button>");
-                          removeButton.addEventListener("click",function(e) {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              myDropzone.removeFile(file);
-                          });
-                          file.previewElement.appendChild(removeButton);*!/
-                     });
-                 },
-                 sendingmultiple: function (file, xhr, formData) {// 在每个文件发送之前调用。获取xhr对象和formData对象作为第二和第三个参数，可以修改它们（例如添加CSRF令牌）或添加其他数据。
-                     $.each(submitParams, function (key, value) {
-                         // formData.set(key, value);
-                     });
-                 },
-                 successmultiple: function (file, response) {// 该文件已成功上传。获取服务器响应作为第二个参数。
-                 },
-                 completemultiple: function (file, data) {
-                 }
-             });*/
-
-        //ACE
-        /* Dropzone.autoDiscover = false;
-
-         var myDropzone = new Dropzone('#dropzone', {
-             previewTemplate: $('#preview-template').html(),
-
-             thumbnailHeight: 120,
-             thumbnailWidth: 120,
-             maxFilesize: 0.5,
-
-             //addRemoveLinks : true,
-             //dictRemoveFile: 'Remove',
-
-             dictDefaultMessage:
-                 '<span class="bigger-150 bolder"><i class="ace-icon fa fa-caret-right red"></i> Drop files</span> to upload \
-                 <span class="smaller-80 grey">(or click)</span> <br /> \
-                 <i class="upload-icon ace-icon fa fa-cloud-upload blue fa-3x"></i>'
-             ,
-
-             thumbnail: function (file, dataUrl) {
-                 if (file.previewElement) {
-                     $(file.previewElement).removeClass("dz-file-preview");
-                     var images = $(file.previewElement).find("[data-dz-thumbnail]").each(function () {
-                         var thumbnailElement = this;
-                         thumbnailElement.alt = file.name;
-                         thumbnailElement.src = dataUrl;
-                     });
-                     setTimeout(function () {
-                         $(file.previewElement).addClass("dz-image-preview");
-                     }, 1);
-                 }
-             }
-
-         });
-
-
-         //simulating upload progress
-         var minSteps = 6,
-             maxSteps = 60,
-             timeBetweenSteps = 100,
-             bytesPerStep = 100000;
-
-         myDropzone.uploadFiles = function (files) {
-             var self = this;
-
-             for (var i = 0; i < files.length; i++) {
-                 var file = files[i];
-                 totalSteps = Math.round(Math.min(maxSteps, Math.max(minSteps, file.size / bytesPerStep)));
-
-                 for (var step = 0; step < totalSteps; step++) {
-                     var duration = timeBetweenSteps * (step + 1);
-                     setTimeout(function (file, totalSteps, step) {
-                         return function () {
-                             file.upload = {
-                                 progress: 100 * (step + 1) / totalSteps,
-                                 total: file.size,
-                                 bytesSent: (step + 1) * file.size / totalSteps
-                             };
-
-                             self.emit('uploadprogress', file, file.upload.progress, file.upload.bytesSent);
-                             if (file.upload.progress == 100) {
-                                 file.status = Dropzone.SUCCESS;
-                                 self.emit("success", file, 'success', null);
-                                 self.emit("complete", file);
-                                 self.processQueue();
-                             }
-                         };
-                     }(file, totalSteps, step), duration);
-                 }
-             }
-         }
-
-
-         //remove dropzone instance when leaving this page in ajax mode
-         $(document).one('ajaxloadstart.page', function (e) {
-             try {
-                 myDropzone.destroy();
-             } catch (e) {
-             }
-         });*/
-
-    })
+    });
 </script>
 <!-- #section:basics/content.breadcrumbs -->
 <div class="breadcrumbs ace-save-state" id="breadcrumbs">
@@ -592,14 +590,14 @@
     </ul><!-- /.breadcrumb -->
 
     <!-- #section:basics/content.searchbox -->
-    <div class="nav-search" id="nav-search">
+    <%--   <div class="nav-search" id="nav-search">
         <form class="form-search">
   <span class="input-icon">
   <input type="text" placeholder="Search ..." class="nav-search-input" id="nav-search-input" autocomplete="off"/>
   <i class="ace-icon fa fa-search nav-search-icon"></i>
   </span>
         </form>
-    </div><!-- /.nav-search -->
+    </div>--%><!-- /.nav-search -->
 
     <!-- /section:basics/content.searchbox -->
 </div>
@@ -611,7 +609,7 @@
                 <label>资产类型 ：</label>
                 <select id="assets" name="assets" class="nav-search-input">
                     <option value="led" selected>LED</option>
-                    <option value="server">服务器</option>
+                    <option value="idc">IDC</option>
                 </select>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;辖区：
                 <select id="street" name="street" class="nav-search-input">
@@ -642,7 +640,9 @@
                     <option value="unfixed">未定</option>
                 </select> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 <label>地址 ：</label>
-                <input type="text" placeholder="地址 ..." name="address" autocomplete="off"/>
+                <input type="text" placeholder="地址 ..." name="address" autocomplete="off"/> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <label>显示删除 ：</label>
+                <input type="checkbox" id="showDeleted">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 <button type="button" class="btn btn-sm btn-success">
                     查询
                     <i class="ace-icon fa fa-search icon-on-right bigger-110"></i>
@@ -678,7 +678,8 @@
 <!-- /.page-content -->
 <div id="dialog-delete" class="hide">
     <div class="alert alert-info bigger-110">
-        删除上传文件： <span id="filename" class="red"></span> ，分析结果、索引、服务器上文件一起删除！
+        删除 <span id="assetsText" class="brown"></span>： <span id="locationForDelete" class="red"></span> ！<br/>
+        地址：<span id="addressForDelete" class="black"></span>
     </div>
 
     <div class="space-6"></div>
@@ -773,6 +774,8 @@
                     </div>
                 </div>
             </div>
+            <input type="hidden" id="imageID" name="imageID">
+            <input type="hidden" id="imageUrl" name="imageUrl">
             <input type="hidden" id="locationID" name="locationID">
         </form>
     </div>
@@ -796,3 +799,4 @@
 </div>
 <div id="Layer1" style="display: none; position: absolute; z-index: 100;">
 </div>
+<input type="hidden" id="selectedAssetsType" value="led">

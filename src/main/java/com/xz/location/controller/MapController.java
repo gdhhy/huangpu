@@ -2,19 +2,14 @@ package com.xz.location.controller;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
-import com.xz.location.dao.ServerMapper;
+import com.xz.location.dao.AssetsMapper;
 import com.xz.location.pojo.Led;
-import com.xz.location.pojo.Server;
+import com.xz.location.pojo.IDC;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,7 +20,7 @@ import java.util.Map;
 
 public class MapController {
     @Autowired
-    private ServerMapper serverMapper;
+    private AssetsMapper assetsMapper;
 
     private Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm").serializeNulls().create();
 
@@ -40,7 +35,7 @@ public class MapController {
         param.put("coordinate", "fixed");
         ArrayList<HashMap> json = new ArrayList<>();
         if ("led".equals(assets)) {
-            List<Led> leds = serverMapper.selectLed(param);
+            List<Led> leds = assetsMapper.selectLed(param);
             for (Led led : leds) {
                 double[] lnglat = {led.getLongitude(), led.getLatitude()};
                 HashMap<String, Object> map = new HashMap(3);
@@ -50,13 +45,13 @@ public class MapController {
             }
 
         }
-        if ("server".equals(assets)) {
-            List<Server> servers = serverMapper.selectServer(param);
-            for (Server server : servers) {
-                double[] lnglat = {server.getLongitude(), server.getLatitude()};
+        if ("idc".equals(assets)) {
+            List<IDC> idcs = assetsMapper.selectIdc(param);
+            for (IDC idc : idcs) {
+                double[] lnglat = {idc.getLongitude(), idc.getLatitude()};
                 HashMap<String, Object> map = new HashMap(3);
                 map.put("lnglat", lnglat);
-                map.put("name", server.getOwner());
+                map.put("name", idc.getOwner());
                 json.add(map);
             }
         }
@@ -75,7 +70,7 @@ public class MapController {
         param.put("coordinate", "fixed");
         ArrayList<HashMap> json = new ArrayList<>();
         if ("led".equals(assets)) {
-            List<Led> leds = serverMapper.selectLed(param);
+            List<Led> leds = assetsMapper.selectLed(param);
             for (Led led : leds) {
                 double[] lnglat = {led.getLongitude(), led.getLatitude()};
                 HashMap<String, Object> map = new HashMap(3);
@@ -87,14 +82,14 @@ public class MapController {
             }
 
         }
-        if ("server".equals(assets)) {
-            List<Server> servers = serverMapper.selectServer(param);
-            for (Server server : servers) {
-                double[] lnglat = {server.getLongitude(), server.getLatitude()};
+        if ("idc".equals(assets)) {
+            List<IDC> idcs = assetsMapper.selectIdc(param);
+            for (IDC idc : idcs) {
+                double[] lnglat = {idc.getLongitude(), idc.getLatitude()};
                 HashMap<String, Object> map = new HashMap(3);
                 map.put("lnglat", lnglat);
-                map.put("name", server.getOwner());
-                map.put("id", server.getLocationID());
+                map.put("name", idc.getOwner());
+                map.put("id", idc.getLocationID());
                 map.put("style", 0);
                 json.add(map);
             }
@@ -113,7 +108,7 @@ public class MapController {
         param.put("coordinate", "fixed");//已有坐标的资产
         ArrayList<HashMap> json = new ArrayList<>();
         if ("led".equals(assets)) {
-            List<Led> leds = serverMapper.selectLed(param);
+            List<Led> leds = assetsMapper.selectLed(param);
             for (Led led : leds) {
                 double[] lnglat = {led.getLongitude(), led.getLatitude()};
                 HashMap<String, Object> map = new HashMap(3);
@@ -125,14 +120,14 @@ public class MapController {
             }
 
         }
-        if ("server".equals(assets)) {
-            List<Server> servers = serverMapper.selectServer(param);
-            for (Server server : servers) {
-                double[] lnglat = {server.getLongitude(), server.getLatitude()};
+        if ("idc".equals(assets)) {
+            List<IDC> idcs = assetsMapper.selectIdc(param);
+            for (IDC idc : idcs) {
+                double[] lnglat = {idc.getLongitude(), idc.getLatitude()};
                 HashMap<String, Object> map = new HashMap(3);
                 map.put("lnglat", lnglat);
-                map.put("name", server.getOwner());
-                map.put("id", server.getLocationID());
+                map.put("name", idc.getOwner());
+                map.put("id", idc.getLocationID());
                 map.put("style", 1);
                 json.add(map);
             }
@@ -148,9 +143,9 @@ public class MapController {
         Map<String, Object> param = new HashMap<>();
         List<HashMap<String, Object>> streets = null;
         if ("led".equals(assets))
-            streets = serverMapper.selectStreetByLed(param);
-        if ("server".equals(assets))
-            streets = serverMapper.selectStreetByServer(param);
+            streets = assetsMapper.selectStreetByLed(param);
+        if ("idc".equals(assets))
+            streets = assetsMapper.selectStreetByServer(param);
         List<String> labels = new ArrayList<>();
 
         String elements = "{" +
@@ -196,9 +191,9 @@ public class MapController {
         Map<String, Object> param = new HashMap<>();
         List<HashMap<String, Object>> streets = null;
         if ("led".equals(assets))
-            streets = serverMapper.selectStreetByLed(param);
-        if ("server".equals(assets))
-            streets = serverMapper.selectStreetByServer(param);
+            streets = assetsMapper.selectStreetByLed(param);
+        if ("idc".equals(assets))
+            streets = assetsMapper.selectStreetByServer(param);
         List<String> labels = new ArrayList<>();
 
         String elements = "{\"name\": \"黄埔led_%d\"," +
@@ -226,9 +221,9 @@ public class MapController {
         Map<String, Object> param = new HashMap<>();
         List<HashMap<String, Object>> streets = null;
         if ("led".equals(assets))
-            streets = serverMapper.selectStreetByLed(param);
-        if ("server".equals(assets))
-            streets = serverMapper.selectStreetByServer(param);
+            streets = assetsMapper.selectStreetByLed(param);
+        if ("idc".equals(assets))
+            streets = assetsMapper.selectStreetByServer(param);
         List<String> labels = new ArrayList<>();
 
         String elements = "{\"name\": \"黄埔led_%d\"," +
@@ -256,14 +251,14 @@ public class MapController {
         Map<String, Object> param = new HashMap<>();
         param.put("locationID", locationID);
         if ("led".equals(assets)) {
-            List<Led> leds = serverMapper.selectLed(param);
+            List<Led> leds = assetsMapper.selectLed(param);
             if (leds.size() == 1)
                 return gson.toJson(leds.get(0));
         }
-        if ("server".equals(assets)) {
-            List<Server> servers = serverMapper.selectServer(param);
-            if (servers.size() == 1)
-                return gson.toJson(servers.get(0));
+        if ("idc".equals(assets)) {
+            List<IDC> idcs = assetsMapper.selectIdc(param);
+            if (idcs.size() == 1)
+                return gson.toJson(idcs.get(0));
         }
         return "{}";
     }

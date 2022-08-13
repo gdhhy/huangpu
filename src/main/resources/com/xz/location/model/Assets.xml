@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.xz.location.dao.ServerMapper">
+<mapper namespace="com.xz.location.dao.AssetsMapper">
     <!--<cache eviction="LRU" readOnly="false" flushInterval="60000" size="10000"/>-->
-    <resultMap id="ServerResult" type="com.xz.location.pojo.Server">
+    <resultMap id="ServerResult" type="com.xz.location.pojo.IDC">
         <result column="locationID" jdbcType="INTEGER" property="locationID"/>
         <result column="sourceID" jdbcType="INTEGER" property="sourceID"/>
         <result column="longitude" jdbcType="DOUBLE" property="longitude"/>
@@ -21,6 +21,7 @@
         <result property="color" column="color" jdbcType="VARCHAR"/>
         <result property="status" column="status" jdbcType="VARCHAR"/>
         <result property="imageID" column="imageID" jdbcType="INTEGER"/>
+        <result property="deleted" column="deleted" jdbcType="INTEGER"/>
     </resultMap>
     <resultMap id="LedResult" type="com.xz.location.pojo.Led">
         <result column="locationID" jdbcType="INTEGER" property="locationID"/>
@@ -50,6 +51,8 @@
         <result property="color" column="color" jdbcType="VARCHAR"/>
         <result property="status" column="status" jdbcType="VARCHAR"/>
         <result property="imageID" column="imageID" jdbcType="INTEGER"/>
+        <result property="imageUrl" column="imageUrl" jdbcType="INTEGER"/>
+        <result property="deleted" column="deleted" jdbcType="INTEGER"/>
     </resultMap>
     <sql id="queryWhere">
         <where>
@@ -57,6 +60,7 @@
             <if test="@com.xz.util.Ognl@isNotEmpty(param.street)">AND street = #{param.street:VARCHAR}</if>
             <if test="param.coordinate=='fixed'">AND longitude>0.001 AND latitude>0.001</if>
             <if test="param.coordinate=='unfixed'">AND (longitude &lt; 0.001 OR latitude &lt; 0.001)</if>
+            <if test="param.showDeleted=='false'">AND deleted=0</if>
             <if test="@com.xz.util.Ognl@isNotEmpty(param.address)">AND address LIKE '%${param.address}%'</if>
         </where>
     </sql>
@@ -66,11 +70,12 @@
             <if test="@com.xz.util.Ognl@isNotEmpty(param.street)">AND street = #{param.street:VARCHAR}</if>
             <if test="param.coordinate=='fixed'">AND longitude>0.001 AND latitude>0.001</if>
             <if test="param.coordinate=='unfixed'">AND (longitude &lt; 0.001 OR latitude &lt; 0.001)</if>
+            <if test="param.showDeleted=='false'">AND deleted=0</if>
             <if test="@com.xz.util.Ognl@isNotEmpty(param.address)">AND address LIKE '%${param.address}%'</if>
         </where>
     </sql>
-    <select id="selectServer" parameterType="java.util.Map" resultMap="ServerResult">
-        SELECT locationID,longitude,latitude,owner,webName,www,ipFrom,ipTo,address,street,link,linkPhone,safeGrade,color,status,imageID FROM server
+    <select id="selectIdc" parameterType="java.util.Map" resultMap="ServerResult">
+        SELECT locationID,longitude,latitude,owner,webName,www,ipFrom,ipTo,address,street,link,linkPhone,safeGrade,color,status,imageID,imageUrl,deleted FROM idc
         <include refid="queryWhere"/>
         ORDER BY locationID desc
         <choose>
@@ -85,12 +90,12 @@
             </otherwise>
         </choose>
     </select>
-    <select id="selectServerCount" parameterType="java.util.Map" resultType="int">
-        SELECT count(locationID) FROM server
+    <select id="insertIdcCount" parameterType="java.util.Map" resultType="int">
+        SELECT count(locationID) FROM idc
         <include refid="queryWhere"/>
     </select>
-    <update id="updateServer" flushCache="true">
-        update server
+    <update id="updateIdc" flushCache="true">
+        update idc
         <set>
             <if test="@com.xz.util.Ognl@isNotEmpty(pojo.address)">address = #{pojo.address:VARCHAR},</if>
             <if test="pojo.longitude>0">longitude = #{pojo.longitude:DOUBLE},</if>
@@ -106,19 +111,21 @@
             <if test="pojo.safeGrade>0">safeGrade = #{pojo.safeGrade:INTEGER},</if>
             <if test="@com.xz.util.Ognl@isNotEmpty(pojo.color)">color = #{pojo.color:VARCHAR},</if>
             <if test="@com.xz.util.Ognl@isNotEmpty(pojo.status)">status = #{pojo.status:VARCHAR},</if>
-            <if test="pojo.imageID>0">imageID = #{pojo.imageID:INTEGER},</if>
+            <if test="pojo.imageID>=0">imageID = #{pojo.imageID:INTEGER},</if>
+            <if test="pojo.deleted>=0">deleted = #{pojo.deleted:INTEGER},</if>
+            <if test="pojo.imageUrl!=null">imageUrl = #{pojo.imageUrl:VARCHAR},</if>
         </set>
         where locationID = #{pojo.locationID:INTEGER}
     </update>
-    <insert id="insertServer" flushCache="true" useGeneratedKeys="true" keyProperty="pojo.locationID">
-        INSERT INTO server (sourceID, longitude, latitude, owner, webName, www, ipFrom, ipTo, address, street, link, linkPhone, safeGrade)
+    <insert id="insertIdc" flushCache="true" useGeneratedKeys="true" keyProperty="pojo.locationID">
+        INSERT INTO idc (sourceID, longitude, latitude, owner, webName, www, ipFrom, ipTo, address, street, link, linkPhone, safeGrade)
         VALUES (#{pojo.sourceID:INTEGER}, #{pojo.longitude:DOUBLE}, #{pojo.latitude:DOUBLE}, #{pojo.owner:VARCHAR}, #{pojo.webName:VARCHAR},
                 #{pojo.www:VARCHAR}, #{pojo.ipFrom:VARCHAR}, #{pojo.ipTo:VARCHAR}, #{pojo.address:VARCHAR},
                 #{pojo.street:VARCHAR}, #{pojo.link:VARCHAR}, #{pojo.linkPhone:VARCHAR}, #{pojo.safeGrade:INTEGER})
     </insert>
-    <delete id="deleteServer" parameterType="int">
-        DELETE
-        FROM server
+    <delete id="deleteIdc" parameterType="int">
+        UPDATE idc
+        set deleted=1
         WHERE locationID = #{locationID:INTEGER}
     </delete>
 
@@ -126,7 +133,7 @@
     <select id="selectLed" parameterType="java.util.Map" resultMap="LedResult">
         SELECT
         locationID,location,address,longitude,latitude,size,sysClass,commMode,controlMode,strongCipher,license,link,linkPhone,recordUnit,approvalUnit,owner,street,leader,
-        leaderPhone,police,policePhone,policeApp,memo,color,status,imageID
+        leaderPhone,police,policePhone,policeApp,memo,color,status,imageID,imageUrl,deleted
         FROM led
         <include refid="queryWhere"/>
         ORDER BY locationID desc
@@ -173,7 +180,9 @@
             <if test="@com.xz.util.Ognl@isNotEmpty(pojo.memo)">memo = #{pojo.memo:VARCHAR},</if>
             <if test="@com.xz.util.Ognl@isNotEmpty(pojo.color)">color = #{pojo.color:VARCHAR},</if>
             <if test="@com.xz.util.Ognl@isNotEmpty(pojo.status)">status = #{pojo.status:VARCHAR},</if>
-            <if test="pojo.imageID>0">imageID = #{pojo.imageID:INTEGER},</if>
+            <if test="pojo.imageID>=0">imageID = #{pojo.imageID:INTEGER},</if>
+            <if test="pojo.deleted>=0">deleted = #{pojo.deleted:INTEGER},</if>
+            <if test="pojo.imageUrl!=null">imageUrl = #{pojo.imageUrl:VARCHAR},</if>
         </set>
         where locationID = #{pojo.locationID:INTEGER}
     </update>
@@ -187,8 +196,8 @@
                 #{pojo.police:VARCHAR}, #{pojo.policePhone:VARCHAR}, #{pojo.policeApp:INTEGER}, #{pojo.memo:VARCHAR})
     </insert>
     <delete id="deleteLed" parameterType="int">
-        DELETE
-        FROM led
+        update led
+        set deleted=1
         WHERE locationID = #{locationID:INTEGER}
     </delete>
     <select id="selectStreetByLed" parameterType="java.util.Map" resultType="java.util.HashMap">
@@ -202,7 +211,7 @@
     <select id="selectStreetByServer" parameterType="java.util.Map" resultType="java.util.HashMap">
         select A.streetID, A.streetName, A.latitude, A.longitude, B.cc
         from street A,
-             (select left(street, 2) street, count(street) cc from server group by street) B
+             (select left(street, 2) street, count(street) cc from idc group by street) B
         where A.streetName = B.street
           and A.latitude > 0
           and A.longitude > 0

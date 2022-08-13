@@ -10,7 +10,8 @@
         <typeHandler handler="com.xz.mybatis.JsonElementTypeHandler"/>
     </typeHandlers>
     <mappers>
-        <mapper resource="com/xz/location/model/Server.xml"/>
+        <mapper resource="com/xz/location/model/Assets.xml"/>
+        <mapper resource="com/xz/location/model/UploadFile.xml"/>
         <mapper resource="com/xz/filter/model/Source.xml"/>
     </mappers>
 </configuration>

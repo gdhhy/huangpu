@@ -17,7 +17,7 @@ import java.io.Serializable;
     linkPhone  varchar(255) comment '法人电话', -- 共同=>linkPhone  LegalPhone
     safeGrade  int comment '等保级别'
  */
-public class Server  extends Location  implements Serializable {
+public class IDC extends Location  implements Serializable {
     private String webName;
     private String www;
     private String ipFrom;

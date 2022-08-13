@@ -10,10 +10,12 @@ import java.util.Map;
 
 public interface UploadFileMapper {
     //uploadFile
-    List<UploadFile> selectUploadFile(@Param("param") Map<String, Object> param); 
-    
+    List<UploadFile> selectUploadFile(@Param("param") Map<String, Object> param);
+
+    UploadFile getUploadFile(@Param("fileID") int fileID);
+
     int deleteUploadFile(@Param("fileID") int fileID);
 
     int insertUploadFile(@Param("pojo") UploadFile uploadFile);
- 
+
 }

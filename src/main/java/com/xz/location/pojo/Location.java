@@ -16,6 +16,9 @@ public class Location implements Serializable {
     private String status;
     private String color;
     private int imageID;
+    private String imageUrl;
+    private String extJson;
+    private int deleted;//1未删除，默认0
 
     public int getLocationID() {
         return locationID;
@@ -119,5 +122,29 @@ public class Location implements Serializable {
 
     public void setImageID(int imageID) {
         this.imageID = imageID;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
+    public String getExtJson() {
+        return extJson;
+    }
+
+    public void setExtJson(String extJson) {
+        this.extJson = extJson;
+    }
+
+    public int getDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(int deleted) {
+        this.deleted = deleted;
     }
 }

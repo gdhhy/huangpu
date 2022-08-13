@@ -3,13 +3,13 @@
 
 <mapper namespace="com.xz.location.dao.UploadFileMapper">
     <!--<cache eviction="LRU" readOnly="false" flushInterval="60000" size="10000"/>-->
-    <resultMap id="FileResult" type="com.xz.location.pojo.UploadFile">
+    <resultMap id="fileResult" type="com.xz.location.pojo.UploadFile">
         <result column="fileID" jdbcType="INTEGER" property="fileID"/>
         <result column="filename" jdbcType="VARCHAR" property="filename"/>
         <result column="path" jdbcType="VARCHAR" property="path"/>
         <result column="username" jdbcType="VARCHAR" property="username"/>
         <result column="size" jdbcType="INTEGER" property="size"/>
-        <result column="uploadTime"  javaType="java.sql.Timestamp" jdbcType="TIMESTAMP" property="uploadTime"/>
+        <result column="uploadTime" javaType="java.sql.Timestamp" jdbcType="TIMESTAMP" property="uploadTime"/>
         <result column="serverPath" jdbcType="VARCHAR" property="serverPath"/>
         <result property="serverFilename" column="serverFilename" jdbcType="VARCHAR"/>
     </resultMap>
@@ -18,7 +18,7 @@
             <if test="param.fileID!=null">AND fileID = #{param.fileID:INTEGER}</if>
         </where>
     </sql>
-    <select id="selectUploadFile" parameterType="java.util.Map" resultMap="FileResult">
+    <select id="selectUploadFile" parameterType="java.util.Map" resultMap="fileResult">
         SELECT fileID,filename,path,username,size,uploadTime,serverPath,serverFilename FROM uploadfile
         <include refid="queryWhere"/>
         ORDER BY fileID desc
@@ -34,14 +34,18 @@
             </otherwise>
         </choose>
     </select>
+    <select id="getUploadFile" parameterType="java.util.Map" resultMap="fileResult">
+        SELECT fileID,filename,path,username,size,uploadTime,serverPath,serverFilename FROM uploadfile
+        WHERE fileID = #{fileID:INTEGER}
+    </select>
     <select id="selectUploadFileCount" parameterType="java.util.Map" resultType="int">
         SELECT count(fileID) FROM uploadfile
         <include refid="queryWhere"/>
     </select>
     <insert id="insertUploadFile" flushCache="true" useGeneratedKeys="true" keyProperty="pojo.fileID">
-        INSERT INTO uploadfile (fileID, filename, path, username, size, uploadTime, serverPath, serverFilename)
-        VALUES (#{pojo.fileID:INTEGER}, #{pojo.filename:VARCHAR}, #{pojo.path:VARCHAR}, #{pojo.username:VARCHAR}, #{pojo.size:INTEGER},
-                #{pojo.uploadTime:TIMESTAMP},#{pojo.serverPath:VARCHAR},#{pojo.serverFilename:VARCHAR})
+        INSERT INTO uploadfile (filename, path, username, size, uploadTime, serverPath, serverFilename)
+        VALUES (#{pojo.filename:VARCHAR}, #{pojo.path:VARCHAR}, #{pojo.username:VARCHAR}, #{pojo.size:INTEGER},
+                #{pojo.uploadTime:TIMESTAMP}, #{pojo.serverPath:VARCHAR}, #{pojo.serverFilename:VARCHAR})
     </insert>
     <delete id="deleteUploadFile" parameterType="int">
         DELETE

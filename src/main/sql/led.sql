@@ -36,8 +36,8 @@ ALTER table led
     add COLUMN status int;
 ALTER table led
     add COLUMN imageID int;
-drop table server;
-create table server
+drop table idc;
+create table idc
 (
     locationID  int auto_increment primary key,
     sourceID    int comment '上传excel文件源source的ID',
@@ -58,11 +58,11 @@ create table server
     status       int,
     imageID      int
 ) engine = MyISAM;
-ALTER table server
+ALTER table idc
     add COLUMN color varchar(255);
-ALTER table server
+ALTER table idc
     add COLUMN status int;
-ALTER table server
+ALTER table idc
     add COLUMN imageID int;
 create table street
 (
@@ -75,7 +75,7 @@ create table street
 
 create table UploadFile
 (
-    fileID         int,
+    fileID         int auto_increment primary key,
     filename       varchar(255),
     path           varchar(255),
     contentType    varchar(255),

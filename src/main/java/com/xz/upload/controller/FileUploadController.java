@@ -13,10 +13,10 @@ import com.xz.ExceptionAdapter;
 import com.xz.filter.dao.SourceMapper;
 import com.xz.filter.pojo.Source;
 import com.xz.location.GPSUtil;
-import com.xz.location.dao.ServerMapper;
+import com.xz.location.dao.AssetsMapper;
 import com.xz.location.dao.UploadFileMapper;
 import com.xz.location.pojo.Led;
-import com.xz.location.pojo.Server;
+import com.xz.location.pojo.IDC;
 import com.xz.location.pojo.UploadFile;
 import com.xz.rbac.web.DeployRunning;
 import com.xz.upload.pojo.FileBucket;
@@ -38,6 +38,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
@@ -58,7 +59,7 @@ public class FileUploadController {
     @Autowired
     private SourceMapper sourceMapper;
     @Autowired
-    private ServerMapper serverMapper;
+    private AssetsMapper assetsMapper;
     @Autowired
     private UploadFileMapper uploadFileMapper;
 
@@ -156,14 +157,12 @@ public class FileUploadController {
 
         return gson.toJson(resultMap);
     }
-
     /**
-     * 上传地图数据文件
      *
      * @return
      */
     // @ResponseBody
-    @RequestMapping(value = "/uploadImage", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
+    /*@RequestMapping(value = "/uploadImage", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
     public String uploadImage(@Valid FileBucket fileBucket, BindingResult result) {
         Map<String, Object> resultMap = new HashMap<>();
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -222,7 +221,7 @@ public class FileUploadController {
         }
 
         return gson.toJson(resultMap);
-    }
+    }*/
 
     private int parseExcel(File file, int sourceID) {
         int count = 0;
@@ -274,7 +273,7 @@ public class FileUploadController {
                     led.setPoliceApp(getChineseTrue(row.getCell(8).getStringCellValue().trim()));
                     led.setMemo(row.getCell(17).getStringCellValue().trim());
 
-                    serverMapper.insertLed(led);
+                    assetsMapper.insertLed(led);
                     count++;
                 }
             } else if ((sheet = workbook.getSheet("Sheet1")) != null) {//网络资产
@@ -282,7 +281,7 @@ public class FileUploadController {
                     logger.debug("rowNum=" + rowNum);
                     Row row = sheet.getRow(rowNum);
 
-                    Server server = new Server();
+                    IDC server = new IDC();
                     server.setSourceID(sourceID);
 
                     server.setOwner(getCellValueAsString(row.getCell(0)));
@@ -295,7 +294,7 @@ public class FileUploadController {
                     server.setLinkPhone(getCellValueAsString(row.getCell(7)));
                     server.setSafeGrade((int) row.getCell(8).getNumericCellValue());
 
-                    serverMapper.insertServer(server);
+                    assetsMapper.insertIdc(server);
                     count++;
                 }
             }
@@ -374,15 +373,16 @@ public class FileUploadController {
         }
         return new double[]{0, 0};
     }
-    @RequestMapping("/uploadImage")
+
+    @RequestMapping(value="/uploadImage" )
     private ResponseEntity<String> uploadImage(MultipartHttpServletRequest request) {
         logger.info("start upload file ......");
         HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;//status code 500
 
-        Map<String, Object> loadResultMap = new HashMap< >();
+        Map<String, Object> loadResultMap = new HashMap<>();
         MultiValueMap<String, MultipartFile> multiMap = request.getMultiFileMap();
 
-       /* String taskKey = request.getParameter("taskKey");
+       /*String taskKey = request.getParameter("taskKey");
         logger.info("taskKey = "+taskKey);*/
 
         //TODO 异常
@@ -392,9 +392,11 @@ public class FileUploadController {
             List<MultipartFile> mFList = entry.getValue();
 
             for (MultipartFile mFile : mFList) {
-                String loadResult = loadFile(mFile, UPLOAD_LOCATION);
+                UploadFile loadResult = loadFile(mFile, UPLOAD_LOCATION);
                 String fileName = mFile.getOriginalFilename();
-                loadResultMap.put(fileName, loadResult);
+                loadResultMap.put(fileName, loadResult.getServerFilename());
+                loadResultMap.put("fileID", loadResult.getFileID());
+                loadResultMap.put("filename", loadResult.getServerFilename());
             }
         }
 
@@ -413,11 +415,7 @@ public class FileUploadController {
         return responseEntity;
     }
 
-    private String loadFile(MultipartFile mfile, String filePath) {
-        logger.error("load file param=", mfile.toString());
-
-       // int result = 1;
-
+    private UploadFile loadFile(MultipartFile mfile, String filePath) {
         // 获取上传的原始文件名
         String fileName = mfile.getOriginalFilename();
 
@@ -436,26 +434,34 @@ public class FileUploadController {
         // 重新设置文件名为 UUID，以确保唯一
         file = new File(filePath, UUID.randomUUID() + fileSuffix);
 
-      String  result = "";
+        UploadFile uploadFile = new UploadFile();
         try {
             // 写入文件
             mfile.transferTo(file);
 
-            UploadFile uploadFile=new UploadFile();
             uploadFile.setUploadTime(new Timestamp(System.currentTimeMillis()));
             uploadFile.setFilename(fileName);
-            uploadFile.setServerFilename(file.getCanonicalPath());
-            logger.debug("getAbsolutePath:"+file.getAbsolutePath());
+            uploadFile.setServerFilename(file.getName());
+         /* logger.debug("getAbsolutePath:"+file.getAbsolutePath());
             logger.debug("getName:"+file.getName());
-            logger.debug("getPath:"+file.getPath());
+            logger.debug("getPath:"+file.getPath());*/
             uploadFile.setServerPath(relative_directory);
             uploadFile.setSize(file.length());
             uploadFileMapper.insertUploadFile(uploadFile);
-            result=file.getCanonicalPath();
         } catch (IOException e) {
             logger.error("load file error", e);
         }
-        return result;
+        return uploadFile;
     }
 
+    @ResponseBody
+    @RequestMapping(value = "getImageInfo", method = RequestMethod.GET, produces = "text/html;charset=UTF-8")
+    public String getImageInfo(@RequestParam(value = "fileID") Integer fileID) {
+        Map<String, Object> param = new HashMap<>();
+        param.put("fileID", fileID);
+        List<UploadFile>  files = uploadFileMapper.selectUploadFile(param);
+        if (files.size() == 1)
+            return gson.toJson(files.get(0));
+        else return "";
+    }
 }
