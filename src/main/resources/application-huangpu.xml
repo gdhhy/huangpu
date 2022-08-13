@@ -43,6 +43,7 @@
     <bean id="sourceMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">
         <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
         <property name="mapperInterface" value="com.xz.filter.dao.SourceMapper"/>
+
     </bean>
     <bean id="assetsMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">
         <property name="sqlSessionFactory" ref="sqlSessionFactory"/>

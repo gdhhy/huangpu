@@ -111,16 +111,13 @@
                         }
                     },
                     {
-                        "orderable": false, 'searchable': false, 'targets': 9, title: '操作', width: 110,
+                        "orderable": false, 'searchable': false, 'targets': 9, title: '操作', width: 70,
                         render: function (data, type, row, meta) {
                             let deleteHtml = row["deleted"] === 0 ? '<a class="hasLink" title="删除" href="#" data-Url="javascript:deleteAssets(\'{0}\',{1},\'{2}\',\'{3}\',\'{4}\');">'
                                     .format($('#selectedAssetsType').val(), row["locationID"], row["location"], row["address"], $('#assets option:selected').text()) +
                                 '<i class="ace-icon glyphicon glyphicon-trash bigger-120"></i></a>' : "";
 
                             return '<div class="hidden-sm hidden-xs action-buttons">' +
-                                '<a class="hasLink" title="新增" href="#" data-Url="javascript:addAssets(\'{0}\',{1});">'.format($('#selectedAssetsType').val(), row["locationID"]) +
-                                '<i class="ace-icon glyphicon glyphicon-plus red bigger-120"></i>' +
-                                '</a> ' +
                                 '<a class="hasLink" title="编辑" href="#" data-Url="javascript:editAssets(\'{0}\',{1});">'.format($('#selectedAssetsType').val(), row["locationID"]) +
                                 '<i class="ace-icon glyphicon glyphicon-edit green bigger-120"></i>' +
                                 '</a> ' +
@@ -152,7 +149,19 @@
                 "serverSide": true,
                 select: {style: 'single'}
             });
-
+        new $.fn.dataTable.Buttons(myTable, {
+            buttons: [
+                {
+                    "text": "<i class='ace-icon glyphicon glyphicon-plus red bigger-120'></i>&nbsp;&nbsp;新增",
+                    "className": "btn btn-xs btn-white btn-primary "
+                }
+            ]
+        });
+        myTable.buttons().container().appendTo($('.tableTools-container'));
+        myTable.button(0).action(function (e, dt, button, config) {
+            e.preventDefault();
+            showAssetsDialog({regularID: 0, paragraph: ''});
+        });
         myTable.on('order.dt search.dt', function () {
             myTable.column(0, {search: 'applied', order: 'applied'}).nodes().each(function (cell, i) {
                 cell.innerHTML = i + 1;
@@ -453,11 +462,16 @@
             queryLnglat($('#location').val());
         });
 
+
         $('#byAddress').on("click", function () {
             queryLnglat($('#address').val());
         });
 
+        function showAssetsDialog(regular) {
+
+        }
         function showLedDialog(loc) {
+
             $('#amap').html("");
             $('#locationID').val(loc.locationID);
             $('#address').val(loc.address);

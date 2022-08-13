@@ -211,9 +211,9 @@ public class LocationController {
         HashMap postMap = gson.fromJson(postJson, HashMap.class);
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Map<String, Object> map = new HashMap<>();
+        map.put("title", "设置资产颜色");
         if (principal instanceof UserDetails) {
             int result = 0;
-            map.put("title", "设置资产颜色");
             if ("led".equals(postMap.get("assets"))) {
                 Led led = new Led();
                 led.setLocationID(Integer.parseInt(postMap.get("locationID").toString()));
@@ -228,7 +228,6 @@ public class LocationController {
 
             map.put("succeed", result > 0);
         } else {
-            map.put("title", "设置资产颜色");
             map.put("succeed", false);
             map.put("message", "没登录用户信息，请重新登录！");
         }
