@@ -1,12 +1,12 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<script src="https://cdn.bootcss.com/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>
+<script src="../assets/js/jquery.ui.touch-punch.min.js"></script>
 <script src="../js/resize.js"></script>
 
-<script src="http://static.runoob.com/assets/jquery-validation-1.14.0/dist/jquery.validate.min.js"></script>
+<script src="../assets/js/jquery.validate.min.js"></script>
 
 <%--<link rel="stylesheet" href="../components/jquery-ui/jquery-ui.css" />--%>
-<link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+<link rel="stylesheet" href="../components/font-awesome-4.7.0/css/font-awesome.min.css" />
 <link rel="stylesheet" href="../jQuery-File-Upload-master/css/jquery.fileupload.css">
 <script type="text/javascript">
     jQuery(function ($) {

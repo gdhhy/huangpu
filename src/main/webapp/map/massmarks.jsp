@@ -393,7 +393,7 @@
 
                 // var marker = new AMap.Marker({content: ' ', map: map});
                 mass.on('click', function (e) {
-                    ajax('/map/getAssets.jspa?assets={0}&locationID={1}'.format(type, e.data.id), function (err, json) {
+                    ajax('/map/getAssets.jspa?assets={0}&assetsID={1}'.format(type, e.data.id), function (err, json) {
                         if (!err) {
                             var hh =
                                 '<p>尺寸：<span style="color: #0288d1;font-weight:bold;">{size}</span></p>' +

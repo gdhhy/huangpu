@@ -49,6 +49,7 @@
         <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
         <property name="mapperInterface" value="com.xz.location.dao.AssetsMapper"/>
     </bean>
+
     <bean id="uploadFileMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">
         <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
         <property name="mapperInterface" value="com.xz.location.dao.UploadFileMapper"/>

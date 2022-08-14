@@ -3,7 +3,7 @@ package com.xz.location.pojo;
 import java.io.Serializable;
 
 /*
-   locationID int auto_increment primary key,
+   assetsID int auto_increment primary key,
     longitude  decimal(12, 8) comment '经度', -- 共同
     latitude   decimal(12, 8) comment '纬度', -- 共同
     owner      varchar(255) comment '企业名称',-- 共同=>owner  corpName
@@ -17,7 +17,7 @@ import java.io.Serializable;
     linkPhone  varchar(255) comment '法人电话', -- 共同=>linkPhone  LegalPhone
     safeGrade  int comment '等保级别'
  */
-public class IDC extends Location  implements Serializable {
+public class IDC extends Assets implements Serializable {
     private String webName;
     private String www;
     private String ipFrom;

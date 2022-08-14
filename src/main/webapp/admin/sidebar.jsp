@@ -114,7 +114,7 @@
 
             <ul class="submenu">
                 <li class="">
-                    <a href="index.jspa?content=/location/location.jsp&menuID=11" id="11">
+                    <a href="index.jspa?content=/location/assets.jsp&menuID=11" id="11">
                         <i class="menu-icon fa fa-caret-right"></i>
                         <i class="fa fa-folder-o"></i>
                         <span class="menu-text">资产管理</span>

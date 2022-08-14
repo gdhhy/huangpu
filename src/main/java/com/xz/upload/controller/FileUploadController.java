@@ -15,8 +15,7 @@ import com.xz.filter.pojo.Source;
 import com.xz.location.GPSUtil;
 import com.xz.location.dao.AssetsMapper;
 import com.xz.location.dao.UploadFileMapper;
-import com.xz.location.pojo.Led;
-import com.xz.location.pojo.IDC;
+import com.xz.location.pojo.Assets;
 import com.xz.location.pojo.UploadFile;
 import com.xz.rbac.web.DeployRunning;
 import com.xz.upload.pojo.FileBucket;
@@ -157,8 +156,8 @@ public class FileUploadController {
 
         return gson.toJson(resultMap);
     }
+
     /**
-     *
      * @return
      */
     // @ResponseBody
@@ -222,7 +221,6 @@ public class FileUploadController {
 
         return gson.toJson(resultMap);
     }*/
-
     private int parseExcel(File file, int sourceID) {
         int count = 0;
         Workbook workbook = null;
@@ -248,32 +246,47 @@ public class FileUploadController {
                     logger.debug("rowNum=" + rowNum);
                     Row row = sheet.getRow(rowNum);
 
-                    Led led = new Led();
-                    led.setSourceID(sourceID);
+                    Assets assets = new Assets();
+                    HashMap<String, Object> json = new HashMap<>();
+                    assets.setAssetsType("led");
+                    assets.setSourceID(sourceID);
+                    assets.setName(getCellValueAsString(row.getCell(1)));
+                    if ("".equals(assets.getName()) || assets.getName() == null) continue;
+                    assets.setAddress(getCellValueAsString(row.getCell(2)));//todo解析坐标
+                    double[] d = parseCoordinate(getCellValueAsString(row.getCell(2)));//已转换百度坐标未高德坐标
+                    assets.setLongitude(d[0]);
+                    assets.setLatitude(d[1]);
+                    json.put("尺寸", getCellValueAsString(row.getCell(3)));
+                    json.put("系统分类", getCellValueAsString(row.getCell(4)));
+                    json.put("通讯方式", getCellValueAsString(row.getCell(5)));
+                    json.put("控制方式", getCellValueAsString(row.getCell(6)));
+                    json.put("有无设置强制密码", getChineseTrue(getCellValueAsString(row.getCell(7))));
+                    json.put("是否有营业执照", getChineseTrue(getCellValueAsString(row.getCell(8))));
+                  /*assets.setSize(row.getCell(3).getStringCellValue().trim());
+                    assets.setSysClass(row.getCell(4).getStringCellValue().trim());
+                    assets.setCommMode(row.getCell(5).getStringCellValue().trim());
+                    assets.setControlMode(row.getCell(6).getStringCellValue().trim());
+                    assets.setStrongCipher(getChineseTrue(row.getCell(7).getStringCellValue().trim()));
+                    assets.setLicense(getChineseTrue(row.getCell(8).getStringCellValue().trim()));*/
+                    assets.setLink(getCellValueAsString(row.getCell(9)));//todo 电话号码分离
+                    json.put("有无报备及报备单位", getCellValueAsString(row.getCell(10)));
+                    /*assets.setRecordUnit(row.getCell(10).getStringCellValue().trim());*/
+                    assets.setOwner(row.getCell(11).getStringCellValue().trim());
+                    json.put("建设审批单位", getCellValueAsString(row.getCell(12)));
+                    /*assets.setApprovalUnit(row.getCell(12).getStringCellValue().trim());*/
+                    assets.setStreet(row.getCell(13).getStringCellValue().trim());
+                    json.put("派出所负责领导及联系电话", getCellValueAsString(row.getCell(14)));
+                    json.put("派出所负责民警及联系电话", getCellValueAsString(row.getCell(15)));
+                    json.put("是否录入社区新警务APP（是或否）", getChineseTrue(getCellValueAsString(row.getCell(16))));
+                    json.put("备注（停用或新增）", getCellValueAsString(row.getCell(17)));
+                    /*assets.setLeader(getCellValueAsString(row.getCell(14)));
+                    assets.setPolice(getCellValueAsString(row.getCell(15)));
+                    assets.setPoliceApp(getChineseTrue(row.getCell(16).getStringCellValue().trim()));
+                    assets.setMemo(row.getCell(17).getStringCellValue().trim());*/
 
-                    led.setLocation(getCellValueAsString(row.getCell(1)));
-                    if ("".equals(led.getLocation()) || led.getLocation() == null) continue;
-                    led.setAddress(getCellValueAsString(row.getCell(2)));//todo解析坐标
-                    double[] d = parseCoordinate(getCellValueAsString(row.getCell(2)));
-                    led.setLongitude(d[0]);
-                    led.setLatitude(d[1]);
-                    led.setSize(row.getCell(3).getStringCellValue().trim());
-                    led.setSysClass(row.getCell(4).getStringCellValue().trim());
-                    led.setCommMode(row.getCell(5).getStringCellValue().trim());
-                    led.setControlMode(row.getCell(6).getStringCellValue().trim());
-                    led.setStrongCipher(getChineseTrue(row.getCell(7).getStringCellValue().trim()));
-                    led.setLicense(getChineseTrue(row.getCell(8).getStringCellValue().trim()));
-                    led.setLink(getCellValueAsString(row.getCell(9)));
-                    led.setRecordUnit(row.getCell(10).getStringCellValue().trim());
-                    led.setOwner(row.getCell(11).getStringCellValue().trim());
-                    led.setApprovalUnit(row.getCell(12).getStringCellValue().trim());
-                    led.setStreet(row.getCell(13).getStringCellValue().trim());
-                    led.setLeader(getCellValueAsString(row.getCell(14)));
-                    led.setPolice(getCellValueAsString(row.getCell(15)));
-                    led.setPoliceApp(getChineseTrue(row.getCell(8).getStringCellValue().trim()));
-                    led.setMemo(row.getCell(17).getStringCellValue().trim());
+                    assets.setExtJson(gson.toJson(json));
 
-                    assetsMapper.insertLed(led);
+                    assetsMapper.insertAssets(assets);
                     count++;
                 }
             } else if ((sheet = workbook.getSheet("Sheet1")) != null) {//网络资产
@@ -281,20 +294,23 @@ public class FileUploadController {
                     logger.debug("rowNum=" + rowNum);
                     Row row = sheet.getRow(rowNum);
 
-                    IDC server = new IDC();
-                    server.setSourceID(sourceID);
+                    Assets assets = new Assets();
+                    assets.setAssetsType("idc");
+                    HashMap<String, Object> json = new HashMap<>();
+                    assets.setSourceID(sourceID);
 
-                    server.setOwner(getCellValueAsString(row.getCell(0)));
-                    server.setWebName(getCellValueAsString(row.getCell(1)));
-                    server.setWww(getCellValueAsString(row.getCell(2)));
-                    server.setIpFrom(getCellValueAsString(row.getCell(3)));
-                    server.setAddress(getCellValueAsString(row.getCell(4)));
-                    server.setStreet(getCellValueAsString(row.getCell(5)));
-                    server.setLink(getCellValueAsString(row.getCell(6)));
-                    server.setLinkPhone(getCellValueAsString(row.getCell(7)));
-                    server.setSafeGrade((int) row.getCell(8).getNumericCellValue());
+                    assets.setOwner(getCellValueAsString(row.getCell(0)));
+                    json.put("网站名称", getCellValueAsString(row.getCell(1)));
+                    json.put("官网", getCellValueAsString(row.getCell(2)));
+                    json.put("IP", getCellValueAsString(row.getCell(3)));
+                    assets.setAddress(getCellValueAsString(row.getCell(4)));
+                    assets.setStreet(getCellValueAsString(row.getCell(5)));
+                    assets.setLink(getCellValueAsString(row.getCell(6)));
+                    assets.setLinkPhone(getCellValueAsString(row.getCell(7)));
+                    json.put("等保级别", (int) row.getCell(8).getNumericCellValue());
+                    assets.setExtJson(gson.toJson(json));
 
-                    assetsMapper.insertIdc(server);
+                    assetsMapper.insertAssets(assets);
                     count++;
                 }
             }
@@ -374,7 +390,7 @@ public class FileUploadController {
         return new double[]{0, 0};
     }
 
-    @RequestMapping(value="/uploadImage" )
+    @RequestMapping(value = "/uploadImage")
     private ResponseEntity<String> uploadImage(MultipartHttpServletRequest request) {
         logger.info("start upload file ......");
         HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;//status code 500
@@ -459,7 +475,7 @@ public class FileUploadController {
     public String getImageInfo(@RequestParam(value = "fileID") Integer fileID) {
         Map<String, Object> param = new HashMap<>();
         param.put("fileID", fileID);
-        List<UploadFile>  files = uploadFileMapper.selectUploadFile(param);
+        List<UploadFile> files = uploadFileMapper.selectUploadFile(param);
         if (files.size() == 1)
             return gson.toJson(files.get(0));
         else return "";

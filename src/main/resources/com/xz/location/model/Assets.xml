@@ -3,60 +3,31 @@
 
 <mapper namespace="com.xz.location.dao.AssetsMapper">
     <!--<cache eviction="LRU" readOnly="false" flushInterval="60000" size="10000"/>-->
-    <resultMap id="ServerResult" type="com.xz.location.pojo.IDC">
-        <result column="locationID" jdbcType="INTEGER" property="locationID"/>
-        <result column="sourceID" jdbcType="INTEGER" property="sourceID"/>
-        <result column="longitude" jdbcType="DOUBLE" property="longitude"/>
-        <result column="latitude" jdbcType="DOUBLE" property="latitude"/>
-        <result column="owner" jdbcType="VARCHAR" property="owner"/>
-        <result column="webName" jdbcType="VARCHAR" property="webName"/>
-        <result column="www" jdbcType="VARCHAR" property="www"/>
-        <result property="ipFrom" column="ipFrom" jdbcType="VARCHAR"/>
-        <result property="ipTo" column="ipTo" jdbcType="VARCHAR"/>
-        <result property="address" column="address" jdbcType="VARCHAR"/>
-        <result property="street" column="street" jdbcType="VARCHAR"/>
-        <result property="link" column="link" jdbcType="VARCHAR"/>
-        <result property="linkPhone" column="linkPhone" jdbcType="VARCHAR"/>
-        <result property="safeGrade" column="safeGrade" jdbcType="INTEGER"/>
-        <result property="color" column="color" jdbcType="VARCHAR"/>
-        <result property="status" column="status" jdbcType="VARCHAR"/>
-        <result property="imageID" column="imageID" jdbcType="INTEGER"/>
-        <result property="deleted" column="deleted" jdbcType="INTEGER"/>
-    </resultMap>
-    <resultMap id="LedResult" type="com.xz.location.pojo.Led">
-        <result column="locationID" jdbcType="INTEGER" property="locationID"/>
-        <result column="sourceID" jdbcType="INTEGER" property="sourceID"/>
-        <result column="location" jdbcType="VARCHAR" property="location"/>
-        <result column="address" jdbcType="VARCHAR" property="address"/>
-        <result column="longitude" jdbcType="DOUBLE" property="longitude"/>
-        <result column="latitude" jdbcType="DOUBLE" property="latitude"/>
-        <result column="size" jdbcType="VARCHAR" property="size"/>
-        <result column="sysClass" jdbcType="VARCHAR" property="sysClass"/>
-        <result column="commMode" jdbcType="VARCHAR" property="commMode"/>
-        <result property="controlMode" column="controlMode" jdbcType="VARCHAR"/>
-        <result property="strongCipher" column="strongCipher" jdbcType="INTEGER"/>
-        <result property="license" column="license" jdbcType="INTEGER"/>
-        <result property="link" column="link" jdbcType="VARCHAR"/>
-        <result property="linkPhone" column="linkPhone" jdbcType="VARCHAR"/>
-        <result property="recordUnit" column="recordUnit" jdbcType="VARCHAR"/>
-        <result property="approvalUnit" column="approvalUnit" jdbcType="VARCHAR"/>
-        <result property="owner" column="owner" jdbcType="VARCHAR"/>
-        <result property="street" column="street" jdbcType="VARCHAR"/>
-        <result property="leader" column="leader" jdbcType="VARCHAR"/>
-        <result property="leaderPhone" column="leaderPhone" jdbcType="VARCHAR"/>
-        <result property="police" column="police" jdbcType="VARCHAR"/>
-        <result property="policePhone" column="policePhone" jdbcType="VARCHAR"/>
-        <result property="policeApp" column="policeApp" jdbcType="INTEGER"/>
-        <result property="memo" column="memo" jdbcType="VARCHAR"/>
-        <result property="color" column="color" jdbcType="VARCHAR"/>
-        <result property="status" column="status" jdbcType="VARCHAR"/>
-        <result property="imageID" column="imageID" jdbcType="INTEGER"/>
-        <result property="imageUrl" column="imageUrl" jdbcType="INTEGER"/>
-        <result property="deleted" column="deleted" jdbcType="INTEGER"/>
+    <resultMap id="ServerResult" type="com.xz.location.pojo.Assets">
+        <result jdbcType="INTEGER" column="assetsID" property="assetsID"/>
+        <result jdbcType="VARCHAR" column="assetsType" property="assetsType"/>
+        <result jdbcType="VARCHAR" column="name" property="name"/>
+        <result jdbcType="VARCHAR" column="owner" property="owner"/>
+        <result jdbcType="VARCHAR" column="address" property="address"/>
+        <result jdbcType="DOUBLE" column="longitude" property="longitude"/>
+        <result jdbcType="DOUBLE" column="latitude" property="latitude"/>
+        <result jdbcType="VARCHAR" column="link" property="link"/>
+        <result jdbcType="VARCHAR" column="linkPhone" property="linkPhone"/>
+        <result jdbcType="INTEGER" column="imageID" property="imageID"/>
+        <result jdbcType="VARCHAR" column="imageUrl" property="imageUrl"/>
+        <result jdbcType="VARCHAR" column="status" property="status"/>
+        <result jdbcType="VARCHAR" column="street" property="street"/>
+        <result jdbcType="VARCHAR" column="extJson" property="extJson"/>
+        <result jdbcType="VARCHAR" column="color" property="color"/>
+        <result jdbcType="INTEGER" column="sourceID" property="sourceID"/>
+        <result jdbcType="INTEGER" column="fixPosition" property="fixPosition"/>
+        <result jdbcType="INTEGER" column="deleted" property="deleted"/>
     </resultMap>
     <sql id="queryWhere">
         <where>
-            <if test="param.locationID!=null">AND locationID = #{param.locationID:INTEGER}</if>
+            <if test="param.assetsID!=null">AND assetsID = #{param.assetsID:INTEGER}</if>
+            <!--<if test="param.assetsType!=null">AND assetsType = #{param.assetsType:VARCHAR}</if>-->
+            <if test="@com.xz.util.Ognl@isNotEmpty(param.assetsType)">AND assetsType = #{param.assetsType:VARCHAR}</if>
             <if test="@com.xz.util.Ognl@isNotEmpty(param.street)">AND street = #{param.street:VARCHAR}</if>
             <if test="param.coordinate=='fixed'">AND longitude>0.001 AND latitude>0.001</if>
             <if test="param.coordinate=='unfixed'">AND (longitude &lt; 0.001 OR latitude &lt; 0.001)</if>
@@ -64,20 +35,10 @@
             <if test="@com.xz.util.Ognl@isNotEmpty(param.address)">AND address LIKE '%${param.address}%'</if>
         </where>
     </sql>
-    <sql id="queryWhere2">
-        <where>
-            <if test="param.locationID!=null">AND locationID = #{param.locationID:INTEGER}</if>
-            <if test="@com.xz.util.Ognl@isNotEmpty(param.street)">AND street = #{param.street:VARCHAR}</if>
-            <if test="param.coordinate=='fixed'">AND longitude>0.001 AND latitude>0.001</if>
-            <if test="param.coordinate=='unfixed'">AND (longitude &lt; 0.001 OR latitude &lt; 0.001)</if>
-            <if test="param.showDeleted=='false'">AND deleted=0</if>
-            <if test="@com.xz.util.Ognl@isNotEmpty(param.address)">AND address LIKE '%${param.address}%'</if>
-        </where>
-    </sql>
-    <select id="selectIdc" parameterType="java.util.Map" resultMap="ServerResult">
-        SELECT locationID,longitude,latitude,owner,webName,www,ipFrom,ipTo,address,street,link,linkPhone,safeGrade,color,status,imageID,imageUrl,deleted FROM idc
+    <select id="selectAssets" parameterType="java.util.Map" resultMap="ServerResult">
+        SELECT assetsID,assetsType,name,owner,address,longitude,latitude,link,linkPhone,imageID,imageUrl,status,street,extJson,color,sourceID,fixPosition,deleted FROM assets
         <include refid="queryWhere"/>
-        ORDER BY locationID desc
+        ORDER BY assetsID desc
         <choose>
             <when test="param.start>0 and param.limit >0">
                 limit #{param.start:INTEGER},#{param.limit:INTEGER}
@@ -90,128 +51,55 @@
             </otherwise>
         </choose>
     </select>
-    <select id="insertIdcCount" parameterType="java.util.Map" resultType="int">
-        SELECT count(locationID) FROM idc
+    <select id="selectAssetsCount" parameterType="java.util.Map" resultType="int">
+        SELECT count(assetsID) FROM assets
         <include refid="queryWhere"/>
     </select>
-    <update id="updateIdc" flushCache="true">
-        update idc
+    <update id="updateAssets" flushCache="true">
+        update assets
         <set>
-            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.address)">address = #{pojo.address:VARCHAR},</if>
-            <if test="pojo.longitude>0">longitude = #{pojo.longitude:DOUBLE},</if>
-            <if test="pojo.latitude>0">latitude = #{pojo.latitude:DOUBLE},</if>
-            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.owner)">owner = #{pojo.owner:VARCHAR},</if>
-            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.street)">street = #{pojo.street:VARCHAR},</if>
-            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.link)">link = #{pojo.link:VARCHAR},</if>
-            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.linkPhone)">linkPhone = #{pojo.linkPhone:VARCHAR},</if>
-            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.webName)">webName = #{pojo.webName:VARCHAR},</if>
-            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.www)">www = #{pojo.www:VARCHAR},</if>
-            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.ipFrom)">ipFrom = #{pojo.ipFrom:VARCHAR},</if>
-            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.ipTo)">ipTo = #{pojo.ipTo:VARCHAR},</if>
-            <if test="pojo.safeGrade>0">safeGrade = #{pojo.safeGrade:INTEGER},</if>
-            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.color)">color = #{pojo.color:VARCHAR},</if>
-            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.status)">status = #{pojo.status:VARCHAR},</if>
+            <if test="pojo.name!=null">name = #{pojo.name:VARCHAR},</if>
+            <if test="pojo.owner!=null">owner = #{pojo.owner:VARCHAR},</if>
+            <if test="pojo.address!=null">address = #{pojo.address:VARCHAR},</if>
+            <if test="pojo.longitude>-1">longitude = #{pojo.longitude:DOUBLE},</if>
+            <if test="pojo.latitude>-1">latitude = #{pojo.latitude:DOUBLE},</if>
+            <if test="pojo.link!=null">link = #{pojo.link:VARCHAR},</if>
+            <if test="pojo.linkPhone!=null">linkPhone = #{pojo.linkPhone:VARCHAR},</if>
             <if test="pojo.imageID>=0">imageID = #{pojo.imageID:INTEGER},</if>
-            <if test="pojo.deleted>=0">deleted = #{pojo.deleted:INTEGER},</if>
             <if test="pojo.imageUrl!=null">imageUrl = #{pojo.imageUrl:VARCHAR},</if>
+            <if test="pojo.status!=null">status = #{pojo.status:VARCHAR},</if>
+            <if test="pojo.street!=null">street = #{pojo.street:VARCHAR},</if>
+            <if test="pojo.extJson!=null">extJson = #{pojo.extJson:VARCHAR},</if>
+            <if test="pojo.color!=null">color = #{pojo.color:VARCHAR},</if>
+            <if test="pojo.fixPosition>=0">fixPosition = #{pojo.fixPosition:INTEGER},</if>
+            <if test="pojo.deleted>=0">deleted = #{pojo.deleted:INTEGER},</if>
         </set>
-        where locationID = #{pojo.locationID:INTEGER}
+        where assetsID = #{pojo.assetsID:INTEGER}
     </update>
-    <insert id="insertIdc" flushCache="true" useGeneratedKeys="true" keyProperty="pojo.locationID">
-        INSERT INTO idc (sourceID, longitude, latitude, owner, webName, www, ipFrom, ipTo, address, street, link, linkPhone, safeGrade)
-        VALUES (#{pojo.sourceID:INTEGER}, #{pojo.longitude:DOUBLE}, #{pojo.latitude:DOUBLE}, #{pojo.owner:VARCHAR}, #{pojo.webName:VARCHAR},
-                #{pojo.www:VARCHAR}, #{pojo.ipFrom:VARCHAR}, #{pojo.ipTo:VARCHAR}, #{pojo.address:VARCHAR},
-                #{pojo.street:VARCHAR}, #{pojo.link:VARCHAR}, #{pojo.linkPhone:VARCHAR}, #{pojo.safeGrade:INTEGER})
+    <insert id="insertAssets" flushCache="true" useGeneratedKeys="true" keyProperty="pojo.assetsID">
+        INSERT INTO assets (assetsType, name, owner, address, longitude, latitude, link, linkPhone, status, street, extJson, sourceID, fixPosition)
+        VALUES (#{pojo.assetsType:VARCHAR}, #{pojo.name:VARCHAR}, #{pojo.owner:VARCHAR}, #{pojo.address:VARCHAR}, #{pojo.longitude:DOUBLE}, #{pojo.latitude:DOUBLE},
+                #{pojo.link:VARCHAR}, #{pojo.linkPhone:VARCHAR}, #{pojo.status:VARCHAR}, #{pojo.street:VARCHAR}, #{pojo.extJson:VARCHAR}, #{pojo.sourceID:INTEGER},
+                #{pojo.fixPosition:INTEGER})
     </insert>
-    <delete id="deleteIdc" parameterType="int">
-        UPDATE idc
+    <delete id="deleteAssets" parameterType="int">
+        UPDATE assets
         set deleted=1
-        WHERE locationID = #{locationID:INTEGER}
+        WHERE assetsID = #{assetsID:INTEGER}
     </delete>
 
-    <!--led-->
-    <select id="selectLed" parameterType="java.util.Map" resultMap="LedResult">
-        SELECT
-        locationID,location,address,longitude,latitude,size,sysClass,commMode,controlMode,strongCipher,license,link,linkPhone,recordUnit,approvalUnit,owner,street,leader,
-        leaderPhone,police,policePhone,policeApp,memo,color,status,imageID,imageUrl,deleted
-        FROM led
-        <include refid="queryWhere"/>
-        ORDER BY locationID desc
-        <choose>
-            <when test="param.start>0 and param.limit >0">
-                limit #{param.start:INTEGER},#{param.limit:INTEGER}
-            </when>
-            <when test="param.limit >0">
-                limit #{param.limit:INTEGER}
-            </when>
-            <otherwise>
-                limit 1000
-            </otherwise>
-        </choose>
-    </select>
-    <select id="selectLedCount" parameterType="java.util.Map" resultType="int">
-        SELECT count(locationID) FROM led
-        <include refid="queryWhere2"/>
-    </select>
-    <update id="updateLed" flushCache="true">
-        update led
-        <set>
-            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.address)">address = #{pojo.address:VARCHAR},</if>
-            <if test="pojo.longitude>0">longitude = #{pojo.longitude:DOUBLE},</if>
-            <if test="pojo.latitude>0">latitude = #{pojo.latitude:DOUBLE},</if>
-            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.owner)">owner = #{pojo.owner:VARCHAR},</if>
-            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.street)">street = #{pojo.street:VARCHAR},</if>
-            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.link)">link = #{pojo.link:VARCHAR},</if>
-            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.linkPhone)">linkPhone = #{pojo.linkPhone:VARCHAR},</if>
-            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.location)">location = #{pojo.location:VARCHAR},</if>
-            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.size)">size = #{pojo.size:VARCHAR},</if>
-            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.sysClass)">sysClass = #{pojo.sysClass:VARCHAR},</if>
-            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.commMode)">commMode = #{pojo.commMode:VARCHAR},</if>
-            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.controlMode)">controlMode = #{pojo.controlMode:VARCHAR},</if>
-            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.strongCipher)">strongCipher = #{pojo.strongCipher:INTEGER},</if>
-            <if test="pojo.license>0">license = #{pojo.license:INTEGER},</if>
-            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.recordUnit)">recordUnit = #{pojo.recordUnit:VARCHAR},</if>
-            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.approvalUnit)">approvalUnit = #{pojo.approvalUnit:VARCHAR},</if>
-            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.leader)">leader = #{pojo.leader:VARCHAR},</if>
-            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.leaderPhone)">leaderPhone = #{pojo.leaderPhone:VARCHAR},</if>
-            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.police)">police = #{pojo.police:VARCHAR},</if>
-            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.policePhone)">policePhone = #{pojo.policePhone:VARCHAR},</if>
-            <if test="pojo.policeApp>0">policeApp = #{pojo.policeApp:INTEGER},</if>
-            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.memo)">memo = #{pojo.memo:VARCHAR},</if>
-            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.color)">color = #{pojo.color:VARCHAR},</if>
-            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.status)">status = #{pojo.status:VARCHAR},</if>
-            <if test="pojo.imageID>=0">imageID = #{pojo.imageID:INTEGER},</if>
-            <if test="pojo.deleted>=0">deleted = #{pojo.deleted:INTEGER},</if>
-            <if test="pojo.imageUrl!=null">imageUrl = #{pojo.imageUrl:VARCHAR},</if>
-        </set>
-        where locationID = #{pojo.locationID:INTEGER}
-    </update>
-    <insert id="insertLed" flushCache="true" useGeneratedKeys="true" keyProperty="pojo.locationID">
-        INSERT INTO led (sourceID, location, address, longitude, latitude, size, sysClass, commMode, controlMode, strongCipher, license, link, linkPhone, recordUnit, approvalUnit,
-                         owner, street, leader, leaderPhone, police, policePhone, policeApp, memo)
-        VALUES (#{pojo.sourceID:INTEGER}, #{pojo.location:VARCHAR}, #{pojo.address:VARCHAR}, #{pojo.longitude:DOUBLE}, #{pojo.latitude:DOUBLE}, #{pojo.size:VARCHAR},
-                #{pojo.sysClass:VARCHAR},
-                #{pojo.commMode:VARCHAR}, #{pojo.controlMode:VARCHAR}, #{pojo.strongCipher:INTEGER}, #{pojo.license:INTEGER}, #{pojo.link:VARCHAR}, #{pojo.linkPhone:VARCHAR},
-                #{pojo.recordUnit:VARCHAR}, #{pojo.approvalUnit:VARCHAR}, #{pojo.owner:VARCHAR}, #{pojo.street:VARCHAR}, #{pojo.leader:VARCHAR}, #{pojo.leaderPhone:VARCHAR},
-                #{pojo.police:VARCHAR}, #{pojo.policePhone:VARCHAR}, #{pojo.policeApp:INTEGER}, #{pojo.memo:VARCHAR})
-    </insert>
-    <delete id="deleteLed" parameterType="int">
-        update led
-        set deleted=1
-        WHERE locationID = #{locationID:INTEGER}
-    </delete>
-    <select id="selectStreetByLed" parameterType="java.util.Map" resultType="java.util.HashMap">
+    <!--<select id="selectStreetByLed" parameterType="java.util.Map" resultType="java.util.HashMap">
         select A.streetID, A.streetName, A.latitude, A.longitude, B.cc
         from street A,
              (select street, count(street) cc from led group by street) B
         where A.streetName = B.street
           and A.latitude > 0
           and A.longitude > 0
-    </select>
-    <select id="selectStreetByServer" parameterType="java.util.Map" resultType="java.util.HashMap">
+    </select>-->
+    <select id="selectStreetByAssets" parameterType="java.util.Map" resultType="java.util.HashMap">
         select A.streetID, A.streetName, A.latitude, A.longitude, B.cc
         from street A,
-             (select left(street, 2) street, count(street) cc from idc group by street) B
+             (select left(street, 2) street, count(street) cc from assets group by street) B
         where A.streetName = B.street
           and A.latitude > 0
           and A.longitude > 0

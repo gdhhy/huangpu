@@ -3,7 +3,7 @@ package com.xz.location.pojo;
 import java.io.Serializable;
 
 /*
-   locationID   int AUTO_INCREMENT primary key,
+   assetsID   int AUTO_INCREMENT primary key,
     location     varchar(255) comment '位置',   -- 共同
     address      varchar(255) comment '地址',   -- 共同
     longitude    decimal(12, 8) comment '经度', -- 共同
@@ -27,7 +27,7 @@ import java.io.Serializable;
     policeApp    int comment '是否录入警务app',
     memo         varchar(255)
  */
-public class Led extends Location implements Serializable {
+public class Led extends Assets implements Serializable {
     private String location;
     private String size;
     private String sysClass;

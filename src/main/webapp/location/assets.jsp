@@ -62,7 +62,7 @@
                 bAutoWidth: false,
                 "columns": [
                     {"data": "assetsID", "sClass": "center"},
-                    {"data": "location", "sClass": "center", defaultContent: ''},
+                    {"data": "name", "sClass": "center", defaultContent: ''},
                     {"data": "address", "sClass": "center"},
                     {"data": "longitude", "sClass": "center"},
                     {"data": "imageUrl", "sClass": "center", defaultContent: ''},//4
@@ -75,10 +75,10 @@
 
                 'columnDefs': [
                     {"orderable": false, "searchable": false, className: 'text-center', "targets": 0},
-                    {"orderable": false, className: 'text-center', "targets": 1, title: '位置'},
+                    {"orderable": false, className: 'text-center', "targets": 1, title: '位置' ,width: 40},
                     {"orderable": false, className: 'text-center', "targets": 2, title: '地址（百度坐标）'},
                     {
-                        "orderable": false, className: 'text-center', "targets": 3, title: '经纬度（高德坐标）', render: function (data, type, row, meta) {
+                        "orderable": false, className: 'text-center', "targets": 3, title: '经纬度（高德坐标）', width: 120, render: function (data, type, row, meta) {
                             if (data > 113.607677 || data < 113.398067 || row.latitude > 23.41208 || row.latitude < 23.030213) {
                                 return "<span style='color:red'>{0},{1}</span>".format(data, row.latitude);
                             } else
@@ -113,7 +113,7 @@
                         "orderable": false, 'searchable': false, 'targets': 9, title: '操作', width: 55,
                         render: function (data, type, row, meta) {
                             let deleteHtml = row["deleted"] === 0 ? '<a class="hasLink" title="删除" href="#" data-Url="javascript:deleteAssets(\'{0}\',{1},\'{2}\',\'{3}\',\'{4}\');">'
-                                    .format($('#selectedAssetsType').val(), row["assetsID"], row["location"], row["address"], $('#assets option:selected').text()) +
+                                    .format($('#selectedAssetsType').val(), row["assetsID"], row["name"], row["address"], $('#assets option:selected').text()) +
                                 '<i class="ace-icon glyphicon glyphicon-trash bigger-120"></i></a>' : "";
 
                             return '<div class="hidden-sm hidden-xs action-buttons">' +
@@ -137,7 +137,7 @@
                 },
                 searching: false,
                 "ajax": {
-                    url: "/location/listAssets.jspa",
+                    url: "/assets/listAssets.jspa?assets=led",
                     "data": function (d) {//删除多余请求参数
                         for (var key in d)
                             if (key.indexOf("columns") === 0 || key.indexOf("order") === 0 || key.indexOf("search") === 0) //以columns开头的参数删除
@@ -177,7 +177,7 @@
                 var submitData = {assetsID: $(this).attr("data-id"), color: this.value, assets: $('#selectedAssetsType').val()};
                 $.ajax({
                     type: "POST",
-                    url: "/location/saveColor.jspa",
+                    url: "/assets/saveColor.jspa",
                     data: JSON.stringify(submitData),
                     //contentType: "application/x-www-form-urlencoded; charset=UTF-8",//http://www.cnblogs.com/yoyotl/p/5853206.html
                     contentType: "application/json; charset=utf-8",
@@ -235,8 +235,7 @@
         function search() {
             // console.log($('#assets option:selected').val());
             $('#selectedAssetsType').val($('#assets option:selected').val());
-
-            var url = "/location/listAssets.jspa?showDeleted=" + $('#showDeleted').is(':checked');
+            var url = "/assets/listAssets.jspa?assetsType={0}&showDeleted={1}".format($('#selectedAssetsType').val(), $('#showDeleted').is(':checked'));
             $('.form-search select').each(function () {
                 if ($(this).val())
                     url += "&" + $(this).attr("name") + "=" + $(this).val();
@@ -250,7 +249,7 @@
         }
 
         var ledForm = $('#ledForm');
-        var saveUrl = "/location/saveLed.jspa";
+        var saveUrl = "/assets/saveAssets.jspa";
         var validator = ledForm.validate({
             errorElement: 'div',
             errorClass: 'help-block',
@@ -310,22 +309,16 @@
         });
 
         function editAssets(assetsType, assetsID) {
-            if (assetsType === 'led')
-                $.getJSON("/location/getLed.jspa?assetsID=" + assetsID, function (ret) {
-                    saveUrl = "/location/saveLed.jspa";
-                    showAssetsDialog(ret);
-                });
-            else if (assetsType === 'idc')
-                $.getJSON("/location/getIdc.jspa?assetsID=" + assetsID, function (ret) {
-                    saveUrl = "/location/saveIdc.jspa";
-                    showAssetsDialog(ret);
-                });
+            $.getJSON("/assets/getAssets.jspa?assetsID=" + assetsID, function (ret) {
+                saveUrl = "/assets/saveAssets.jspa";
+                showAssetsDialog(ret);
+            });
         }
 
-        function deleteAssets(assetsType, assetsID, location, address, assetsText) {
+        function deleteAssets(assetsType, assetsID, name, address, assetsText) {
             if (assetsID === undefined) return;
             $('#assetsText').text(assetsText);
-            $('#locationForDelete').text(location);
+            $('#locationForDelete').text(name);
             $('#addressForDelete').text(address);
             $("#dialog-delete").removeClass('hide').dialog({
                 resizable: false,
@@ -339,7 +332,7 @@
                         click: function () {
                             $.ajax({
                                 type: "POST",
-                                url: "/location/deleteAssets.jspa?assets={0}&assetsID={1}".format(assetsType, assetsID),
+                                url: "/assets/deleteAssets.jspa?assets={0}&assetsID={1}".format(assetsType, assetsID),
                                 //contentType: "application/x-www-form-urlencoded; charset=UTF-8",//http://www.cnblogs.com/yoyotl/p/5853206.html
                                 cache: false,
                                 success: function (response, textStatus) {
@@ -456,8 +449,8 @@
             });
         }
 
-        $('#byLocation').on("click", function () {
-            queryLnglat($('#location').val());
+        $('#byName').on("click", function () {
+            queryLnglat($('#name').val());
         });
 
 
@@ -467,12 +460,11 @@
 
         function showAssetsDialog(loc) {
             validator.resetForm();//复位错误消息
-            if ($('#selectedAssetsType').val() === 'idc')
-                saveUrl = "/location/saveIdc.jspa";
+
             $('#amap').html("");
             $('#assetsID').val(loc.assetsID);
             $('#address').val(loc.address);
-            $('#location').val(loc.location);
+            $('#name').val(loc.name);
             $('#longitude').val(loc.longitude);
             $('#latitude').val(loc.latitude);
             $('#owner').val(loc.owner);
@@ -481,9 +473,9 @@
             $("#imageUrl").val(loc.imageUrl);
             runTimes = 0;
             markers = [];
-            /* if (loc.location === null || loc.location === '') runTimes++;
+            /* if (loc.name === null || loc.name === '') runTimes++;
              else*/
-            p1(loc.location, "位", '0xFFFF00');
+            p1(loc.name, "位", '0xFFFF00');
             p1(loc.address, "地", '0x00FF00');
             // "https://restapi.amap.com/v3/staticmap?markers=large,0xFF0000,%E4%BD%8D:116.37359,39.92437|large,0xFF0000,%E5%9C%B0:116.47359,39.92437&key=b772bf606b75644e7c2f3dcda3639896&radius");
             $("#dialog-edit").removeClass('hide').dialog({
@@ -735,12 +727,12 @@
             </div>
             <div class="row">
                 <div class="form-group" style="margin-bottom: 3px;margin-top: 3px">
-                    <label class="col-xs-2 control-label no-padding-right" for="location"> 位置</label>
+                    <label class="col-xs-2 control-label no-padding-right" for="name"> 名称</label>
                     <div class="col-xs-8">
-                        <input type="text" id="location" name="location" style="width: 100%" placeholder="位置"/>
+                        <input type="text" id="name" name="name" style="width: 100%" placeholder="名称"/>
                     </div>
                     <div class="col-xs-1">
-                        <button type="button" class="btn btn-info btn-minier" id="byLocation" title="位置 -> 经纬度">
+                        <button type="button" class="btn btn-info btn-minier" id="byName" title="名称 -> 经纬度">
                             <i class="ace-icon  fa fa-map-pin icon-on-right bigger-110"></i>
                         </button>
                     </div>

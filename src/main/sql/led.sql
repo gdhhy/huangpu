@@ -1,7 +1,7 @@
 drop table led;
 create table led
 (
-    locationID   int AUTO_INCREMENT primary key,
+    assetsID     int AUTO_INCREMENT primary key,
     sourceID     int comment '上传excel文件源source的ID',
     location     varchar(255) comment '位置',   -- 共同
     address      varchar(255) comment '地址',   -- 共同
@@ -30,16 +30,10 @@ create table led
     status       int,
     imageID      int
 ) engine = MyISAM;
-ALTER table led
-    add COLUMN color varchar(255);
-ALTER table led
-    add COLUMN status int;
-ALTER table led
-    add COLUMN imageID int;
 drop table idc;
 create table idc
 (
-    locationID  int auto_increment primary key,
+    assetsID    int auto_increment primary key,
     sourceID    int comment '上传excel文件源source的ID',
     longitude   decimal(12, 8) comment '经度', -- 共同
     latitude    decimal(12, 8) comment '纬度', -- 共同
@@ -54,16 +48,35 @@ create table idc
     linkPhone   varchar(255) comment '法人电话', -- 共同=>linkPhone  LegalPhone
     safeGrade   int comment '等保级别',
     fixPosition int comment '已定位（即是经纬度已解析）',
-    color        varchar(255),
-    status       int,
-    imageID      int
+    color       varchar(255),
+    status      int,
+    imageID     int,
+    imageUrl    varchar(255)
 ) engine = MyISAM;
-ALTER table idc
-    add COLUMN color varchar(255);
-ALTER table idc
-    add COLUMN status int;
-ALTER table idc
-    add COLUMN imageID int;
+
+drop table assets;
+create table assets
+(
+    assetsID    int auto_increment primary key,
+    assetsType  varchar(255)   default '' comment 'idc、led、netbar、secsys',
+    name        varchar(255)   default '' comment '网站名称',
+    owner       varchar(255)   default '' comment '企业名称',-- 共同=>owner  corpName
+    address     varchar(255)   default '' comment '企业地址', -- 共同 =>address corpAddress
+    longitude   decimal(12, 8) default -1 comment '经度', -- 共同
+    latitude    decimal(12, 8) default -1 comment '纬度', -- 共同
+    link        varchar(255)   default '' comment '联系人', -- 共同=>link  legalPerson
+    linkPhone   varchar(255)   default '' comment '联系人电话', -- 共同=>linkPhone  LegalPhone
+    imageID     int            default 0,
+    imageUrl    varchar(255)   default '',
+    status      int            default 0,
+    street      varchar(255)   default '' comment '所属街道', -- 共同
+    extJson     varchar(8191)  default '',
+    color       varchar(255)   default '',
+    sourceID    int            default 0 comment '上传excel文件源source的ID',
+    fixPosition int            default 0 comment '已定位（即是经纬度已解析）',
+    deleted     int            default 0
+) engine = MyISAM;
+
 create table street
 (
     streetID    int auto_increment primary key,
@@ -73,7 +86,7 @@ create table street
     assetsCount int
 ) engine = MyISAM;
 
-create table UploadFile
+create table uploadfile
 (
     fileID         int auto_increment primary key,
     filename       varchar(255),
