@@ -268,7 +268,9 @@ public class FileUploadController {
                     assets.setControlMode(row.getCell(6).getStringCellValue().trim());
                     assets.setStrongCipher(getChineseTrue(row.getCell(7).getStringCellValue().trim()));
                     assets.setLicense(getChineseTrue(row.getCell(8).getStringCellValue().trim()));*/
-                    assets.setLink(getCellValueAsString(row.getCell(9)));//todo 电话号码分离
+                    String[] nameTel = nameTel(getCellValueAsString(row.getCell(9)));
+                    assets.setLink(nameTel[0]);
+                    assets.setLinkPhone(nameTel[1]);
                     json.put("有无报备及报备单位", getCellValueAsString(row.getCell(10)));
                     /*assets.setRecordUnit(row.getCell(10).getStringCellValue().trim());*/
                     assets.setOwner(row.getCell(11).getStringCellValue().trim());
@@ -335,13 +337,13 @@ public class FileUploadController {
         return "";
     }
 
-    public static void main(String[] args) {
+  /*  public static void main(String[] args) {
         String[] str = {"113.421912,23.073626", "经度113.42.072 纬度23.079.58", "经：113.4051 纬：23.0741", "X:113.55688, Y:23.20839", "北纬23°09'43''东经113°31'35.36\""};
         for (String s : str) {
             double[] f = parseCoordinate(s);
             System.out.println("f = " + f[0] + "," + f[1]);
         }
-    }
+    }*/
 
     private static double[] parseCoordinate(String string) {
         //
@@ -479,5 +481,53 @@ public class FileUploadController {
         if (files.size() == 1)
             return gson.toJson(files.get(0));
         else return "";
+    }
+
+    public static String[] nameTel(String text) {
+        String[] nameTel = {"", ""};
+        text = text.replaceAll("[1-9]\\d{5}(18|19|([23]\\d))\\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\\d{3}[0-9Xx]", "");//替换掉身份证
+
+        Pattern namePattern = Pattern.compile("[\\u4e00-\\u9fa5]{2,}", Pattern.CASE_INSENSITIVE);
+        Matcher m = namePattern.matcher(text);
+        if (m.find()) nameTel[0] = m.group(0);
+
+        Pattern telPattern = Pattern.compile("1[3456789]\\d{9}?|(?:\\d{8})", Pattern.CASE_INSENSITIVE);
+        Matcher m1 = telPattern.matcher(text);
+        while (m1.find()) nameTel[1] += ("".equals(nameTel[1]) ? "" : "、") + m1.group(0);
+
+        return nameTel;
+    }
+
+    public static void main(String[] args) {
+        String text = "钟帅31602671、18122708802\n";
+        String s[] = nameTel(text);
+        System.out.println("s0 = " + s[0]);
+        System.out.println("s1 = " + s[1]);
+      /*  Pattern idPattern = Pattern.compile("[1-9]\\d{5}(18|19|([23]\\d))\\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\\d{3}[0-9Xx]");
+        Matcher repMatcher = idPattern.matcher(text);
+        text = text.replaceAll("[1-9]\\d{5}(18|19|([23]\\d))\\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\\d{3}[0-9Xx]", "");
+
+        System.out.println("s = " + text);
+        Pattern namePattern = Pattern.compile("[\\u4e00-\\u9fa5]{2,}", Pattern.CASE_INSENSITIVE);
+        Matcher m = namePattern.matcher(text);
+
+        int matchCount = 0;
+        while (m.find()) {
+            System.out.println("m.groupCount() = " + m.groupCount() + " ----------++++----------------------------------------");
+            System.out.println("group(0)=" + m.group(0));
+            matchCount++;
+        }
+        System.out.println("matchCount = " + matchCount);
+
+        Pattern telPattern = Pattern.compile("1[3456789]\\d{9}?|(?:\\d{8})", Pattern.CASE_INSENSITIVE);
+        Matcher m1 = telPattern.matcher(text);
+
+        matchCount = 0;
+        while (m1.find()) {
+            System.out.println("m1.groupCount() = " + m1.groupCount() + " ----------++++----------------------------------------");
+            System.out.println("group(0)=" + m1.group(0));
+            matchCount++;
+        }
+        System.out.println("matchCount = " + matchCount);*/
     }
 }

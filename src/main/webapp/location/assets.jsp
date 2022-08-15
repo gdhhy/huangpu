@@ -69,20 +69,21 @@
                     {"data": "owner", "sClass": "center"},
                     {"data": "street", "sClass": "center"},
                     {"data": "link", "sClass": "center"},
-                    {"data": "color", "sClass": "center"},
-                    {"data": "assetsID", "sClass": "center"}//9
+                    {"data": "status", "sClass": "center"},
+                    {"data": "color", "sClass": "center"},//9
+                    {"data": "assetsID", "sClass": "center"}
                 ],
 
                 'columnDefs': [
                     {"orderable": false, "searchable": false, className: 'text-center', "targets": 0},
-                    {"orderable": false, className: 'text-center', "targets": 1, title: '位置' ,width: 40},
+                    {"orderable": false, className: 'text-center', "targets": 1, title: '位置'},//,width: 40
                     {"orderable": false, className: 'text-center', "targets": 2, title: '地址（百度坐标）'},
                     {
                         "orderable": false, className: 'text-center', "targets": 3, title: '经纬度（高德坐标）', width: 120, render: function (data, type, row, meta) {
                             if (data > 113.607677 || data < 113.398067 || row.latitude > 23.41208 || row.latitude < 23.030213) {
-                                return "<span style='color:red'>{0},{1}</span>".format(data, row.latitude);
+                                return "<span style='color:red;font-weight: bold'>{0},{1}</span>".format(data, row.latitude);
                             } else
-                                return "<a href=\"\" onmouseout=\"hiddenPic();\" onmousemove=\"showPic(event,'https://restapi.amap.com/v3/staticmap?markers=mid,0xFF0000,:{0},{1}&key=b772bf606b75644e7c2f3dcda3639896&radius&size=300*200');\">{2},{3}</a>".format(data, row.latitude, data, row.latitude);
+                                return "<a href=\"\" style=' color:saddlebrown' onmouseout=\"hiddenPic();\" onmousemove=\"showPic(event,'https://restapi.amap.com/v3/staticmap?markers=mid,0xFF0000,:{0},{1}&key=b772bf606b75644e7c2f3dcda3639896&radius&size=300*200');\">{2},{3}</a>".format(data, row.latitude, data, row.latitude);
                         }
                     },
                     {
@@ -95,30 +96,34 @@
                             return "";
                         }
                     },
-                    {"orderable": false, "searchable": false, className: 'text-center', "targets": 5, title: '权属单位'},
+                    {"orderable": false, "searchable": false, className: 'text-center', "targets": 5, title: '单位名称'},
                     {"orderable": false, "searchable": false, className: 'text-center', "targets": 6, title: '辖区', width: 60},
                     {"orderable": false, "searchable": false, className: 'text-center', "targets": 7, title: '联系人', width: 60},
+                    {"orderable": false, "searchable": false, className: 'text-center', "targets": 8, title: '状态', width: 40},
                     {
-                        "orderable": false, "searchable": false, className: 'text-center', "targets": 8, title: '状态', width: 40,
+                        "orderable": false, "searchable": false, className: 'text-center', "targets": 9, title: '标色', width: 30,
                         render: function (data, type, row, meta) {
                             return '<select id="skin-colorpicker"  class="hide" data-id="{0}" data-color="{1}">'.format(row["assetsID"], data) +
-                                '<option data-skin="no-skin" value="#438EB9">#438EB9</option>' +
+                                '<option data-skin="no-skin" value="darkgray">darkgray</option>' +
                                 '<option data-skin="skin-1" value="red">red</option>' +
-                                '<option data-skin="skin-2" value="#C6487E">#C6487E</option>' +
+                                '<option data-skin="skin-2" value="orange">orange</option>' +
                                 '<option data-skin="skin-3" value="green">green</option> ' +
                                 '</select>';
                         }
                     },
                     {
-                        "orderable": false, 'searchable': false, 'targets': 9, title: '操作', width: 55,
+                        "orderable": false, 'searchable': false, 'targets': 10, title: '操作', width: 80,
                         render: function (data, type, row, meta) {
                             let deleteHtml = row["deleted"] === 0 ? '<a class="hasLink" title="删除" href="#" data-Url="javascript:deleteAssets(\'{0}\',{1},\'{2}\',\'{3}\',\'{4}\');">'
                                     .format($('#selectedAssetsType').val(), row["assetsID"], row["name"], row["address"], $('#assets option:selected').text()) +
-                                '<i class="ace-icon glyphicon glyphicon-trash bigger-120"></i></a>' : "";
+                                '<i class="ace-icon glyphicon glyphicon-trash brown bigger-120"></i></a>' : "";
 
                             return '<div class="hidden-sm hidden-xs action-buttons">' +
                                 '<a class="hasLink" title="编辑" href="#" data-Url="javascript:editAssets(\'{0}\',{1});">'.format($('#selectedAssetsType').val(), row["assetsID"]) +
                                 '<i class="ace-icon glyphicon glyphicon-edit green bigger-120"></i>' +
+                                '</a> ' +
+                                '<a class="hasLink" title="扩展信息" href="#" data-Url="javascript:expandAssets(\'{0}\',{1});">'.format($('#selectedAssetsType').val(), row["assetsID"]) +
+                                '<i class="ace-icon glyphicon glyphicon-expand maroon bigger-120"></i>' +
                                 '</a> ' +
                                 deleteHtml +
                                 '</div>';
@@ -159,7 +164,7 @@
         myTable.buttons().container().appendTo($('.tableTools-container'));
         myTable.button(0).action(function (e, dt, button, config) {
             e.preventDefault();
-            showAssetsDialog({assetsID: 0, imageID: 0});
+            showAssetsDialog({assetsID: 0, imageID: 0, assetsType: $('#selectedAssetsType').val()});
         });
         myTable.on('order.dt search.dt', function () {
             myTable.column(0, {search: 'applied', order: 'applied'}).nodes().each(function (cell, i) {
@@ -256,8 +261,9 @@
             focusInvalid: false,
             ignore: "",
             rules: {
-                latitude: {max: 23.41208, min: 23.030213},
-                longitude: {max: 113.607677, min: 113.398067}
+                name: {required: true},
+                latitude: {max: 23.41208, min: 23.030213, required: true},
+                longitude: {max: 113.607677, min: 113.398067, required: true}
             },
             highlight: function (e) {
                 $(e).closest('.form-group').removeClass('has-info').addClass('has-error');
@@ -444,7 +450,7 @@
                         }
                     }
                 } else {
-                    $('#amap').html('<div class="center red">查询失败！</div>');
+                    $('#amap').html('<div class="center red">查询位置失败！</div>');
                 }
             });
         }
@@ -460,7 +466,28 @@
 
         function showAssetsDialog(loc) {
             validator.resetForm();//复位错误消息
+            let title = (loc.assetsID === 0 ? "新增" : "编辑") + $('#assets option[value=' + $('#selectedAssetsType').val() + ']').text();
+            if ($('#selectedAssetsType').val() === 'idc')
+                $('#assetsName').text("机房名称");
+            else
+                $('#assetsName').text($('#assets option[value=' + $('#selectedAssetsType').val() + ']').text() + "名称");
 
+            if ($('#selectedAssetsType').val() === 'secsys') {
+                $('input:radio[name=status]:eq(0)').val("未测评");
+                $('input:radio[name=status]:eq(0)+span').text("未测评");
+                $('input:radio[name=status]:eq(1)').val("测评");
+                $('input:radio[name=status]:eq(1)+span').text("测评");
+            } else {
+                $('input:radio[name=status]:eq(0)').val("停用");
+                $('input:radio[name=status]:eq(0)+span').text("停用");
+                $('input:radio[name=status]:eq(1)').val("在用");
+                $('input:radio[name=status]:eq(1)+span').text("在用");
+            }
+
+            $('input:radio[name=status]').filter('[value=' + loc.status + ']').prop('checked', true);
+
+            $('#img').attr("src", "/components/jquery.easyui/themes/icons/blank.gif");
+            $('#assetsType').val(loc.assetsType);
             $('#amap').html("");
             $('#assetsID').val(loc.assetsID);
             $('#address').val(loc.address);
@@ -469,6 +496,7 @@
             $('#latitude').val(loc.latitude);
             $('#owner').val(loc.owner);
             $('#link').val(loc.link);
+            $('#linkPhone').val(loc.linkPhone);
             $("#imageID").val(loc.imageID);
             $("#imageUrl").val(loc.imageUrl);
             runTimes = 0;
@@ -484,7 +512,7 @@
                 width: 860,
                 height: 620,
                 modal: true,
-                title: "编辑资产信息",
+                title: title,
                 buttons: [
                     {
                         html: "<i class='ace-icon fa fa-floppy-o bigger-110'></i>&nbsp;保存",
@@ -613,6 +641,8 @@
                 <select id="assets" name="assets" class="nav-search-input">
                     <option value="led" selected>LED</option>
                     <option value="idc">IDC</option>
+                    <option value="netbar">网吧</option>
+                    <option value="secsys">等保系统</option>
                 </select>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;辖区：
                 <select id="street" name="street" class="nav-search-input">
@@ -711,23 +741,7 @@
         <form class="form-horizontal" role="form" id="ledForm">
             <div class="row">
                 <div class="form-group" style="margin-bottom: 3px;margin-top: 3px">
-                    <label class="col-xs-2 control-label no-padding-right" for="latitude">单位名称</label>
-                    <div class="col-xs-10">
-                        <input type="text" id="owner" name="owner" style="width: 100%" placeholder="单位名称"/>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="form-group" style="margin-bottom: 3px;margin-top: 3px">
-                    <label class="col-xs-2 control-label no-padding-right" for="link">联系人</label>
-                    <div class="col-xs-10">
-                        <input type="text" id="link" name="link" style="width: 100%" placeholder="联系人"/>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="form-group" style="margin-bottom: 3px;margin-top: 3px">
-                    <label class="col-xs-2 control-label no-padding-right" for="name"> 名称</label>
+                    <label class="col-xs-2 control-label no-padding-right" for="name" id="assetsName">名称</label>
                     <div class="col-xs-8">
                         <input type="text" id="name" name="name" style="width: 100%" placeholder="名称"/>
                     </div>
@@ -740,9 +754,29 @@
             </div>
             <div class="row">
                 <div class="form-group" style="margin-bottom: 3px;margin-top: 3px">
+                    <label class="col-xs-2 control-label no-padding-right" for="latitude">单位名称</label>
+                    <div class="col-xs-10">
+                        <input type="text" id="owner" name="owner" style="width: 100%" placeholder="单位名称"/>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group" style="margin-bottom: 3px;margin-top: 3px">
+                    <label class="col-xs-2 control-label no-padding-right" for="link">联系人</label>
+                    <div class="col-xs-4">
+                        <input type="text" id="link" name="link" style="width: 100%" placeholder="联系人"/>
+                    </div>
+                    <label class="col-xs-2 control-label no-padding-right" for="linkPhone">电话</label>
+                    <div class="col-xs-4">
+                        <input type="text" id="linkPhone" name="linkPhone" style="width: 100%" placeholder="电话"/>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group" style="margin-bottom: 3px;margin-top: 3px">
                     <label class="col-xs-2 control-label no-padding-right" for="address"> 地址</label>
                     <div class="col-xs-8">
-                        <input type="text" id="address" readonly name="address" style="width: 100%" placeholder="地址"/>
+                        <input type="text" id="address" name="address" style="width: 100%" placeholder="地址"/>
                     </div>
                     <div class="col-xs-1 pull-left">
                         <button type="button" class="btn btn-info btn-minier" id="byAddress" title="地址 -> 经纬度">
@@ -757,10 +791,6 @@
                     <div class="col-xs-4">
                         <input type="text" id="longitude" name="longitude" style="width: 100%" placeholder="经度"/>
                     </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="form-group" style="margin-bottom: 3px;margin-top: 3px">
                     <label class="col-xs-2 control-label no-padding-right" for="latitude"> 纬度 </label>
                     <div class="col-xs-4">
                         <input type="text" id="latitude" name="latitude" style="width: 100%" placeholder="纬度"/>
@@ -769,8 +799,39 @@
             </div>
             <div class="row">
                 <div class="form-group" style="margin-bottom: 3px;margin-top: 3px">
+                    <label class="col-xs-2 control-label no-padding-right" for="longitude"> 状态 </label>
+                    <div class="radio col-xs-5">
+                        <label>
+                            <input name="status" type="radio" class="ace" value="停用"/>
+                            <span class="lbl">停用</span>
+                        </label>
+                        <label>
+                            <input name="status" type="radio" class="ace" value="在用" checked/>
+                            <span class="lbl">在用</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+           <%-- <div class="row">
+                <div class="form-group" style="margin-bottom: 3px;margin-top: 3px">
+                    <label class="col-xs-2 control-label no-padding-right" for="deviceNum">设备数量</label>
+                    <div class="col-xs-2">
+                        <input type="text" id="deviceNum" name="deviceNum" style="width: 100%" placeholder="设备"/>
+                    </div>
+                    <label class="col-xs-2 control-label no-padding-right" for="ipNum">IP数量</label>
+                    <div class="col-xs-2">
+                        <input type="text" id="ipNum" name="ipNum" style="width: 100%" placeholder="IP数"/>
+                    </div>
+                    <label class="col-xs-2 control-label no-padding-right" for="userNum">用户数量</label>
+                    <div class="col-xs-2">
+                        <input type="text" id="userNum" name="userNum" style="width: 100%" placeholder="用户"/>
+                    </div>
+                </div>
+            </div>--%>
+            <div class="row">
+                <div class="form-group" style="margin-bottom: 3px;margin-top: 3px">
                     <label class="col-xs-2 control-label no-padding-right" for="dropzone">图片</label>
-                    <div class="col-xs-9 dropzone " id="dropzone" style="margin: 10px 10px 10px 10px">
+                    <div class="col-xs-9 dropzone well-sm" id="dropzone" style="margin: 0 10px 0 10px">
                         <div class="am-text-success dz-message">
                             将文件拖拽到此处<br>或点此打开文件管理器选择文件
                         </div>
@@ -778,16 +839,16 @@
                 </div>
             </div>
             <input type="hidden" id="imageID" name="imageID">
-
             <input type="hidden" id="imageUrl" name="imageUrl">
+            <input type="hidden" id="assetsType" name="assetsType">
             <input type="hidden" id="assetsID" name="assetsID">
         </form>
     </div>
 
     <div class="col-xs-6">
-        <label class=" control-label no-padding-right" for="address"> 位置参考：红色是已保存的位置</label>
+        <label class="control-label no-padding-right" for="address"> 位置参考：红色是已保存的位置</label>
         <div id="container" class="map"><img id="img"/></div>
-        <label class=" control-label no-padding-right " style="height: 20px" for="address" id="amap"> </label>
+        <label class="control-label no-padding-right" style="height: 20px" for="address" id="amap"> </label>
     </div>
 </div>
 <div id="dialog-error" class="hide alert" title="提示">

@@ -1,6 +1,7 @@
 package com.xz.location.pojo;
 
 import java.io.Serializable;
+
 /*assetsID    int auto_increment primary key,
 assetsType  varchar(255) comment 'idc、led、netbar、secsys',
 name        varchar(255) comment '网站名称',
@@ -23,8 +24,8 @@ public class Assets implements Serializable {
     private String name;
     private String owner;
     private String address;
-    private double longitude; //OK
-    private double latitude;//OK
+    private double longitude = 0; //OK
+    private double latitude = 0;//OK
     private String link;//OK
     private String linkPhone;//OK
     private int imageID;

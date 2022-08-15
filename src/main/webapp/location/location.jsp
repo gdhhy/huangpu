@@ -255,10 +255,11 @@
             errorElement: 'div',
             errorClass: 'help-block',
             focusInvalid: false,
+
             ignore: "",
             rules: {
-                latitude: {max: 23.41208, min: 23.030213},
-                longitude: {max: 113.607677, min: 113.398067}
+                latitude: {max: 23.41208, min: 23.030213, required: true},
+                longitude: {max: 113.607677, min: 113.398067, required: true}
             },
             highlight: function (e) {
                 $(e).closest('.form-group').removeClass('has-info').addClass('has-error');

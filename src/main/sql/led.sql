@@ -68,10 +68,10 @@ create table assets
     linkPhone   varchar(255)   default '' comment '联系人电话', -- 共同=>linkPhone  LegalPhone
     imageID     int            default 0,
     imageUrl    varchar(255)   default '',
-    status      int            default 0,
+    status      varchar(20)    default '在用',
     street      varchar(255)   default '' comment '所属街道', -- 共同
     extJson     varchar(8191)  default '',
-    color       varchar(255)   default '',
+    color       varchar(255)   default 'darkgray',
     sourceID    int            default 0 comment '上传excel文件源source的ID',
     fixPosition int            default 0 comment '已定位（即是经纬度已解析）',
     deleted     int            default 0

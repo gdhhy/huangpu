@@ -25,7 +25,7 @@
     </resultMap>
     <sql id="queryWhere">
         <where>
-            <if test="param.assetsID!=null">AND assetsID = #{param.assetsID:INTEGER}</if>
+            <if test="param.assetsID>0">AND assetsID = #{param.assetsID:INTEGER}</if>
             <!--<if test="param.assetsType!=null">AND assetsType = #{param.assetsType:VARCHAR}</if>-->
             <if test="@com.xz.util.Ognl@isNotEmpty(param.assetsType)">AND assetsType = #{param.assetsType:VARCHAR}</if>
             <if test="@com.xz.util.Ognl@isNotEmpty(param.street)">AND street = #{param.street:VARCHAR}</if>
@@ -61,8 +61,8 @@
             <if test="pojo.name!=null">name = #{pojo.name:VARCHAR},</if>
             <if test="pojo.owner!=null">owner = #{pojo.owner:VARCHAR},</if>
             <if test="pojo.address!=null">address = #{pojo.address:VARCHAR},</if>
-            <if test="pojo.longitude>-1">longitude = #{pojo.longitude:DOUBLE},</if>
-            <if test="pojo.latitude>-1">latitude = #{pojo.latitude:DOUBLE},</if>
+            <if test="pojo.longitude>0">longitude = #{pojo.longitude:DOUBLE},</if>
+            <if test="pojo.latitude>0">latitude = #{pojo.latitude:DOUBLE},</if>
             <if test="pojo.link!=null">link = #{pojo.link:VARCHAR},</if>
             <if test="pojo.linkPhone!=null">linkPhone = #{pojo.linkPhone:VARCHAR},</if>
             <if test="pojo.imageID>=0">imageID = #{pojo.imageID:INTEGER},</if>
@@ -77,10 +77,10 @@
         where assetsID = #{pojo.assetsID:INTEGER}
     </update>
     <insert id="insertAssets" flushCache="true" useGeneratedKeys="true" keyProperty="pojo.assetsID">
-        INSERT INTO assets (assetsType, name, owner, address, longitude, latitude, link, linkPhone, status, street, extJson, sourceID, fixPosition)
+        INSERT INTO assets (assetsType, name, owner, address, longitude, latitude, link, linkPhone, imageID, imageUrl, status, street, extJson, sourceID, fixPosition)
         VALUES (#{pojo.assetsType:VARCHAR}, #{pojo.name:VARCHAR}, #{pojo.owner:VARCHAR}, #{pojo.address:VARCHAR}, #{pojo.longitude:DOUBLE}, #{pojo.latitude:DOUBLE},
-                #{pojo.link:VARCHAR}, #{pojo.linkPhone:VARCHAR}, #{pojo.status:VARCHAR}, #{pojo.street:VARCHAR}, #{pojo.extJson:VARCHAR}, #{pojo.sourceID:INTEGER},
-                #{pojo.fixPosition:INTEGER})
+                #{pojo.link:VARCHAR}, #{pojo.linkPhone:VARCHAR}, #{pojo.imageID:INTEGER}, #{pojo.imageUrl:VARCHAR}, #{pojo.status:VARCHAR}, #{pojo.street:VARCHAR},
+                #{pojo.extJson:VARCHAR}, #{pojo.sourceID:INTEGER}, #{pojo.fixPosition:INTEGER})
     </insert>
     <delete id="deleteAssets" parameterType="int">
         UPDATE assets
