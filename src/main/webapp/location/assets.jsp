@@ -4,10 +4,11 @@
 <script src="https://cdn.datatables.net/buttons/2.2.3/js/dataTables.buttons.min.js"></script>
 <script src="http://ace.jeka.by/assets/js/jquery.dataTables.bootstrap.min.js"></script>
 <script src="https://cdn.datatables.net/select/1.4.0/js/dataTables.select.min.js"></script>
-<script src="http://bootboxjs.com/assets/js/bootbox.all.min.js"></script>
+<script src="/assets/js/bootbox.all.min.js"></script>
 <script src="https://cdn.datatables.net/responsive/2.3.0/js/dataTables.responsive.min.js"></script>
 <script src="../js/jquery-validation-messages_zh.js"></script>
 <script src="../js/resize.js"></script>
+<script src="../assets/js/x-editable/bootstrap-editable.min.js"></script>
 <!-- page specific plugin scripts -->
 
 <link href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css" rel="stylesheet">
@@ -15,6 +16,7 @@
 <link rel="stylesheet" href="https://cdn.datatables.net/select/1.4.0/css/select.dataTables.min.css"/>
 <link rel="stylesheet" href="../components/font-awesome-4.7.0/css/font-awesome.min.css"/>
 <link href="https://cdn.datatables.net/responsive/2.3.0/css/responsive.dataTables.min.css" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/bootstrap-editable.css"/>
 <%--<script src="../components/dropzone/dist/dropzone.js"></script>
 <link rel="stylesheet" href="../components/dropzone/dist/dropzone.css"/>--%>
 <script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
@@ -55,6 +57,7 @@
 
     Dropzone.autoDiscover = false;
 
+    var editor;
     jQuery(function ($) {
         var myTable = $('#dynamic-table')
             //.wrap("<div class='dataTables_borderWrap' />")   //if you are applying horizontal scrolling (sScrollX)
@@ -108,6 +111,7 @@
                                 '<option data-skin="skin-1" value="red">red</option>' +
                                 '<option data-skin="skin-2" value="orange">orange</option>' +
                                 '<option data-skin="skin-3" value="green">green</option> ' +
+                                '<option data-skin="skin-4" value="purple">purple</option> ' +
                                 '</select>';
                         }
                     },
@@ -122,7 +126,7 @@
                                 '<a class="hasLink" title="编辑" href="#" data-Url="javascript:editAssets(\'{0}\',{1});">'.format($('#selectedAssetsType').val(), row["assetsID"]) +
                                 '<i class="ace-icon glyphicon glyphicon-edit green bigger-120"></i>' +
                                 '</a> ' +
-                                '<a class="hasLink" title="扩展信息" href="#" data-Url="javascript:expandAssets(\'{0}\',{1});">'.format($('#selectedAssetsType').val(), row["assetsID"]) +
+                                '<a class="hasLink" title="扩展信息" href="#" data-Url="javascript:showExpandDialog(\'{0}\',{1},\'{2}\',);">'.format($('#selectedAssetsType').val(), row["assetsID"], row["name"]) +
                                 '<i class="ace-icon glyphicon glyphicon-expand maroon bigger-120"></i>' +
                                 '</a> ' +
                                 deleteHtml +
@@ -142,7 +146,7 @@
                 },
                 searching: false,
                 "ajax": {
-                    url: "/assets/listAssets.jspa?assets=led",
+                    url: "/assets/listAssets.jspa?assetsType=led",
                     "data": function (d) {//删除多余请求参数
                         for (var key in d)
                             if (key.indexOf("columns") === 0 || key.indexOf("order") === 0 || key.indexOf("search") === 0) //以columns开头的参数删除
@@ -593,7 +597,7 @@
 
                         // If you only have access to the original image sizes on your server,
                         // and want to resize them in the browser:
-                        var file = $.parseJSON(loc.extJson);
+                        var file = $.parseJSON(loc.imageJson);
                         //console.log(file.size);
                         let mockFile = {name: file.filename, size: file.size};//todo 读服务器
                         myDropzone.files.push(mockFile);//gzhhy发现的，负责会保留上一次加载的图片
@@ -608,6 +612,48 @@
             });
         }
 
+        $.fn.editable.defaults.mode = 'inline';
+
+        function showExpandDialog(assetsType, assetsID, assetsName) {
+            $('#assetsName2').text(assetsName);
+            let title = $('#assets option[value=' + $('#selectedAssetsType').val() + ']').text() + "扩展信息"
+            let table;
+            if ($.fn.dataTable.isDataTable('#assets-expand-table')) {
+                table = $('#assets-expand-table').DataTable();
+            } else {
+                table = $('#assets-expand-table').DataTable({
+                    dom: "t", order: [[1, 'desc']], paging: false, searching: false,
+                    columns: [{data: "key"},
+                        {data: "value"}
+                    ],
+                    'columnDefs': [
+                        {"orderable": false,"data": "key", "targets": 0},
+                        {
+                            "orderable": false,"data": "value", "targets": 1, title: '值', className: 'center', render: function (data, type, row, meta) {
+                                return '<a href="#" data-pk="{0}" id="{1}" data-value="{2}" data-type="text" class="editable" data-url="/assets/saveExtKeyValue.jspa">{3}</a>'
+                                    .format(assetsID, row["key"], data, data);
+                            }
+                        }
+                    ],
+                    select: {
+                        style: 'os',
+                        selector: 'td:first-child'
+                    }
+                });
+
+            }
+            table.ajax.url("/assets/getAssetsExpand.jspa?assetsID=" + assetsID).load();
+            table.on('draw', function (e, setting) {
+                $("#assets-expand-table tr").find(".editable").editable();
+            });
+
+            $("#dialog-expand").removeClass('hide').dialog({
+                resizable: false, icon: 'fa fa-key', width: 500, height: 640, modal: true, title: title, title_html: true,
+                close: function (event, ui) {
+                    myTable.ajax.reload(null, false);//null为callback,false是是否回到第一页
+                }
+            });
+        }
     });
 </script>
 <!-- #section:basics/content.breadcrumbs -->
@@ -812,22 +858,22 @@
                     </div>
                 </div>
             </div>
-           <%-- <div class="row">
-                <div class="form-group" style="margin-bottom: 3px;margin-top: 3px">
-                    <label class="col-xs-2 control-label no-padding-right" for="deviceNum">设备数量</label>
-                    <div class="col-xs-2">
-                        <input type="text" id="deviceNum" name="deviceNum" style="width: 100%" placeholder="设备"/>
-                    </div>
-                    <label class="col-xs-2 control-label no-padding-right" for="ipNum">IP数量</label>
-                    <div class="col-xs-2">
-                        <input type="text" id="ipNum" name="ipNum" style="width: 100%" placeholder="IP数"/>
-                    </div>
-                    <label class="col-xs-2 control-label no-padding-right" for="userNum">用户数量</label>
-                    <div class="col-xs-2">
-                        <input type="text" id="userNum" name="userNum" style="width: 100%" placeholder="用户"/>
-                    </div>
-                </div>
-            </div>--%>
+            <%-- <div class="row">
+                 <div class="form-group" style="margin-bottom: 3px;margin-top: 3px">
+                     <label class="col-xs-2 control-label no-padding-right" for="deviceNum">设备数量</label>
+                     <div class="col-xs-2">
+                         <input type="text" id="deviceNum" name="deviceNum" style="width: 100%" placeholder="设备"/>
+                     </div>
+                     <label class="col-xs-2 control-label no-padding-right" for="ipNum">IP数量</label>
+                     <div class="col-xs-2">
+                         <input type="text" id="ipNum" name="ipNum" style="width: 100%" placeholder="IP数"/>
+                     </div>
+                     <label class="col-xs-2 control-label no-padding-right" for="userNum">用户数量</label>
+                     <div class="col-xs-2">
+                         <input type="text" id="userNum" name="userNum" style="width: 100%" placeholder="用户"/>
+                     </div>
+                 </div>
+             </div>--%>
             <div class="row">
                 <div class="form-group" style="margin-bottom: 3px;margin-top: 3px">
                     <label class="col-xs-2 control-label no-padding-right" for="dropzone">图片</label>
@@ -865,3 +911,18 @@
 <div id="Layer1" style="display: none; position: absolute; z-index: 100;">
 </div>
 <input type="hidden" id="selectedAssetsType" value="led">
+<div id="dialog-expand" class="hide">
+    <div class="row" style="width: 470px;">
+        <label class="col-xs-12 control-label no-padding-right" for="name" id="assetsName2"></label>
+        <div class="col-xs-12" style="padding: 0 0 0 0;margin: 0 0 0 0;font-weight: bold">
+            <table id="assets-expand-table" class="display" cellspacing="0">
+                <thead>
+                <tr>
+                    <th style="width: 150px">属性</th>
+                    <th style="width: 100px">值</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+</div>

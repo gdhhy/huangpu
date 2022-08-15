@@ -1,7 +1,9 @@
 package com.xz.location.controller;
 
+import cn.hutool.core.lang.Pair;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import com.xz.location.dao.AssetsMapper;
 import com.xz.location.dao.UploadFileMapper;
 import com.xz.location.pojo.Assets;
@@ -16,6 +18,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,14 +39,14 @@ public class AssetsController {
 
     @ResponseBody
     @RequestMapping(value = "listAssets", method = RequestMethod.GET, produces = "text/html;charset=UTF-8")
-    public String listAssets(@RequestParam(value = "assetsType", required = false, defaultValue = "led") String assetsType,
-                          @RequestParam(value = "street", required = false, defaultValue = "") String street,
-                          @RequestParam(value = "address", required = false, defaultValue = "") String address,
-                          @RequestParam(value = "coordinate", required = false, defaultValue = "all") String coordinate,
-                          @RequestParam(value = "showDeleted", required = false, defaultValue = "false") String showDeleted,
-                          @RequestParam(value = "draw", required = false) Integer draw,
-                          @RequestParam(value = "start", required = false, defaultValue = "0") int start,
-                          @RequestParam(value = "length", required = false, defaultValue = "100") int limit) {
+    public String listAssets(@RequestParam(value = "assetsType", required = false, defaultValue = "assets") String assetsType,
+                             @RequestParam(value = "street", required = false, defaultValue = "") String street,
+                             @RequestParam(value = "address", required = false, defaultValue = "") String address,
+                             @RequestParam(value = "coordinate", required = false, defaultValue = "all") String coordinate,
+                             @RequestParam(value = "showDeleted", required = false, defaultValue = "false") String showDeleted,
+                             @RequestParam(value = "draw", required = false) Integer draw,
+                             @RequestParam(value = "start", required = false, defaultValue = "0") int start,
+                             @RequestParam(value = "length", required = false, defaultValue = "100") int limit) {
         Map<String, Object> param = new HashMap<>();
         param.put("start", start);
         param.put("limit", limit);
@@ -74,10 +78,32 @@ public class AssetsController {
             Assets assets = assets1.get(0);
             if (assets.getImageID() > 0) {
                 UploadFile file = uploadFileMapper.getUploadFile(assets.getImageID());
-                assets.setExtJson(gson.toJson(file));
+                assets.setImageJson(gson.toJson(file));
             }
             return gson.toJson(assets);
         } else return "";
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "getAssetsExpand", method = RequestMethod.GET, produces = "text/html;charset=UTF-8")
+    public String getAssetsExpand(@RequestParam(value = "assetsID") Integer assetsID, @RequestParam(value = "draw", required = false, defaultValue = "1") Integer draw) {
+        Map<String, Object> param = new HashMap<>();
+        param.put("assetsID", assetsID);
+        List<Assets> assets1 = assetsMapper.selectAssets(param);
+        if (assets1.size() == 1) {
+            Assets assets = assets1.get(0);
+
+            Map<String, Object> result = new HashMap<>();
+            Type listType = new TypeToken<List<Pair<String, String>>>() {
+            }.getType();
+            List<Pair<String, String>> json = gson.fromJson(assets.getExtJson(), listType);
+            result.put("draw", draw);
+            result.put("data", json);
+            result.put("iTotalRecords", json.size());//todo 表的行数，未加任何调剂
+            result.put("iTotalDisplayRecords", json.size());
+
+            return gson.toJson(result);
+        } else return "[]";
     }
 
     @ResponseBody
@@ -104,7 +130,6 @@ public class AssetsController {
     }
 
     @ResponseBody
-    @Transactional
     @RequestMapping(value = "/saveColor", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
     public String saveColor(@RequestBody String postJson) {
         HashMap postMap = gson.fromJson(postJson, HashMap.class);
@@ -112,10 +137,10 @@ public class AssetsController {
         Map<String, Object> map = new HashMap<>();
         map.put("title", "设置资产颜色");
         if (principal instanceof UserDetails) {
-            Assets led = new Assets();
-            led.setAssetsID(Integer.parseInt(postMap.get("assetsID").toString()));
-            led.setColor(postMap.get("color").toString());
-            int result = assetsMapper.updateAssets(led);
+            Assets assets = new Assets();
+            assets.setAssetsID(Integer.parseInt(postMap.get("assetsID").toString()));
+            assets.setColor(postMap.get("color").toString());
+            int result = assetsMapper.updateAssets(assets);
 
             map.put("succeed", result > 0);
         } else {
@@ -124,6 +149,51 @@ public class AssetsController {
         }
 
         return gson.toJson(map);
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/saveExtKeyValue", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
+    public String saveExtKeyValue(@RequestParam(value = "pk") Integer assetsID,
+                                  @RequestParam(value = "name") String key,
+                                  @RequestParam(value = "value") String value) {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        Map<String, Object> param = new HashMap<>();
+        param.put("assetsID", assetsID);
+        Map<String, Object> returnMap = new HashMap<>();
+        returnMap.put("title", "设置资产扩展信息");
+        if (principal instanceof UserDetails) {
+            List<Assets> assets1 = assetsMapper.selectAssets(param);
+            int result = -1;
+            if (assets1.size() == 1) {
+                Assets assets = assets1.get(0);
+                Type listType = new TypeToken<List<HashMap<String, String>>>() {
+                }.getType();
+                List<HashMap<String, String>> keyValueList = gson.fromJson(assets.getExtJson(), listType);
+                for (HashMap<String, String> keyValueMap : keyValueList) {
+                    if (keyValueMap.get("key").equals(key)) {
+                        keyValueMap.put("value", value);
+
+                        assets.setExtJson(gson.toJson(keyValueList));
+                        result = assetsMapper.updateAssets(assets);
+                        break;
+                    }
+                }
+                if (result == -1) {
+                    returnMap.put("succeed", false);
+                    returnMap.put("message", "不存在的键值！");
+                } else
+                    returnMap.put("succeed", result > 0);
+            } else {
+                returnMap.put("succeed", false);
+                returnMap.put("message", "参数错误，找不到主键：" + assetsID);
+            }
+        } else {
+            returnMap.put("succeed", false);
+            returnMap.put("message", "没登录用户信息，请重新登录！");
+        }
+
+        return gson.toJson(returnMap);
     }
 
     @ResponseBody

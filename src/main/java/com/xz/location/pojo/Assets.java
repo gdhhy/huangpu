@@ -34,6 +34,7 @@ public class Assets implements Serializable {
     private String street;//OK
     private String color;
     private String extJson;
+    private String imageJson;
     private int sourceID;
     private boolean fixPosition;
     private int deleted;//1未删除，默认0
@@ -180,5 +181,13 @@ public class Assets implements Serializable {
 
     public void setDeleted(int deleted) {
         this.deleted = deleted;
+    }
+
+    public String getImageJson() {
+        return imageJson;
+    }
+
+    public void setImageJson(String imageJson) {
+        this.imageJson = imageJson;
     }
 }

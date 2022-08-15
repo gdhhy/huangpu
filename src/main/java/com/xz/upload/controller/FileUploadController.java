@@ -5,6 +5,7 @@ package com.xz.upload.controller;
  */
 
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.lang.Pair;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
@@ -247,7 +248,7 @@ public class FileUploadController {
                     Row row = sheet.getRow(rowNum);
 
                     Assets assets = new Assets();
-                    HashMap<String, Object> json = new HashMap<>();
+                    List<Pair<String, String>> json = new ArrayList<>();
                     assets.setAssetsType("led");
                     assets.setSourceID(sourceID);
                     assets.setName(getCellValueAsString(row.getCell(1)));
@@ -256,12 +257,18 @@ public class FileUploadController {
                     double[] d = parseCoordinate(getCellValueAsString(row.getCell(2)));//已转换百度坐标未高德坐标
                     assets.setLongitude(d[0]);
                     assets.setLatitude(d[1]);
-                    json.put("尺寸", getCellValueAsString(row.getCell(3)));
+                    json.add(new Pair<>("尺寸", getCellValueAsString(row.getCell(3))));
+                    json.add(new Pair<>("系统分类", getCellValueAsString(row.getCell(4))));
+                    json.add(new Pair<>("通讯方式", getCellValueAsString(row.getCell(5))));
+                    json.add(new Pair<>("控制方式", getCellValueAsString(row.getCell(6))));
+                    json.add(new Pair<>("有无设置强制密码", getCellValueAsString(row.getCell(7))));
+                    json.add(new Pair<>("是否有营业执照", getCellValueAsString(row.getCell(8))));
+                    /*json.put("尺寸", getCellValueAsString(row.getCell(3)));
                     json.put("系统分类", getCellValueAsString(row.getCell(4)));
                     json.put("通讯方式", getCellValueAsString(row.getCell(5)));
                     json.put("控制方式", getCellValueAsString(row.getCell(6)));
                     json.put("有无设置强制密码", getChineseTrue(getCellValueAsString(row.getCell(7))));
-                    json.put("是否有营业执照", getChineseTrue(getCellValueAsString(row.getCell(8))));
+                    json.put("是否有营业执照", getChineseTrue(getCellValueAsString(row.getCell(8))));*/
                   /*assets.setSize(row.getCell(3).getStringCellValue().trim());
                     assets.setSysClass(row.getCell(4).getStringCellValue().trim());
                     assets.setCommMode(row.getCell(5).getStringCellValue().trim());
@@ -271,16 +278,25 @@ public class FileUploadController {
                     String[] nameTel = nameTel(getCellValueAsString(row.getCell(9)));
                     assets.setLink(nameTel[0]);
                     assets.setLinkPhone(nameTel[1]);
-                    json.put("有无报备及报备单位", getCellValueAsString(row.getCell(10)));
+
+                    json.add(new Pair<>("有无报备及报备单位", getCellValueAsString(row.getCell(5))));
+                    //json.put("有无报备及报备单位", getCellValueAsString(row.getCell(5)));
                     /*assets.setRecordUnit(row.getCell(10).getStringCellValue().trim());*/
                     assets.setOwner(row.getCell(11).getStringCellValue().trim());
-                    json.put("建设审批单位", getCellValueAsString(row.getCell(12)));
+
+                    json.add(new Pair<>("建设审批单位", getCellValueAsString(row.getCell(12))));
+                    //json.put("建设审批单位", getCellValueAsString(row.getCell(12)));
                     /*assets.setApprovalUnit(row.getCell(12).getStringCellValue().trim());*/
                     assets.setStreet(row.getCell(13).getStringCellValue().trim());
-                    json.put("派出所负责领导及联系电话", getCellValueAsString(row.getCell(14)));
-                    json.put("派出所负责民警及联系电话", getCellValueAsString(row.getCell(15)));
-                    json.put("是否录入社区新警务APP（是或否）", getChineseTrue(getCellValueAsString(row.getCell(16))));
-                    json.put("备注（停用或新增）", getCellValueAsString(row.getCell(17)));
+
+                    json.add(new Pair<>("派出所负责领导及联系电话", getCellValueAsString(row.getCell(14))));
+                    json.add(new Pair<>("派出所负责民警及联系电话", getCellValueAsString(row.getCell(15))));
+                    /*json.put("派出所负责领导及联系电话", getCellValueAsString(row.getCell(14)));
+                    json.put("派出所负责民警及联系电话", getCellValueAsString(row.getCell(15)));*/
+                    json.add(new Pair<>("是否录入社区新警务APP（是或否）", getCellValueAsString(row.getCell(16))));
+                    json.add(new Pair<>("备注（停用或新增）", getCellValueAsString(row.getCell(17))));
+                    //json.put("是否录入社区新警务APP（是或否）", getChineseTrue(getCellValueAsString(row.getCell(16))));
+                    //json.put("备注（停用或新增）", getCellValueAsString(row.getCell(17)));
                     /*assets.setLeader(getCellValueAsString(row.getCell(14)));
                     assets.setPolice(getCellValueAsString(row.getCell(15)));
                     assets.setPoliceApp(getChineseTrue(row.getCell(16).getStringCellValue().trim()));
@@ -298,18 +314,23 @@ public class FileUploadController {
 
                     Assets assets = new Assets();
                     assets.setAssetsType("idc");
-                    HashMap<String, Object> json = new HashMap<>();
+                    //HashMap<String, Object> json = new HashMap<>();
+                    List<Pair<String, String>> json = new ArrayList<>();
                     assets.setSourceID(sourceID);
 
                     assets.setOwner(getCellValueAsString(row.getCell(0)));
-                    json.put("网站名称", getCellValueAsString(row.getCell(1)));
+                    json.add(new Pair<>("网站名称", getCellValueAsString(row.getCell(1))));
+                    json.add(new Pair<>("官网", getCellValueAsString(row.getCell(2))));
+                    json.add(new Pair<>("IP", getCellValueAsString(row.getCell(3))));
+                    /*json.put("网站名称", getCellValueAsString(row.getCell(1)));
                     json.put("官网", getCellValueAsString(row.getCell(2)));
-                    json.put("IP", getCellValueAsString(row.getCell(3)));
+                    json.put("IP", getCellValueAsString(row.getCell(3)));*/
                     assets.setAddress(getCellValueAsString(row.getCell(4)));
                     assets.setStreet(getCellValueAsString(row.getCell(5)));
                     assets.setLink(getCellValueAsString(row.getCell(6)));
                     assets.setLinkPhone(getCellValueAsString(row.getCell(7)));
-                    json.put("等保级别", (int) row.getCell(8).getNumericCellValue());
+                    json.add(new Pair<>("等保级别", getCellValueAsString(row.getCell(8))));
+                    //json.put("等保级别", (int) row.getCell(8).getNumericCellValue());
                     assets.setExtJson(gson.toJson(json));
 
                     assetsMapper.insertAssets(assets);
