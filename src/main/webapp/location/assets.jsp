@@ -265,7 +265,7 @@
             focusInvalid: false,
             ignore: "",
             rules: {
-                name: {required: true},
+                //name: {required: true},
                 latitude: {max: 23.41208, min: 23.030213, required: true},
                 longitude: {max: 113.607677, min: 113.398067, required: true}
             },

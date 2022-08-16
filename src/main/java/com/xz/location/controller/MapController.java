@@ -51,7 +51,7 @@ public class MapController {
     }
 
     @RequestMapping(value = "massmarks", method = RequestMethod.GET, produces = "text/html;charset=UTF-8")
-    public String massmarks(@RequestParam(value = "assets", required = false, defaultValue = "led") String assetsType,
+    public String massmarks(@RequestParam(value = "assetsType", required = false, defaultValue = "led") String assetsType,
                             @RequestParam(value = "street", required = false, defaultValue = "") String street, ModelMap model) {
         Map<String, Object> param = new HashMap<>();
         param.put("start", 0);
@@ -79,10 +79,10 @@ public class MapController {
 
     @ResponseBody
     @RequestMapping(value = "getAssetsList", method = RequestMethod.GET, produces = "text/html;charset=UTF-8")
-    public String getAssetsList(@RequestParam(value = "assets", required = false, defaultValue = "led") String assetsType) {
+    public String getAssetsList(@RequestParam(value = "assetsType", required = false, defaultValue = "led") String assetsType) {
         Map<String, Object> param = new HashMap<>();
         param.put("start", 0);
-        param.put("assets", assetsType);
+        param.put("assetsType", assetsType);
         param.put("limit", 999999);
         param.put("coordinate", "fixed");//已有坐标的资产
         ArrayList<HashMap<String, Object>> json = new ArrayList<>();
@@ -93,7 +93,14 @@ public class MapController {
             map.put("lnglat", lnglat);
             map.put("name", assets.getName());
             map.put("id", assets.getAssetsID());
-            map.put("style", 0);
+            if ("led".equals(assetsType))
+                map.put("style", 0);
+            if ("idc".equals(assetsType))
+                map.put("style", 1);
+            if ("netbar".equals(assetsType))
+                map.put("style", 2);
+            if ("secsys".equals(assetsType))
+                map.put("style", 3);
             json.add(map);
         }
 
@@ -178,7 +185,7 @@ public class MapController {
 
     @ResponseBody
     @RequestMapping(value = "getStreet3", method = RequestMethod.GET, produces = "text/javascript;charset=UTF-8")
-    public String getStreet3(@RequestParam(value = "assets", required = false, defaultValue = "led") String assets) {
+    public String getStreet3(@RequestParam(value = "assetsType", required = false, defaultValue = "led") String assets) {
         Map<String, Object> param = new HashMap<>();
         param.put("assetsType", assets);
         List<HashMap<String, Object>> streets = assetsMapper.selectStreetByAssets(param);
@@ -205,9 +212,10 @@ public class MapController {
 
     @ResponseBody
     @RequestMapping(value = "getAssets", method = RequestMethod.GET, produces = "text/html;charset=UTF-8")
-    public String getAssets(@RequestParam(value = "assets", required = false, defaultValue = "led") String assets, @RequestParam(value = "assetsID") Integer assetsID) {
+    public String getAssets(@RequestParam(value = "assetsType", required = false, defaultValue = "led") String assets, @RequestParam(value = "assetsID") Integer assetsID) {
         Map<String, Object> param = new HashMap<>();
         param.put("assetsID", assetsID);
+        param.put("assetsType", assets);
 
         List<Assets> assets1 = assetsMapper.selectAssets(param);
         if (assets1.size() == 1)

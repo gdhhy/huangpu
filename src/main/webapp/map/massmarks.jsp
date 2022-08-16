@@ -114,11 +114,13 @@
 <body>
 <div id="container" class="map" tabindex="0"></div>
 
-<div class="input-card" style="width: 120px; top: 10px; bottom: auto;">
+<div class="input-card" style="width: 130px; top: 10px; bottom: auto;">
     <h4>资产类型</h4>
     <div id="coordinate">
         <div class="input-item"><input id="led" name="language" type="radio" checked="checked"><span class="input-text">LED</span></div>
         <div class="input-item"><input id="idc" name="language" type="radio"><span class="input-text">IDC</span></div>
+        <div class="input-item"><input id="netbar" name="language" type="radio"><span class="input-text">网吧</span></div>
+        <div class="input-item"><input id="secsys" name="language" type="radio"><span class="input-text">等保系统</span></div>
     </div>
 </div>
 <div class="input-card">
@@ -218,7 +220,7 @@
         map.add(polygon);
     }
 
-    addPolygon(luogang, '#ccebc5', [1, 15]);
+    /*addPolygon(luogang, '#ccebc5', [1, 15]);
     addPolygon(lianghe, 'LightBLue', [1, 15]);
     addPolygon(hongshan, 'LightBLue', [1, 15]);
     addPolygon(dasha, 'Khaki', [1, 15]);
@@ -230,9 +232,9 @@
     addPolygon(xiagang, 'Khaki', [1, 15]);
     addPolygon(suidong, 'pink', [1, 15]);
     addPolygon(huangpustreet, '#ccebc5', [1, 15]);
-    addPolygon(jiulong, 'snow', [1, 15]);
+    addPolygon(jiulong, 'snow', [1, 15]);*/
     //addPolygon(zhongcun, 'snow', [1, 20]);//番禺钟村
-    //addPolygon(huangpudistrinct, 'snow', [1, 15]);
+    addPolygon(huangpudistrinct, 'snow', [1, 15]);
     //街道边界结束
 
     //信息窗体开始
@@ -299,7 +301,7 @@
     function loadStreetMarker(type) {
         layer.clear();
         // 初始化 labelMarker 街道的label
-        ajax('/map/getStreet3.jspa?assets={0}'.format(type), function (err, json) {
+        ajax('/map/getStreet3.jspa?assetsType={0}'.format(type), function (err, json) {
             if (!err) {
                 var markers = [];
                 json.forEach(function (item) {
@@ -349,14 +351,19 @@
     //大量信息点使用的图标
     // JSAPI 2.0 支持显示设置 zIndex, zIndex 越大约靠前，默认按顺序排列
     var style = [{
-        url: '/assets/images/screen.png',
+        url: '/assets/images/led.png',
         anchor: new AMap.Pixel(6, 6), zIndex: 3,
         size: new AMap.Size(32, 22)
     }, {
-        url: '/assets/images/server.png',
+        url: '/assets/images/idc.png',
         anchor: new AMap.Pixel(4, 4),
-        size: new AMap.Size(32, 10),
+        size: new AMap.Size(16, 16),
         zIndex: 2,
+    }, {
+        url:  '/assets/images/netbar.png',
+        anchor: new AMap.Pixel(3, 3),
+        size: new AMap.Size(5, 5),
+        zIndex: 1,
     }, {
         url: 'https://webapi.amap.com/images/mass/mass2.png',
         anchor: new AMap.Pixel(3, 3),
@@ -382,18 +389,13 @@
         if (mass) mass.clear();
 
         loadStreetMarker(type);
-        ajax('/map/getAssetsList.jspa?assets={0}'.format(type), function (err, json) {
+        ajax('/map/getAssetsList.jspa?assetsType={0}'.format(type), function (err, json) {
             if (!err) {
-                mass = new AMap.MassMarks(json, {
-                    opacity: 0.8,
-                    zIndex: 111,
-                    cursor: 'pointer',
-                    style: style
-                });
+                mass = new AMap.MassMarks(json, {opacity: 0.8, zIndex: 111, cursor: 'pointer', style: style});
 
                 // var marker = new AMap.Marker({content: ' ', map: map});
                 mass.on('click', function (e) {
-                    ajax('/map/getAssets.jspa?assets={0}&assetsID={1}'.format(type, e.data.id), function (err, json) {
+                    ajax('/map/getAssets.jspa?assetsType={0}&assetsID={1}'.format(type, e.data.id), function (err, json) {
                         if (!err) {
                             var hh =
                                 '<p>尺寸：<span style="color: #0288d1;font-weight:bold;">{size}</span></p>' +
