@@ -114,7 +114,7 @@
 <body>
 <div id="container" class="map" tabindex="0"></div>
 
-<div class="input-card" style="width:16rem;left:10px;top:10px;bottom:auto">
+<div class="input-card" style="width:11rem;left:10px;top:10px;bottom:auto">
     <h4>资产类型</h4>
     <div id="coordinate">
         <div class="input-item"><input id="led" name="language" type="radio" checked="checked"><span class="input-text">LED</span></div>
@@ -123,14 +123,14 @@
         <div class="input-item"><input id="secsys" name="language" type="radio"><span class="input-text">等保系统</span></div>
     </div>
 </div>
-<div class="input-card">
+<%--<div class="input-card">
     <label style="color:grey">标注避让设置</label>
     <div class="input-item">
         <input id="allowCollision" type="button" class="btn collision-btn" onclick="allowCollisionFunc()"
                value="标注避让">
         <input id="notAllowCollision" type="button" class="btn collision-btn" onclick="notAllowCollisionFunc()" value="显示全部">
     </div>
-</div>
+</div>--%>
 <script type="text/javascript">
     String.prototype.format = function () {
         var args = arguments;
@@ -180,10 +180,13 @@
             center: [113.5141753, 23.2296782],
             layers: layerCtrl1.getEnabledLayers(),
             // layers: [new AMap.TileLayer.Satellite()],
-            zoom: 12, pitch: 60/*,
+            zoom: 11, pitch: 60/*,
   mapStyle: 'amap://styles/macaron' */ //https://lbs.amap.com/demo/javascript-api/example/personalized-map/set-theme-style
         });
         map.addControl(layerCtrl1);
+        map.on('zoomstart', closeInfoWindow);
+        map.on('zoomchange', closeInfoWindow);
+        map.on('zoomend', closeInfoWindow);
 
         //街道边界
         //http://datav.aliyun.com/portal/school/atlas/area_selector
@@ -305,14 +308,13 @@
         //信息窗体结束
 
         //街道label开始
-        var allowCollision = false;
-        var layer;
-        layer = new AMap.LabelsLayer({
+        //var allowCollision = false;
+        var layer = new AMap.LabelsLayer({
             zooms: [3, 20],
             zIndex: 1000,
             // collision: false,
             // 设置 allowCollision：true，可以让标注避让用户的标注
-            allowCollision
+            allowCollision:false
         });
         // 图层添加到地图
         map.add(layer);
@@ -337,33 +339,6 @@
         }
 
         //map.setFitView(null, false, [100, 150, 10, 10]);
-        toggleBtn();
-
-        function allowCollisionFunc() {
-            allowCollision = true;
-            layer.setAllowCollision(true);
-            toggleBtn();
-        }
-
-        function notAllowCollisionFunc() {
-            allowCollision = false;
-            layer.setAllowCollision(false);
-            toggleBtn();
-        }
-
-        function toggleBtn() {
-            var allowCollisionBtn = document.getElementById('allowCollision');
-            var notAllowCollisionBtn = document.getElementById('notAllowCollision');
-            var disableClass = 'disable';
-
-            if (allowCollision) {
-                allowCollisionBtn.classList.add(disableClass);
-                notAllowCollisionBtn.classList.remove(disableClass);
-            } else {
-                allowCollisionBtn.classList.remove(disableClass);
-                notAllowCollisionBtn.classList.add(disableClass);
-            }
-        }
 
         // 街道的label结束
 
