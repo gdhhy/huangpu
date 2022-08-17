@@ -60,7 +60,7 @@
     var editor;
     jQuery(function ($) {
         var myTable = $('#dynamic-table')
-            //.wrap("<div class='dataTables_borderWrap' />")   //if you are applying horizontal scrolling (sScrollX)
+            //.wrap("<div class='dataTables_borderWrap' />") //if you are applying horizontal scrolling (sScrollX)
             .DataTable({
                 bAutoWidth: false,
                 "columns": [
@@ -86,7 +86,7 @@
                             if (data > 113.607677 || data < 113.398067 || row.latitude > 23.41208 || row.latitude < 23.030213) {
                                 return "<span style='color:red;font-weight: bold'>{0},{1}</span>".format(data, row.latitude);
                             } else
-                                return "<a href=\"\" style=' color:saddlebrown' onmouseout=\"hiddenPic();\" onmousemove=\"showPic(event,'https://restapi.amap.com/v3/staticmap?markers=mid,0xFF0000,:{0},{1}&key=b772bf606b75644e7c2f3dcda3639896&radius&size=300*200');\">{2},{3}</a>".format(data, row.latitude, data, row.latitude);
+                                return "<a href=\"\" style=' color:saddlebrown' onmouseout=\"hiddenPic();\" onmousemove=\"showPic(event,'https://restapi.amap.com/v3/staticmap?scale=2&markers=mid,0xFF0000,:{0},{1}&key=b772bf606b75644e7c2f3dcda3639896&radius&size=300*200');\">{2},{3}</a>".format(data, row.latitude, data, row.latitude);
                         }
                     },
                     {
@@ -106,7 +106,7 @@
                     {
                         "orderable": false, "searchable": false, className: 'text-center', "targets": 9, title: '标色', width: 30,
                         render: function (data, type, row, meta) {
-                            return '<select id="skin-colorpicker"  class="hide" data-id="{0}" data-color="{1}">'.format(row["assetsID"], data) +
+                            return '<select id="skin-colorpicker" class="hide" data-id="{0}" data-color="{1}">'.format(row["assetsID"], data) +
                                 '<option data-skin="no-skin" value="darkgray">darkgray</option>' +
                                 '<option data-skin="skin-1" value="red">red</option>' +
                                 '<option data-skin="skin-2" value="orange">orange</option>' +
@@ -405,7 +405,7 @@
         function runTwice() {
             runTimes++;
             let markerparam = "large,{0},{1}:{2},{3}";
-            let lastUrl = "https://restapi.amap.com/v3/staticmap?key=b772bf606b75644e7c2f3dcda3639896&radius&markers="
+            let lastUrl = "https://restapi.amap.com/v3/staticmap?scale=2&size=200*200&key=b772bf606b75644e7c2f3dcda3639896&radius&markers="
             if (runTimes === 2) {
                 if ($('#longitude').val() > 0 && $('#latitude').val() > 0) {
                     markers.push({label: "", color: '0xFF0000', lnglat: [$('#longitude').val(), $('#latitude').val()]});
@@ -438,14 +438,14 @@
             $.getJSON(url.format(addr), function (ret) {
                 if (ret.status === "1") {
                     if (ret.geocodes.length === 1) {
-                        $('#amap').html('位置标准名： <span   style="color: #0288d1; ">{0}</span>'.format(ret.geocodes[0].formatted_address));
+                        $('#amap').html('位置标准名： <span style="color: #0288d1; ">{0}</span>'.format(ret.geocodes[0].formatted_address));
                         if (ret.geocodes[0].formatted_address.indexOf("广东省广州市黄埔区") === 0) {
                             var lnglat = ret.geocodes[0].location.split(",");
                             $('#longitude').val(lnglat[0]);
                             $('#latitude').val(lnglat[1]);
 
                             let markerparam = "large,{0},{1}:{2},{3}";
-                            let lastUrl = "https://restapi.amap.com/v3/staticmap?key=b772bf606b75644e7c2f3dcda3639896&radius&markers="
+                            let lastUrl = "https://restapi.amap.com/v3/staticmap?scale=2&size=200*200&key=b772bf606b75644e7c2f3dcda3639896&radius&markers="
                             lastUrl += markerparam.format('0xE59866', '新', lnglat[0], lnglat[1]);
                             $('#img').attr("src", lastUrl);
                         } else {
@@ -543,7 +543,7 @@
                 }
             });
 
-            //    var dz = $("div#dropzone").dropzone({
+            // var dz = $("div#dropzone").dropzone({
             var dz = new Dropzone("div#dropzone", {//https://blog.csdn.net/jinxhj2010/article/details/107683026
                 url: '/upload/uploadImage.jspa',
                 autoProcessQueue: true,// 如果为false，文件将被添加到队列中，但不会自动处理队列。
@@ -795,7 +795,7 @@
                     </div>
                     <div class="col-xs-1">
                         <button type="button" class="btn btn-info btn-minier" id="byName" title="名称 -> 经纬度">
-                            <i class="ace-icon  fa fa-map-pin icon-on-right bigger-110"></i>
+                            <i class="ace-icon fa fa-map-pin icon-on-right bigger-110"></i>
                         </button>
                     </div>
                 </div>
@@ -828,7 +828,7 @@
                     </div>
                     <div class="col-xs-1 pull-left">
                         <button type="button" class="btn btn-info btn-minier" id="byAddress" title="地址 -> 经纬度">
-                            <i class="ace-icon  fa fa-map-pin icon-on-right bigger-110"></i>
+                            <i class="ace-icon fa fa-map-pin icon-on-right bigger-110"></i>
                         </button>
                     </div>
                 </div>
@@ -883,22 +883,6 @@
                     </div>
                 </div>
             </div>
-            <%-- <div class="row">
-                 <div class="form-group" style="margin-bottom: 3px;margin-top: 3px">
-                     <label class="col-xs-2 control-label no-padding-right" for="deviceNum">设备数量</label>
-                     <div class="col-xs-2">
-                         <input type="text" id="deviceNum" name="deviceNum" style="width: 100%" placeholder="设备"/>
-                     </div>
-                     <label class="col-xs-2 control-label no-padding-right" for="ipNum">IP数量</label>
-                     <div class="col-xs-2">
-                         <input type="text" id="ipNum" name="ipNum" style="width: 100%" placeholder="IP数"/>
-                     </div>
-                     <label class="col-xs-2 control-label no-padding-right" for="userNum">用户数量</label>
-                     <div class="col-xs-2">
-                         <input type="text" id="userNum" name="userNum" style="width: 100%" placeholder="用户"/>
-                     </div>
-                 </div>
-             </div>--%>
             <div class="row">
                 <div class="form-group" style="margin-bottom: 3px;margin-top: 3px">
                     <label class="col-xs-2 control-label no-padding-right" for="dropzone">图片</label>
