@@ -4,8 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.xz.location.dao.AssetsMapper;
 import com.xz.location.pojo.Assets;
-import com.xz.location.pojo.Led;
-import com.xz.location.pojo.IDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -83,6 +81,7 @@ public class MapController {
         Map<String, Object> param = new HashMap<>();
         param.put("start", 0);
         param.put("assetsType", assetsType);
+        param.put("showDeleted", "false");
         param.put("limit", 999999);
         param.put("coordinate", "fixed");//已有坐标的资产
         ArrayList<HashMap<String, Object>> json = new ArrayList<>();
@@ -92,6 +91,9 @@ public class MapController {
             HashMap<String, Object> map = new HashMap(3);
             map.put("lnglat", lnglat);
             map.put("name", assets.getName());
+            map.put("imageUrl", assets.getImageUrl());
+            map.put("longitude", assets.getLongitude());
+            map.put("latitude", assets.getLatitude());
             map.put("id", assets.getAssetsID());
             if ("led".equals(assetsType))
                 map.put("style", 0);
@@ -185,9 +187,9 @@ public class MapController {
 
     @ResponseBody
     @RequestMapping(value = "getStreet3", method = RequestMethod.GET, produces = "text/javascript;charset=UTF-8")
-    public String getStreet3(@RequestParam(value = "assetsType", required = false, defaultValue = "led") String assets) {
+    public String getStreet3(@RequestParam(value = "assetsType", required = false, defaultValue = "led") String assetsType) {
         Map<String, Object> param = new HashMap<>();
-        param.put("assetsType", assets);
+        param.put("assetsType", assetsType);
         List<HashMap<String, Object>> streets = assetsMapper.selectStreetByAssets(param);
         List<String> labels = new ArrayList<>();
 
@@ -212,10 +214,9 @@ public class MapController {
 
     @ResponseBody
     @RequestMapping(value = "getAssets", method = RequestMethod.GET, produces = "text/html;charset=UTF-8")
-    public String getAssets(@RequestParam(value = "assetsType", required = false, defaultValue = "led") String assets, @RequestParam(value = "assetsID") Integer assetsID) {
+    public String getAssets(  @RequestParam(value = "assetsID") Integer assetsID) {
         Map<String, Object> param = new HashMap<>();
         param.put("assetsID", assetsID);
-        param.put("assetsType", assets);
 
         List<Assets> assets1 = assetsMapper.selectAssets(param);
         if (assets1.size() == 1)

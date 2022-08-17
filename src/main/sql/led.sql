@@ -62,8 +62,8 @@ create table assets
     name        varchar(255)   default '' comment '网站名称',
     owner       varchar(255)   default '' comment '企业名称',-- 共同=>owner  corpName
     address     varchar(255)   default '' comment '企业地址', -- 共同 =>address corpAddress
-    longitude   decimal(12, 8) default -1 comment '经度', -- 共同
-    latitude    decimal(12, 8) default -1 comment '纬度', -- 共同
+    longitude   decimal(12, 6) default -1 comment '经度', -- 共同
+    latitude    decimal(12, 6) default -1 comment '纬度', -- 共同
     link        varchar(255)   default '' comment '联系人', -- 共同=>link  legalPerson
     linkPhone   varchar(255)   default '' comment '联系人电话', -- 共同=>linkPhone  LegalPhone
     imageID     int            default 0,

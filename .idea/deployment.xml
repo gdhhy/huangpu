@@ -11,6 +11,13 @@
           </mappings>
         </serverdata>
       </paths>
+      <paths name="tencent">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/home/map" local="$PROJECT_DIR$/src/main/webapp" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
     </serverData>
     <option name="myAutoUpload" value="ALWAYS" />
   </component>

@@ -100,7 +100,7 @@
                         }
                     },
                     {"orderable": false, "searchable": false, className: 'text-center', "targets": 5, title: '单位名称'},
-                    {"orderable": false, "searchable": false, className: 'text-center', "targets": 6, title: '辖区', width: 60},
+                    {"orderable": false, "searchable": false, className: 'text-center', "targets": 6, title: '街道', width: 60},
                     {"orderable": false, "searchable": false, className: 'text-center', "targets": 7, title: '联系人', width: 60},
                     {"orderable": false, "searchable": false, className: 'text-center', "targets": 8, title: '状态', width: 40},
                     {
@@ -491,8 +491,10 @@
             $('input:radio[name=status]').filter('[value=' + loc.status + ']').prop('checked', true);
 
             $('#img').attr("src", "/components/jquery.easyui/themes/icons/blank.gif");
+            //$('#img').attr("height", 350);
+            $('#street').val(loc.street);
             $('#assetsType').val(loc.assetsType);
-            $('#amap').html("");
+            $('#amap').html("纬度的小数点后第4位，每变化1，大约偏移11米。<br/>经度的小数点后第4位，每变化1，大约偏移9米。");
             $('#assetsID').val(loc.assetsID);
             $('#address').val(loc.address);
             $('#name').val(loc.name);
@@ -627,9 +629,9 @@
                         {data: "value"}
                     ],
                     'columnDefs': [
-                        {"orderable": false,"data": "key", "targets": 0},
+                        {"orderable": false, "data": "key", "targets": 0},
                         {
-                            "orderable": false,"data": "value", "targets": 1, title: '值', className: 'center', render: function (data, type, row, meta) {
+                            "orderable": false, "data": "value", "targets": 1, title: '值', className: 'center', render: function (data, type, row, meta) {
                                 return '<a href="#" data-pk="{0}" id="{1}" data-value="{2}" data-type="text" class="editable" data-url="/assets/saveExtKeyValue.jspa">{3}</a>'
                                     .format(assetsID, row["key"], data, data);
                             }
@@ -690,8 +692,8 @@
                     <option value="netbar">网吧</option>
                     <option value="secsys">等保系统</option>
                 </select>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;辖区：
-                <select id="street" name="street" class="nav-search-input">
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;街道：
+                <select id="byStreet" name="byStreet" class="nav-search-input">
                     <option value="" selected>全部</option>
                     <option value="黄埔">黄埔</option>
                     <option value="长洲">长洲</option>
@@ -845,8 +847,31 @@
             </div>
             <div class="row">
                 <div class="form-group" style="margin-bottom: 3px;margin-top: 3px">
+                    <label class="col-xs-2 control-label no-padding-right" for="street"> 街道</label>
+                    <div class="col-xs-4">
+                        <select id="street" name="street" class="nav-search-input">
+                            <option value="黄埔区" selected>不确定</option>
+                            <option value="黄埔">黄埔</option>
+                            <option value="长洲">长洲</option>
+                            <option value="文冲">文冲</option>
+                            <option value="永和">永和</option>
+                            <option value="南岗">南岗</option>
+                            <option value="红山">红山</option>
+                            <option value="联和">联和</option>
+                            <option value="云埔">云埔</option>
+                            <option value="大沙">大沙</option>
+                            <option value="萝岗">萝岗</option>
+                            <option value="长岭">长岭</option>
+                            <option value="新龙">新龙</option>
+                            <option value="龙湖">龙湖</option>
+                            <option value="鱼珠">九佛</option>
+                            <option value="鱼珠">鱼珠</option>
+                            <option value="夏港">夏港</option>
+                            <option value="穗东">穗东</option>
+                        </select>
+                    </div>
                     <label class="col-xs-2 control-label no-padding-right" for="longitude"> 状态 </label>
-                    <div class="radio col-xs-5">
+                    <div class="radio col-xs-4">
                         <label>
                             <input name="status" type="radio" class="ace" value="停用"/>
                             <span class="lbl">停用</span>
@@ -893,8 +918,8 @@
 
     <div class="col-xs-6">
         <label class="control-label no-padding-right" for="address"> 位置参考：红色是已保存的位置</label>
-        <div id="container" class="map"><img id="img"/></div>
-        <label class="control-label no-padding-right" style="height: 20px" for="address" id="amap"> </label>
+        <div id="container" class="map"><span class="border"><img id="img"/></span></div>
+        <label class="control-label no-padding-right" style="height: 20px" for="address" id="amap"></label>
     </div>
 </div>
 <div id="dialog-error" class="hide alert" title="提示">

@@ -5,7 +5,14 @@
       <webServer id="52015a75-ae43-4cab-9890-40764ff73b27" name="openwrt" url="http://192.168.6.1:8080">
         <fileTransfer rootFolder="/opt/tomcat/ROOT" host="192.168.6.1" port="21">
           <advancedOptions>
-            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+            <advancedOptions dataProtectionLevel="Private" keepAliveTimeout="0" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+      <webServer id="8f742c5b-0c16-40d7-bb3b-e97db9f86101" name="tencent" url="http://http://101.35.179.129/">
+        <fileTransfer rootFolder="/home/map" accessType="SFTP" host="101.35.179.129" port="22" sshConfigId="ef1d2df1-f339-4390-82a9-681ae3c87016" sshConfig="root@101.35.179.129:22 password">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" keepAliveTimeout="0" passiveMode="true" shareSSLContext="true" />
           </advancedOptions>
         </fileTransfer>
       </webServer>

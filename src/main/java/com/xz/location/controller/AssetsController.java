@@ -40,7 +40,7 @@ public class AssetsController {
     @ResponseBody
     @RequestMapping(value = "listAssets", method = RequestMethod.GET, produces = "text/html;charset=UTF-8")
     public String listAssets(@RequestParam(value = "assetsType", required = false, defaultValue = "assets") String assetsType,
-                             @RequestParam(value = "street", required = false, defaultValue = "") String street,
+                             @RequestParam(value = "byStreet", required = false, defaultValue = "") String street,
                              @RequestParam(value = "address", required = false, defaultValue = "") String address,
                              @RequestParam(value = "coordinate", required = false, defaultValue = "all") String coordinate,
                              @RequestParam(value = "showDeleted", required = false, defaultValue = "false") String showDeleted,
@@ -89,21 +89,28 @@ public class AssetsController {
     public String getAssetsExpand(@RequestParam(value = "assetsID") Integer assetsID, @RequestParam(value = "draw", required = false, defaultValue = "1") Integer draw) {
         Map<String, Object> param = new HashMap<>();
         param.put("assetsID", assetsID);
+        Map<String, Object> result = new HashMap<>();
+        result.put("draw", draw);
         List<Assets> assets1 = assetsMapper.selectAssets(param);
         if (assets1.size() == 1) {
             Assets assets = assets1.get(0);
 
-            Map<String, Object> result = new HashMap<>();
             Type listType = new TypeToken<List<Pair<String, String>>>() {
             }.getType();
             List<Pair<String, String>> json = gson.fromJson(assets.getExtJson(), listType);
-            result.put("draw", draw);
-            result.put("data", json);
-            result.put("iTotalRecords", json.size());//todo 表的行数，未加任何调剂
-            result.put("iTotalDisplayRecords", json.size());
+            if (json != null) {
+                result.put("data", json);
+                result.put("iTotalRecords", json.size());
+                result.put("iTotalDisplayRecords", json.size());
+            }
+        }
+        if (result.get("data") == null) {
+            result.put("data", new ArrayList<>());
+            result.put("iTotalRecords", 0);
+            result.put("iTotalDisplayRecords", 0);
+        }
 
-            return gson.toJson(result);
-        } else return "[]";
+        return gson.toJson(result);
     }
 
     @ResponseBody

@@ -287,7 +287,7 @@ public class FileUploadController {
                     json.add(new Pair<>("建设审批单位", getCellValueAsString(row.getCell(12))));
                     //json.put("建设审批单位", getCellValueAsString(row.getCell(12)));
                     /*assets.setApprovalUnit(row.getCell(12).getStringCellValue().trim());*/
-                    assets.setStreet(row.getCell(13).getStringCellValue().trim());
+                    assets.setStreet(row.getCell(13).getStringCellValue().replace("街", "").trim());
 
                     json.add(new Pair<>("派出所负责领导及联系电话", getCellValueAsString(row.getCell(14))));
                     json.add(new Pair<>("派出所负责民警及联系电话", getCellValueAsString(row.getCell(15))));
