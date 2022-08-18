@@ -102,7 +102,14 @@
                     {"orderable": false, "searchable": false, className: 'text-center', "targets": 5, title: '单位名称'},
                     {"orderable": false, "searchable": false, className: 'text-center', "targets": 6, title: '街道', width: 60},
                     {"orderable": false, "searchable": false, className: 'text-center', "targets": 7, title: '联系人', width: 60},
-                    {"orderable": false, "searchable": false, className: 'text-center', "targets": 8, title: '状态', width: 40},
+                    {
+                        "orderable": false, "searchable": false, className: 'text-center', "targets": 8, title: '状态', width: 40, render: function (data, type, row, meta) {
+                            let statusColor="black";
+                            if(data==="未测评" || data==="停用") statusColor="silver";
+                            return '<a href="#" data-pk="{0}" id="Status" data-value="{1}" data-type="select" style="color:{2};" class="editable" data-url="/assets/setAssets.jspa">{3}</a>'
+                                .format(row["assetsID"], data, statusColor,data === null ? "空" : data);
+                        }
+                    },
                     {
                         "orderable": false, "searchable": false, className: 'text-center', "targets": 9, title: '标色', width: 30,
                         render: function (data, type, row, meta) {
@@ -175,6 +182,7 @@
                 cell.innerHTML = i + 1;
             });
         });
+        var options = [{value: "停用", text: '停用'}, {value: "在用", text: '在用'}];
         myTable.on('draw', function () {
             $('#dynamic-table tr').find('a:eq(1)').click(function () {
                 $.cookie("data-assetsID", $(this).attr("data-assetsID"));
@@ -231,6 +239,15 @@
                 } else
                     window.open($(this).attr("data-Url"), "_blank");
             });
+
+            $("#dynamic-table tr").find(".editable").editable({
+                mode: "popup",
+                source: options,
+                success: function (response, newValue) {
+                    if (response.succeed !== 'false')
+                        myTable.ajax.reload(null, false);//null为callback,false是是否回到第一页
+                }
+            });
         });
         $('.btn-success').click(function () {
             search();
@@ -253,6 +270,19 @@
                 if ($(this).val())
                     url += "&" + $(this).attr("name") + "=" + $(this).val();
             });
+            if ($('#selectedAssetsType').val() === "secsys") {
+                options = [{value: "未测评", text: '未测评'}, {value: "测评", text: '测评'}];
+                $('input:radio[name=status]:eq(0)').val("未测评");
+                $('input:radio[name=status]:eq(0)+span').text("未测评");
+                $('input:radio[name=status]:eq(1)').val("测评");
+                $('input:radio[name=status]:eq(1)+span').text("测评");
+            } else {
+                options = [{value: "停用", text: '停用'}, {value: "在用", text: '在用'}];
+                $('input:radio[name=status]:eq(0)').val("停用");
+                $('input:radio[name=status]:eq(0)+span').text("停用");
+                $('input:radio[name=status]:eq(1)').val("在用");
+                $('input:radio[name=status]:eq(1)+span').text("在用");
+            }
 
             myTable.ajax.url(encodeURI(url)).load();
         }
@@ -476,17 +506,17 @@
             else
                 $('#assetsName').text($('#assets option[value=' + $('#selectedAssetsType').val() + ']').text() + "名称");
 
-            if ($('#selectedAssetsType').val() === 'secsys') {
-                $('input:radio[name=status]:eq(0)').val("未测评");
-                $('input:radio[name=status]:eq(0)+span').text("未测评");
-                $('input:radio[name=status]:eq(1)').val("测评");
-                $('input:radio[name=status]:eq(1)+span').text("测评");
-            } else {
-                $('input:radio[name=status]:eq(0)').val("停用");
-                $('input:radio[name=status]:eq(0)+span').text("停用");
-                $('input:radio[name=status]:eq(1)').val("在用");
-                $('input:radio[name=status]:eq(1)+span').text("在用");
-            }
+            /*  if ($('#selectedAssetsType').val() === 'secsys') {
+                  $('input:radio[name=status]:eq(0)').val("未测评");
+                  $('input:radio[name=status]:eq(0)+span').text("未测评");
+                  $('input:radio[name=status]:eq(1)').val("测评");
+                  $('input:radio[name=status]:eq(1)+span').text("测评");
+              } else {
+                  $('input:radio[name=status]:eq(0)').val("停用");
+                  $('input:radio[name=status]:eq(0)+span').text("停用");
+                  $('input:radio[name=status]:eq(1)').val("在用");
+                  $('input:radio[name=status]:eq(1)+span').text("在用");
+              }*/
 
             $('input:radio[name=status]').filter('[value=' + loc.status + ']').prop('checked', true);
 

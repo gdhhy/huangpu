@@ -17,6 +17,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -158,6 +159,36 @@ public class AssetsController {
     }
 
     @ResponseBody
+    @RequestMapping(value = "/setAssets", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
+    public String setAssets(@RequestParam(value = "pk") Integer pk,
+                             @RequestParam(value = "name") String name,
+                             @RequestParam(value = "value") String value) {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Map<String, Object> map = new HashMap<>();
+        map.put("title", "设置资产属性");
+        int result = -1;
+        if (principal instanceof UserDetails) {
+            Assets assets = new Assets();
+            assets.setAssetsID(pk);
+            try {
+                //assets.setStatus(value); 通过反射调用，不用这行
+                Method method = assets.getClass().getMethod("set" + name, String.class);
+                method.invoke(assets, value);
+                result = assetsMapper.updateAssets(assets);
+            } catch (Exception e) {
+                map.put("message", "调用方法失败，请检查参数！");
+            }
+
+            map.put("succeed", result > 0);
+        } else {
+            map.put("succeed", false);
+            map.put("message", "没登录用户信息，请重新登录！");
+        }
+
+        return gson.toJson(map);
+    }
+
+    @ResponseBody
     @RequestMapping(value = "/saveExtKeyValue", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
     public String saveExtKeyValue(@RequestParam(value = "pk") String pk,
                                   @RequestParam(value = "name") String name,
@@ -174,16 +205,6 @@ public class AssetsController {
             int result = -1;
             if (assets1.size() == 1) {
                 Assets assets = assets1.get(0);
-               /* if (assets.getExtJson() == null || "".equals(assets.getExtJson())) {
-
-                    HashMap<String, Object> map = new HashMap<>();
-                    map.put("expandID", Integer.parseInt(keys[1]));
-                    map.put(name, value);
-                    map.put(name.equals("key") ? "name" : "key", "");
-                    assets.setExtJson(gson.toJson(keyValueList));
-                    result = assetsMapper.updateAssets(assets);
-                    returnMap.put("message", "增加资产扩展信息成功");
-                } else {*/
                 Type listType = new TypeToken<List<HashMap<String, Object>>>() {
                 }.getType();
                 List<HashMap<String, Object>> keyValueList = gson.fromJson(assets.getExtJson(), listType);

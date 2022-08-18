@@ -361,7 +361,7 @@
         }, {
             url: '/assets/images/secsys.png',
             anchor: new AMap.Pixel(3, 3),
-            size: new AMap.Size(32, 32),
+            size: new AMap.Size(24, 24),
             zIndex: 1,
         }];
         //

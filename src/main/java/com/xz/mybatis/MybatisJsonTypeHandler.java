@@ -1,8 +1,8 @@
 package com.xz.mybatis;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.MappedJdbcTypes;
@@ -20,7 +20,8 @@ import java.sql.SQLException;
 @MappedJdbcTypes(JdbcType.VARCHAR)
 public class MybatisJsonTypeHandler<T extends Object> extends BaseTypeHandler<T> {
 
-    private static final ObjectMapper mapper = new ObjectMapper();
+    //private static final ObjectMapper mapper = new ObjectMapper();
+    private static final Gson gson = new GsonBuilder().serializeNulls().create();
     private Class<T> clazz;
 
     public MybatisJsonTypeHandler(Class<T> clazz) {
@@ -50,7 +51,7 @@ public class MybatisJsonTypeHandler<T extends Object> extends BaseTypeHandler<T>
 
     private String toJson(T object) {
         try {
-            return mapper.writeValueAsString(object);
+            return gson.toJson(object);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -59,7 +60,7 @@ public class MybatisJsonTypeHandler<T extends Object> extends BaseTypeHandler<T>
     private T toObject(String content, Class<?> clazz) {
         if (content != null && !content.isEmpty()) {
             try {
-                return (T) mapper.readValue(content, clazz);
+                return (T) gson.toJson(content, clazz);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -69,7 +70,7 @@ public class MybatisJsonTypeHandler<T extends Object> extends BaseTypeHandler<T>
     }
 
     static {
-        mapper.configure(JsonParser.Feature.ALLOW_MISSING_VALUES, false);
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        /*mapper.configure(JsonParser.Feature.ALLOW_MISSING_VALUES, false);
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);*/
     }
 }

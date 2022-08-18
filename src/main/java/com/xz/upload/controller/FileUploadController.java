@@ -5,8 +5,6 @@ package com.xz.upload.controller;
  */
 
 import cn.hutool.core.date.DateUtil;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.xz.ExceptionAdapter;
@@ -64,7 +62,7 @@ public class FileUploadController {
 
     private static String relative_directory = "upload";
     private static String UPLOAD_LOCATION = DeployRunning.getDir() + relative_directory + File.separator;
-    private Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
+    private static Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
 
     /**
      * 上传地图数据文件
@@ -392,8 +390,6 @@ public class FileUploadController {
     @RequestMapping(value = "/uploadImage")
     private ResponseEntity<String> uploadImage(MultipartHttpServletRequest request) {
         logger.info("start upload file ......");
-        HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;//status code 500
-
         Map<String, Object> loadResultMap = new HashMap<>();
         MultiValueMap<String, MultipartFile> multiMap = request.getMultiFileMap();
 
@@ -416,18 +412,7 @@ public class FileUploadController {
         }
 
         //封装返回
-        ObjectMapper objMapper = new ObjectMapper();
-        String body = "";
-        try {
-            body = objMapper.writeValueAsString(loadResultMap);
-
-            httpStatus = HttpStatus.OK;
-        } catch (JsonProcessingException e) {
-            logger.error("load file error", e);
-        }
-
-        ResponseEntity responseEntity = new ResponseEntity(body, httpStatus);
-        return responseEntity;
+        return new ResponseEntity<>(gson.toJson(loadResultMap), HttpStatus.OK);
     }
 
     private UploadFile loadFile(MultipartFile mfile, String filePath) {
