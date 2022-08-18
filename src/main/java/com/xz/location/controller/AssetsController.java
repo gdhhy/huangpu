@@ -1,6 +1,5 @@
 package com.xz.location.controller;
 
-import cn.hutool.core.lang.Pair;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -95,9 +94,9 @@ public class AssetsController {
         if (assets1.size() == 1) {
             Assets assets = assets1.get(0);
 
-            Type listType = new TypeToken<List<Pair<String, String>>>() {
+            Type listType = new TypeToken<List<HashMap<String, Object>>>() {
             }.getType();
-            List<Pair<String, String>> json = gson.fromJson(assets.getExtJson(), listType);
+            List<HashMap<String, Object>> json = gson.fromJson(assets.getExtJson(), listType);
             if (json != null) {
                 result.put("data", json);
                 result.put("iTotalRecords", json.size());
@@ -160,13 +159,14 @@ public class AssetsController {
 
     @ResponseBody
     @RequestMapping(value = "/saveExtKeyValue", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
-    public String saveExtKeyValue(@RequestParam(value = "pk") Integer assetsID,
-                                  @RequestParam(value = "name") String key,
+    public String saveExtKeyValue(@RequestParam(value = "pk") String pk,
+                                  @RequestParam(value = "name") String name,
                                   @RequestParam(value = "value") String value) {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String[] keys = pk.split("-");
 
         Map<String, Object> param = new HashMap<>();
-        param.put("assetsID", assetsID);
+        param.put("assetsID", Integer.parseInt(keys[0]));
         Map<String, Object> returnMap = new HashMap<>();
         returnMap.put("title", "设置资产扩展信息");
         if (principal instanceof UserDetails) {
@@ -174,26 +174,48 @@ public class AssetsController {
             int result = -1;
             if (assets1.size() == 1) {
                 Assets assets = assets1.get(0);
-                Type listType = new TypeToken<List<HashMap<String, String>>>() {
-                }.getType();
-                List<HashMap<String, String>> keyValueList = gson.fromJson(assets.getExtJson(), listType);
-                for (HashMap<String, String> keyValueMap : keyValueList) {
-                    if (keyValueMap.get("key").equals(key)) {
-                        keyValueMap.put("value", value);
+               /* if (assets.getExtJson() == null || "".equals(assets.getExtJson())) {
 
-                        assets.setExtJson(gson.toJson(keyValueList));
-                        result = assetsMapper.updateAssets(assets);
-                        break;
+                    HashMap<String, Object> map = new HashMap<>();
+                    map.put("expandID", Integer.parseInt(keys[1]));
+                    map.put(name, value);
+                    map.put(name.equals("key") ? "name" : "key", "");
+                    assets.setExtJson(gson.toJson(keyValueList));
+                    result = assetsMapper.updateAssets(assets);
+                    returnMap.put("message", "增加资产扩展信息成功");
+                } else {*/
+                Type listType = new TypeToken<List<HashMap<String, Object>>>() {
+                }.getType();
+                List<HashMap<String, Object>> keyValueList = gson.fromJson(assets.getExtJson(), listType);
+                if (keyValueList != null)
+                    for (HashMap<String, Object> map : keyValueList) {
+                        if (Math.abs(Integer.parseInt(keys[1]) - (Double) map.get("expandID")) < 0.001) {
+                            map.put(name, value);
+
+                            assets.setExtJson(gson.toJson(keyValueList));
+                            result = assetsMapper.updateAssets(assets);
+                            returnMap.put("message", "更新资产扩展信息成功");
+                            break;
+                        }
                     }
-                }
+                //}
                 if (result == -1) {
-                    returnMap.put("succeed", false);
-                    returnMap.put("message", "不存在的键值！");
-                } else
-                    returnMap.put("succeed", result > 0);
+                    if (keyValueList == null)
+                        keyValueList = new ArrayList<>();
+                    HashMap<String, Object> map = new HashMap<>();//增加一次需要两次saveExtKeyValue
+                    map.put("expandID", Integer.parseInt(keys[1]));
+                    map.put(name, value);
+                    map.put(name.equals("key") ? "name" : "key", "");
+                    keyValueList.add(map);
+                    assets.setExtJson(gson.toJson(keyValueList));
+                    result = assetsMapper.updateAssets(assets);
+                    returnMap.put("message", "增加资产扩展信息成功");
+                }
+
+                returnMap.put("succeed", result > 0);
             } else {
                 returnMap.put("succeed", false);
-                returnMap.put("message", "参数错误，找不到主键：" + assetsID);
+                returnMap.put("message", "参数错误，找不到主键：" + keys[0]);
             }
         } else {
             returnMap.put("succeed", false);
@@ -204,14 +226,50 @@ public class AssetsController {
     }
 
     @ResponseBody
-    @RequestMapping(value = "/deleteAssets", method = RequestMethod.POST)
+    @RequestMapping(value = "/deleteAssets", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
     public String deleteAssets(@RequestParam("assetsID") int assetsID) {
-        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> returnMap = new HashMap<>();
 
         int deleteCount = assetsMapper.deleteAssets(assetsID);
-        map.put("succeed", deleteCount > 0);
-        map.put("affectedRowCount", deleteCount);
+        returnMap.put("succeed", deleteCount > 0);
+        returnMap.put("affectedRowCount", deleteCount);
 
-        return gson.toJson(map);
+        return gson.toJson(returnMap);
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/deleteAssetsExpand", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
+    public String deleteAssetsExpand(@RequestParam("assetsID") int assetsID, @RequestParam("expandID") int expandID) {
+        Map<String, Object> param = new HashMap<>();
+        param.put("assetsID", assetsID);
+
+        Map<String, Object> returnMap = new HashMap<>();
+        returnMap.put("title", "删除资产扩展信息");
+
+        List<Assets> assets1 = assetsMapper.selectAssets(param);
+        int result = -1;
+        if (assets1.size() == 1) {
+            Assets assets = assets1.get(0);
+            Type listType = new TypeToken<List<HashMap<String, Object>>>() {
+            }.getType();
+            List<HashMap<String, Object>> keyValueList = gson.fromJson(assets.getExtJson(), listType);
+            for (HashMap<String, Object> map : keyValueList) {
+                if (Math.abs(expandID - (Double) map.get("expandID")) < 0.001) {
+                    keyValueList.remove(map);
+
+                    assets.setExtJson(gson.toJson(keyValueList));
+                    result = assetsMapper.updateAssets(assets);
+                    returnMap.put("message", "删除资产扩展信息成功");
+                    break;
+                }
+            }
+            returnMap.put("succeed", result > 0);
+            if (result == -1) returnMap.put("message", "没找到该资产的扩展信息");
+        } else {
+            returnMap.put("succeed", false);
+            returnMap.put("message", "参数错误，找不到主键：" + assetsID);
+        }
+
+        return gson.toJson(returnMap);
     }
 }

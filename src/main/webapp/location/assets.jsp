@@ -127,7 +127,7 @@
                                 '<i class="ace-icon glyphicon glyphicon-edit green bigger-120"></i>' +
                                 '</a> ' +
                                 '<a class="hasLink" title="扩展信息" href="#" data-Url="javascript:showExpandDialog(\'{0}\',{1},\'{2}\',);">'.format($('#selectedAssetsType').val(), row["assetsID"], row["name"]) +
-                                '<i class="ace-icon glyphicon glyphicon-expand maroon bigger-120"></i>' +
+                                '<i class="ace-icon glyphicon  glyphicon-equalizer maroon bigger-120"></i>' +
                                 '</a> ' +
                                 deleteHtml +
                                 '</div>';
@@ -513,12 +513,8 @@
             p1(loc.address, "地", '0x00FF00');
             // "https://restapi.amap.com/v3/staticmap?markers=large,0xFF0000,%E4%BD%8D:116.37359,39.92437|large,0xFF0000,%E5%9C%B0:116.47359,39.92437&key=b772bf606b75644e7c2f3dcda3639896&radius");
             $("#dialog-edit").removeClass('hide').dialog({
-                resizable: false,
+                resizable: false, width: 860, height: 620, modal: true, title: title,
                 //icon:'fa fa-key',
-                width: 860,
-                height: 620,
-                modal: true,
-                title: title,
                 buttons: [
                     {
                         html: "<i class='ace-icon fa fa-floppy-o bigger-110'></i>&nbsp;保存",
@@ -616,24 +612,38 @@
 
         $.fn.editable.defaults.mode = 'inline';
 
+        let table;
+
         function showExpandDialog(assetsType, assetsID, assetsName) {
             $('#assetsName2').text(assetsName);
             let title = $('#assets option[value=' + $('#selectedAssetsType').val() + ']').text() + "扩展信息"
-            let table;
             if ($.fn.dataTable.isDataTable('#assets-expand-table')) {
                 table = $('#assets-expand-table').DataTable();
             } else {
                 table = $('#assets-expand-table').DataTable({
-                    dom: "t", order: [[1, 'desc']], paging: false, searching: false,
-                    columns: [{data: "key"},
-                        {data: "value"}
-                    ],
+                    dom: "t", order: [[0, 'asc']], paging: false, searching: false,
+                    columns: [{data: "expandID"}, {data: "key"}, {data: "value"}, {data: "expandID"}],
                     'columnDefs': [
-                        {"orderable": false, "data": "key", "targets": 0},
+                        {"orderable": true, "searchable": false, className: 'text-center', "targets": 0},
                         {
-                            "orderable": false, "data": "value", "targets": 1, title: '值', className: 'center', render: function (data, type, row, meta) {
-                                return '<a href="#" data-pk="{0}" id="{1}" data-value="{2}" data-type="text" class="editable" data-url="/assets/saveExtKeyValue.jspa">{3}</a>'
-                                    .format(assetsID, row["key"], data, data);
+                            "orderable": false, "data": "key", className: 'text-center', title: '属性', "targets": 1, render: function (data, type, row, meta) {
+                                return '<a href="#" data-pk="{0}" id="key" data-value="{1}" data-type="text" class="editable" data-url="/assets/saveExtKeyValue.jspa">{2}</a>'
+                                    .format(assetsID + "-" + row["expandID"], data, data);
+                            }
+                        },
+                        {
+                            "orderable": false, "data": "value", className: 'text-center', "targets": 2, title: '值', render: function (data, type, row, meta) {
+                                return '<a href="#" data-pk="{0}" id="value" data-value="{1}" data-type="text" class="editable" data-url="/assets/saveExtKeyValue.jspa">{2}</a>'
+                                    .format(assetsID + "-" + row["expandID"], data, data);
+                            }
+                        },
+                        {
+                            "orderable": false, 'searchable': false, 'targets': 3, title: '操作',
+                            render: function (data, type, row, meta) {
+                                return '<div class="hidden-sm hidden-xs action-buttons">' +
+                                    '<a class="hasLink" title="删除" href="#" data-Url="javascript:deleteAssetsExpand({0}, {1});">'.format(assetsID, data) +
+                                    '<i class="ace-icon fa fa-trash brown bigger-120"></i></a>' +
+                                    '</div>';
                             }
                         }
                     ],
@@ -646,8 +656,20 @@
             }
             table.ajax.url("/assets/getAssetsExpand.jspa?assetsID=" + assetsID).load();
             table.on('draw', function (e, setting) {
-                $("#assets-expand-table tr").find(".editable").editable();
+                $("#assets-expand-table tr").find(".editable").editable({
+                    success: function (response, newValue) {
+                        if (response.succeed !== 'false')
+                            table.ajax.reload(null, false);//null为callback,false是是否回到第一页
+                    }
+                });
+                $('#dialog-expand tr').find('.hasLink').click(function () {
+                    if ($(this).attr("data-Url").indexOf('javascript:') >= 0) {
+                        eval($(this).attr("data-Url"));
+                    } else
+                        window.open($(this).attr("data-Url"), "_blank");
+                });
             });
+
 
             $("#dialog-expand").removeClass('hide').dialog({
                 resizable: false, icon: 'fa fa-key', width: 500, height: 640, modal: true, title: title, title_html: true,
@@ -656,6 +678,48 @@
                 }
             });
         }
+
+        function deleteAssetsExpand(assetsID, expandID) {
+            bootbox.confirm({
+                title: "删除资产扩展信息",
+                message: "删除将不可恢复！",
+                buttons: {
+                    cancel: {
+                        label: '<i class="fa fa-times"></i> 取消'
+                    },
+                    confirm: {
+                        label: '<i class="fa fa-check"></i> 确认'
+                    }
+                },
+                callback: function (result) {
+                    // console.log('This was logged in the callback: ' + result);
+                    if (result) //true or false
+                        $.ajax({
+                            type: "POST",
+                            url: "/assets/deleteAssetsExpand.jspa?assetsID={0}&expandID={1}".format(assetsID, expandID),
+                            //contentType: "application/x-www-form-urlencoded; charset=UTF-8",//http://www.cnblogs.com/yoyotl/p/5853206.html
+                            cache: false,
+                            success: function (response, textStatus) {
+                                var result = JSON.parse(response);
+                                if (result.succeed) {
+                                    //bootbox.alert( result.message );
+                                    table.ajax.reload();
+                                } else
+                                    bootbox.alert({message: "请求结果：" + result.succeed + "\n" + result.message});
+                            },
+                            error: function (response, textStatus) {/*能够接收404,500等错误*/
+                                //showDialog("请求状态码：" + response.status, response.responseText);
+                                //console.log(response.responseText);
+                                bootbox.alert({message: response.responseText});
+                            }
+                        });
+                }
+            });
+        }
+
+        $('#addRow').on('click', function () {
+            table.rows.add([{"expandID": table.page.info().recordsDisplay + 1, "key": "", "value": ""}]).draw();
+        });
     });
 </script>
 <!-- #section:basics/content.breadcrumbs -->
@@ -921,14 +985,18 @@
 </div>
 <input type="hidden" id="selectedAssetsType" value="led">
 <div id="dialog-expand" class="hide">
+
     <div class="row" style="width: 470px;">
-        <label class="col-xs-12 control-label no-padding-right" for="name" id="assetsName2"></label>
+        <label class="col-xs-10 control-label no-padding-right" for="name" id="assetsName2"></label>
+        <button id="addRow" class="col-xs-2 pull-right">添加</button>
         <div class="col-xs-12" style="padding: 0 0 0 0;margin: 0 0 0 0;font-weight: bold">
             <table id="assets-expand-table" class="display" cellspacing="0">
                 <thead>
                 <tr>
+                    <th style="width: 10px"></th>
                     <th style="width: 150px">属性</th>
                     <th style="width: 100px">值</th>
+                    <th style="width: 20px">操作</th>
                 </tr>
                 </thead>
             </table>
