@@ -104,10 +104,10 @@
                     {"orderable": false, "searchable": false, className: 'text-center', "targets": 7, title: '联系人', width: 60},
                     {
                         "orderable": false, "searchable": false, className: 'text-center', "targets": 8, title: '状态', width: 40, render: function (data, type, row, meta) {
-                            let statusColor="black";
-                            if(data==="未测评" || data==="停用") statusColor="silver";
+                            let statusColor = "black";
+                            if (data === "未测评" || data === "停用") statusColor = "silver";
                             return '<a href="#" data-pk="{0}" id="Status" data-value="{1}" data-type="select" style="color:{2};" class="editable" data-url="/assets/setAssets.jspa">{3}</a>'
-                                .format(row["assetsID"], data, statusColor,data === null ? "空" : data);
+                                .format(row["assetsID"], data, statusColor, data === null ? "空" : data);
                         }
                     },
                     {

@@ -92,7 +92,7 @@
         select A.streetID, A.streetName, A.latitude, A.longitude, if(B.cc is null, 0, B.cc) as cc
         from street A
                  left join
-             (select left(street, 2) street, count(street) cc from assets where deleted=0 and  assetsType = 'led' and street is not null and street != '黄埔区' group by left(street, 2)) B
+             (select left(street, 2) street, count(street) cc from assets where deleted=0 and  assetsType =  #{param.assetsType:VARCHAR} and street is not null and street != '黄埔区' group by left(street, 2)) B
              on A.streetName = B.street
         WHERE A.latitude > 0
           and A.longitude > 0
