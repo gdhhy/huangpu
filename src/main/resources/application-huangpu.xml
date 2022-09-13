@@ -16,7 +16,7 @@
 
     <bean id="reviewDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
         <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
-        <property name="url" value="jdbc:mysql://192.168.6.100:3307/led?characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;serverTimezone=GMT%2B8"/>
+        <property name="url" value="jdbc:mysql://192.168.6.100:3307/led?useSSL=false&amp;characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;serverTimezone=GMT%2B8"/>
         <property name="password" value="Huang3102,"/>
         <property name="username" value="root"/>
         <property name="validationQuery" value="select 1"/>
@@ -77,7 +77,7 @@
     </bean>
 
     <context:annotation-config/>
-    <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
+ <!--   <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
         <property name="messageConverters">
             <list>
                 <ref bean="mappingJacksonHttpMessageConverter"/>
@@ -90,7 +90,7 @@
                 <value>text/html;charset=UTF-8</value>
             </list>
         </property>
-    </bean>
+    </bean>-->
 
     <bean id="dictMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">
         <property name="sqlSessionFactory" ref="sqlSessionFactory"/>

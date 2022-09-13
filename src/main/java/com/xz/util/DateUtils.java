@@ -7,15 +7,16 @@
 package com.xz.util;
 
 import com.xz.ExceptionAdapter;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import java.text.ParsePosition;
-import java.text.SimpleDateFormat;
 import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.ParsePosition;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.Calendar;
 
 /**
  * @author 黄海晏
@@ -24,7 +25,7 @@ import java.util.Calendar;
  *         Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 public class DateUtils {
-    static Logger logger = Logger.getLogger(DateUtils.class);
+    static Logger logger = LogManager.getLogger(DateUtils.class);
 
     /**
      * 把日期字符串转换成日期

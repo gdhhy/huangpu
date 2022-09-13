@@ -3,7 +3,8 @@ package com.xz.security.auth;
 import com.xz.security.dao.UserMapper;
 import com.xz.security.pojo.User;
 import com.xz.util.Hmac;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
@@ -21,7 +22,7 @@ import java.util.Properties;
  * Created by hhy on 17-5-20.
  */
 public class SecurityProvider implements AuthenticationProvider {
-    Logger logger = Logger.getLogger(SecurityProvider.class);
+    Logger logger = LogManager.getLogger(SecurityProvider.class);
 
     @Autowired
     private UserMapper userMapper;

@@ -108,7 +108,14 @@
 															<i class="icon-lock"></i>
 														</span>
                                             </label>
-
+                                            <c:if test="${not empty captchaEnc}">
+                                                <label class="block clearfix">
+														<span class="block input-icon input-icon-right">
+															<input type="text" class="form-control" id="j_captcha" name="j_captcha" placeholder="验证码"/>
+														   <img src="data:image/png;base64,${captchaEnc}"/></br>
+														</span>
+                                                </label>
+                                            </c:if>
                                             <div class="space"></div>
 
                                             <div class="clearfix">

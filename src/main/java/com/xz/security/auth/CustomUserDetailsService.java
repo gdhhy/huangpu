@@ -3,14 +3,14 @@ package com.xz.security.auth;
 
 import com.xz.security.dao.UserMapper;
 import com.xz.security.pojo.User;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,10 +18,9 @@ import java.util.List;
 import java.util.Map;
 
 
-@Service("customUserDetailsService")
+//@Service("customUserDetailsService")
 public class CustomUserDetailsService implements UserDetailsService {
-    Logger logger = Logger.getLogger(CustomUserDetailsService.class);
-
+    private final Logger logger = LogManager.getLogger(CustomUserDetailsService.class);
     @Autowired
     private UserMapper userMapper;
 
@@ -29,13 +28,15 @@ public class CustomUserDetailsService implements UserDetailsService {
     //@Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String loginname)
             throws UsernameNotFoundException {
+        logger.info("loadUserByUsername = " + loginname);
         //System.out.println("userDao = " + userDao);
         Map<String, Object> param = new HashMap<>();
         param.put("loginname", loginname);
         User user = userMapper.getUser(param);
 
         if (user == null) {
-            throw new UsernameNotFoundException("用户名不存在！");
+            //throw new UsernameNotFoundException("用户名不存在！");
+            return new User();
         }
        /* logger.debug("user:" + user.getUsername());
 
@@ -43,10 +44,10 @@ public class CustomUserDetailsService implements UserDetailsService {
         logger.debug("User.isAccountNonExpired(): " + user.isAccountNonExpired());
         logger.debug("User.isAccountNonLocked(): " + user.isAccountNonLocked());
         logger.debug("User.isCredentialsNonExpired(): " + user.isCredentialsNonExpired());*/
-        //return user;
-        return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(),
+        return user;
+        /*return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(),
                 user.isEnabled(), user.isAccountNonExpired(), user.isCredentialsNonExpired(), user.isAccountNonLocked(),
-                getGrantedAuthorities(user));
+                getGrantedAuthorities(user));*/
     }
 
 
@@ -61,7 +62,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         }*/
       /*  authorities.add(new SimpleGrantedAuthority("ADMIN"));
         authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));*/
-        logger.info("authorities :" + authorities);
+        logger.info("getGrantedAuthorities authorities :" + authorities);
         return authorities;
     }
 

@@ -22,8 +22,8 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.util.IOUtils;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -52,7 +52,7 @@ import java.util.regex.Pattern;
 @Controller
 @RequestMapping("/upload")
 public class FileUploadController {
-    private static Logger logger = LoggerFactory.getLogger(FileUploadController.class);
+    private static Logger logger = LogManager.getLogger(FileUploadController.class);
     @Autowired
     private SourceMapper sourceMapper;
     @Autowired

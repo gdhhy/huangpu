@@ -1,5 +1,6 @@
 <beans:beans xmlns="http://www.springframework.org/schema/security"
              xmlns:beans="http://www.springframework.org/schema/beans"
+             xmlns:sec="http://www.springframework.org/schema/security"
              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
              xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
     http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-4.2.xsd">
@@ -8,19 +9,17 @@
         <headers>
             <frame-options policy="SAMEORIGIN"/>
         </headers>
-        <!--https://www.baeldung.com/spring-security-expressions-->
-        <intercept-url pattern="/" access="permitAll"/> 
+
+        <intercept-url pattern="/" access="permitAll"/>
         <!-- <intercept-url pattern="/home" access="permitAll"/>-->
         <!-- <intercept-url pattern="/admin/assets/**" access="permitAll" />-->
         <intercept-url pattern="/rbac/getFunctionList.jspa" access="permitAll"/>
         <!-- <intercept-url pattern="/admin/login.jspa" access="permitAll"/>
          <intercept-url pattern="/admin/index.jspa" access="permitAll"/>-->
         <intercept-url pattern="/admin/upload/*.jspa" access="hasRole('ADMIN')"/>
-        <intercept-url pattern="/location/*.jspa" access="hasAnyAuthority('ADMIN','USER')"/>
-        <intercept-url pattern="/map/*.jspa" access="hasAnyAuthority('ADMIN','USER')"/>
         <!--<intercept-url pattern="/admin/*.jspa" access="hasRole('ADMIN')"/>-->
         <!--<intercept-url pattern="/remark/*.jspa" access="hasRole('ADMIN')"/>-->
-        <intercept-url pattern="/dba*" access="hasRole('ADMIN') OR hasRole('DBA')"/>
+        <intercept-url pattern="/dba*" access="hasRole('ADMIN') and hasRole('DBA')"/>
         <!-- authentication-success-forward-url="/ace/index.html"-->
         <!--   default-target-url="/admin/index.jspa"-->
         <!-- authentication-success-forward-url="/admin/index.jspa?forward" -->
@@ -28,22 +27,30 @@
                     username-parameter="loginName"
                     password-parameter="password"
                     login-processing-url="/login"
+                    authentication-details-source-ref="captchaDetailsSource"
                     authentication-success-handler-ref="savedRequestAware"
                     authentication-failure-url="/loginPage.jspa?error"/>
+        <!--authentication-failure-handler-ref=""-->
+
         <csrf disabled="true"/>
+        <logout delete-cookies="JSESSIONID"/>
 
         <remember-me remember-me-parameter="remember-me" remember-me-cookie="remember-me"
                      token-repository-ref="jdbcTokenRepository"
                      token-validity-seconds="86400"/>
     </http>
+    <beans:bean id="captchaDetailsSource" class="com.xz.security.captcha.CaptchaAuthenticationDetailsSource"/>
+    <authentication-manager>
+        <authentication-provider ref="authenticationProvider"/>
+    </authentication-manager>
 
+    <beans:bean id="authenticationProvider" class="com.xz.security.captcha.CaptchaDaoAuthenticationProvider">
+        <beans:property name="userDetailsService" ref="customUserDetailsService"/>
+
+    </beans:bean>
     <beans:bean id="customUserDetailsService" class="com.xz.security.auth.CustomUserDetailsService"/>
 
-    <beans:bean id="securityProvider" class="com.xz.security.auth.SecurityProvider"/>
-    <authentication-manager>
-        <authentication-provider ref="securityProvider"/>
-    </authentication-manager>
-    <beans:bean id="savedRequestAware" class="org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler ">
+    <beans:bean id="savedRequestAware" class="com.xz.security.controller.LoginSuccessHandler ">
         <beans:property name="defaultTargetUrl" value="/index.jspa"/>
         <beans:property name="useReferer" value="true"/>
     </beans:bean>
@@ -57,5 +64,6 @@
         <beans:constructor-arg name="loginFormUrl" value="/login"/>
         <beans:property name="useForward" value="true"/>
     </beans:bean>-->
+    <beans:bean class="com.xz.security.controller.AuthenticationResultListener"/>
 
 </beans:beans>

@@ -8,8 +8,8 @@ import com.xz.location.dao.UploadFileMapper;
 import com.xz.location.pojo.Assets;
 import com.xz.location.pojo.UploadFile;
 import com.xz.upload.controller.FileUploadController;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -28,7 +28,7 @@ import java.util.Map;
 @RequestMapping("/assets")
 
 public class AssetsController {
-    private static Logger logger = LoggerFactory.getLogger(FileUploadController.class);
+    private  final static Logger logger = LogManager.getLogger(FileUploadController.class);
     @Autowired
     private AssetsMapper assetsMapper;
     @Autowired

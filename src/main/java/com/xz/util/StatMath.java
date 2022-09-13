@@ -1,6 +1,7 @@
 package com.xz.util;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -14,7 +15,7 @@ import java.util.List;
  * Time: 下午9:17
  */
 public class StatMath {
-    static Logger logger = Logger.getLogger(StatMath.class);
+    static Logger logger = LogManager.getLogger(StatMath.class);
 
     /**
      * 对集合某列求和，然后计算占比例
