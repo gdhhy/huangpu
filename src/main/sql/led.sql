@@ -74,9 +74,15 @@ create table assets
     color       varchar(255)   default 'darkgray',
     sourceID    int            default 0 comment '上传excel文件源source的ID',
     fixPosition int            default 0 comment '已定位（即是经纬度已解析）',
-    deleted     int            default 0
+    deleted     int            default 0,
+    insertTime timestamp  default CURRENT_TIMESTAMP(),
+    updateTime datetime default CURRENT_TIMESTAMP()
 ) engine = MyISAM;
+alter table assets add  insertTime timestamp  default CURRENT_TIMESTAMP();
+alter table assets add    updateTime datetime;
 
+		update assets set insertTime=now();
+		update assets set updateTime=now();
 create table street
 (
     streetID    int auto_increment primary key,
@@ -95,5 +101,6 @@ create table uploadfile
     size           int,
     uploadTime     timestamp,
     serverPath     varchar(255),
-    serverFilename varchar(255)
+    serverFilename varchar(255),
+    username        varchar(100)
 )

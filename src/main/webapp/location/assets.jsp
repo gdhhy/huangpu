@@ -133,7 +133,7 @@
                                 '<a class="hasLink" title="编辑" href="#" data-Url="javascript:editAssets(\'{0}\',{1});">'.format($('#selectedAssetsType').val(), row["assetsID"]) +
                                 '<i class="ace-icon glyphicon glyphicon-edit green bigger-120"></i>' +
                                 '</a> ' +
-                                '<a class="hasLink" title="扩展信息" href="#" data-Url="javascript:showExpandDialog(\'{0}\',{1},\'{2}\',);">'.format($('#selectedAssetsType').val(), row["assetsID"], row["name"]) +
+                                '<a class="hasLink" title="扩展信息" href="#" data-Url="javascript:showExpandDialog(\'{0}\',{1},\'{2}\');">'.format($('#selectedAssetsType').val(), row["assetsID"], row["name"]) +
                                 '<i class="ace-icon glyphicon  glyphicon-equalizer maroon bigger-120"></i>' +
                                 '</a> ' +
                                 deleteHtml +
@@ -271,11 +271,11 @@
                     url += "&" + $(this).attr("name") + "=" + $(this).val();
             });
             if ($('#selectedAssetsType').val() === "secsys") {
-                options = [{value: "未测评", text: '未测评'}, {value: "测评", text: '测评'}];
+                options = [{value: "未测评", text: '未测评'}, {value: "已测评", text: '已测评'}];
                 $('input:radio[name=status]:eq(0)').val("未测评");
                 $('input:radio[name=status]:eq(0)+span').text("未测评");
-                $('input:radio[name=status]:eq(1)').val("测评");
-                $('input:radio[name=status]:eq(1)+span').text("测评");
+                $('input:radio[name=status]:eq(1)').val("已测评");
+                $('input:radio[name=status]:eq(1)+span').text("已测评");
             } else {
                 options = [{value: "停用", text: '停用'}, {value: "在用", text: '在用'}];
                 $('input:radio[name=status]:eq(0)').val("停用");
@@ -506,17 +506,6 @@
             else
                 $('#assetsName').text($('#assets option[value=' + $('#selectedAssetsType').val() + ']').text() + "名称");
 
-            /*  if ($('#selectedAssetsType').val() === 'secsys') {
-                  $('input:radio[name=status]:eq(0)').val("未测评");
-                  $('input:radio[name=status]:eq(0)+span').text("未测评");
-                  $('input:radio[name=status]:eq(1)').val("测评");
-                  $('input:radio[name=status]:eq(1)+span').text("测评");
-              } else {
-                  $('input:radio[name=status]:eq(0)').val("停用");
-                  $('input:radio[name=status]:eq(0)+span').text("停用");
-                  $('input:radio[name=status]:eq(1)').val("在用");
-                  $('input:radio[name=status]:eq(1)+span').text("在用");
-              }*/
 
             $('input:radio[name=status]').filter('[value=' + loc.status + ']').prop('checked', true);
 
@@ -646,13 +635,13 @@
 
         function showExpandDialog(assetsType, assetsID, assetsName) {
             $('#assetsName2').text(assetsName);
-            let title = $('#assets option[value=' + $('#selectedAssetsType').val() + ']').text() + "扩展信息"
+            let title = $('#assets option[value=' + $('#selectedAssetsType').val() + ']').text() + "扩展信息";
             if ($.fn.dataTable.isDataTable('#assets-expand-table')) {
                 table = $('#assets-expand-table').DataTable();
             } else {
                 table = $('#assets-expand-table').DataTable({
                     dom: "t", order: [[0, 'asc']], paging: false, searching: false,
-                    columns: [{data: "expandID"}, {data: "key"}, {data: "value"}, {data: "expandID"}],
+                    columns: [{data: "orderID"}, {data: "key"}, {data: "value"}, {data: "expandID"}],
                     'columnDefs': [
                         {"orderable": true, "searchable": false, className: 'text-center', "targets": 0},
                         {
@@ -682,24 +671,22 @@
                         selector: 'td:first-child'
                     }
                 });
-
+                table.on('draw', function (e, setting) {
+                    $("#assets-expand-table tr").find(".editable").editable({
+                        success: function (response, newValue) {
+                            if (response.succeed !== 'false')
+                                table.ajax.reload(null, false);//null为callback,false是是否回到第一页
+                        }
+                    });
+                    $('#assets-expand-table tr').find('.hasLink').click(function () {
+                        if ($(this).attr("data-Url").indexOf('javascript:') >= 0) {
+                            eval($(this).attr("data-Url"));
+                        } else
+                            window.open($(this).attr("data-Url"), "_blank");
+                    });
+                });
             }
             table.ajax.url("/assets/getAssetsExpand.jspa?assetsID=" + assetsID).load();
-            table.on('draw', function (e, setting) {
-                $("#assets-expand-table tr").find(".editable").editable({
-                    success: function (response, newValue) {
-                        if (response.succeed !== 'false')
-                            table.ajax.reload(null, false);//null为callback,false是是否回到第一页
-                    }
-                });
-                $('#dialog-expand tr').find('.hasLink').click(function () {
-                    if ($(this).attr("data-Url").indexOf('javascript:') >= 0) {
-                        eval($(this).attr("data-Url"));
-                    } else
-                        window.open($(this).attr("data-Url"), "_blank");
-                });
-            });
-
 
             $("#dialog-expand").removeClass('hide').dialog({
                 resizable: false, icon: 'fa fa-key', width: 500, height: 640, modal: true, title: title, title_html: true,
@@ -748,7 +735,7 @@
         }
 
         $('#addRow').on('click', function () {
-            table.rows.add([{"expandID": table.page.info().recordsDisplay + 1, "key": "", "value": ""}]).draw();
+            table.rows.add([{"orderID": table.page.info().recordsDisplay + 1, "key": "", "value": "", "expandID": Math.floor(Math.random() * 2147483647)}]).draw();
         });
     });
 </script>

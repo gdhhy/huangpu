@@ -9,7 +9,8 @@
     <!-- basic styles -->
 
     <link rel="stylesheet" href="/components/bootstrap-3.3.7-dist/css/bootstrap.min.css"/>
-    <link rel="stylesheet" href="/components/font-awesome/4.7.0/font-awesome.min.css" />
+    <link rel="stylesheet" href="/components/font-awesome-4.7.0/css/font-awesome.min.css" />
+
     <%--<link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">--%>
 
     <%--<!--[if IE 7]>
@@ -81,7 +82,7 @@
                                 <div class="widget-main">
                                     <c:if test="${param.error == null}">
                                         <h4 class="header blue lighter bigger">
-                                            <i class="icon-coffee green"></i>
+                                            <i class="ace-icon fa fa-coffee green"></i>
                                             请输入您的用户信息
                                         </h4>
                                     </c:if>
@@ -98,14 +99,14 @@
                                             <label class="block clearfix">
 														<span class="block input-icon input-icon-right">
 															<input type="text" class="form-control" placeholder="用户名" id="username" name="loginName"/>
-															<i class="icon-user"></i>
+                                                            <i class="ace-icon fa fa-user"></i>
 														</span>
                                             </label>
 
                                             <label class="block clearfix">
 														<span class="block input-icon input-icon-right">
 															<input type="password" class="form-control" id="password" name="password" placeholder="密码"/>
-															<i class="icon-lock"></i>
+														    <i class="ace-icon fa fa-lock"></i>
 														</span>
                                             </label>
                                             <c:if test="${not empty captchaEnc}">

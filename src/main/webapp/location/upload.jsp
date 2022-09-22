@@ -145,11 +145,14 @@
                     <div id="files" class="files"></div>
                 </div>
 
-                <div class="col-xs-12 grey">备注:
+                <div class="col-xs-12">备注：
                     <ul>
-                        <li>仅支xls、xlsx格式文件上传</li>
-                        <li>LED格式数据从第4行开始，模板<a href="/temp/全区 LED 电子显示屏情况表（新).xls">下载</a></li>
-                        <li>网络资产格式数据从第2行开始，模板<a href="/temp/黄埔区网络资产--一图展开发用.xlsx">下载</a></li>
+                        <li style="height: 30px">仅支xls、xlsx格式文件上传</li>
+                        <li style="height: 30px">LED格式工作表名字为“总表”，数据从第4行开始，模板<a href="/temp/全区 LED 电子显示屏情况表（新).xls">下载</a></li>
+                        <li style="height: 30px">IDC格式工作表名字为“IDC”，数据从第2行开始，模板<a href="/temp/IDC.xlsx">下载</a></li>
+                        <li style="height: 30px">网吧格式工作表名字为“网吧”，数据从第2行开始，模板<a href="/temp/网吧.xlsx">下载</a></li>
+                        <li style="height: 30px">等保系统格式工作表名字为“等保系统”，数据从第2行开始，模板<a href="/temp/等保系统.xlsx">下载</a></li>
+                        <%--<li style="height: 30px">网络资产格式数据从第2行开始，模板<a href="/temp/.xlsx">下载</a></li>--%>
                     </ul>
                 </div>
             </div>

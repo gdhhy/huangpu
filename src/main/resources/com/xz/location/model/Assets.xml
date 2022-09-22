@@ -58,6 +58,7 @@
     <update id="updateAssets" flushCache="true">
         update assets
         <set>
+            updateTime=now(),
             <if test="pojo.name!=null">name = #{pojo.name:VARCHAR},</if>
             <if test="pojo.owner!=null">owner = #{pojo.owner:VARCHAR},</if>
             <if test="pojo.address!=null">address = #{pojo.address:VARCHAR},</if>
@@ -92,7 +93,13 @@
         select A.streetID, A.streetName, A.latitude, A.longitude, if(B.cc is null, 0, B.cc) as cc
         from street A
                  left join
-             (select left(street, 2) street, count(street) cc from assets where deleted=0 and assetsType = #{assetsType:VARCHAR} and street is not null and street != '黄埔区' group by left(street, 2)) B
+             (select left(street, 2) street, count(street) cc
+              from assets
+              where deleted = 0
+                and assetsType = #{assetsType:VARCHAR}
+                and street is not null
+                and street != '黄埔区'
+              group by left(street, 2)) B
              on A.streetName = B.street
         WHERE A.latitude > 0
           and A.longitude > 0

@@ -28,7 +28,7 @@ import java.util.Map;
 @RequestMapping("/assets")
 
 public class AssetsController {
-    private  final static Logger logger = LogManager.getLogger(FileUploadController.class);
+    private final static Logger logger = LogManager.getLogger(FileUploadController.class);
     @Autowired
     private AssetsMapper assetsMapper;
     @Autowired
@@ -98,7 +98,12 @@ public class AssetsController {
             Type listType = new TypeToken<List<HashMap<String, Object>>>() {
             }.getType();
             List<HashMap<String, Object>> json = gson.fromJson(assets.getExtJson(), listType);
+
             if (json != null) {
+                int k = 0;
+                for (HashMap<String, Object> map : json)
+                    map.put("orderID", ++k);
+
                 result.put("data", json);
                 result.put("iTotalRecords", json.size());
                 result.put("iTotalDisplayRecords", json.size());
@@ -161,8 +166,8 @@ public class AssetsController {
     @ResponseBody
     @RequestMapping(value = "/setAssets", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
     public String setAssets(@RequestParam(value = "pk") Integer pk,
-                             @RequestParam(value = "name") String name,
-                             @RequestParam(value = "value") String value) {
+                            @RequestParam(value = "name") String name,
+                            @RequestParam(value = "value") String value) {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Map<String, Object> map = new HashMap<>();
         map.put("title", "设置资产属性");
@@ -284,7 +289,7 @@ public class AssetsController {
                     break;
                 }
             }
-            returnMap.put("succeed", result > 0);
+            returnMap.put("succeed", true);
             if (result == -1) returnMap.put("message", "没找到该资产的扩展信息");
         } else {
             returnMap.put("succeed", false);

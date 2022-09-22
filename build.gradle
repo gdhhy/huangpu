@@ -29,7 +29,7 @@ dependencies {
     implementation group: 'commons-lang', name: 'commons-lang', version: '2.6'
 
     implementation group: 'com.google.code.gson', name: 'gson', version: '2.8.0'
-    implementation group: 'com.alibaba', name: 'fastjson', version: '1.2.59'
+    implementation group: 'com.alibaba', name: 'fastjson', version: '2.0.14'
     /*compile group: 'org.aspectj', name: 'aspectjrt', version: '1.8.9'
     compile group: 'org.aspectj', name: 'aspectjweaver', version: '1.8.9'*/
     implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.17.2'
@@ -72,10 +72,10 @@ dependencies {
 tasks.withType(JavaCompile) {
     options.encoding = "UTF-8"
 }
-/*task copyJars(type: Copy) {
+task copyJars(type: Copy) {
     from configurations.runtime
     into 'lib' // 目标位置
-}*/
+}
 task copyJarToDeploy(type: Copy) {
     dependsOn  ':jar'
     from  "$buildDir/libs/huangpu-1.0-SNAPSHOT.jar"

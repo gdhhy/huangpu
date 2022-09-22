@@ -241,7 +241,7 @@ public class FileUploadController {
             if ((sheet = workbook.getSheet("总表")) != null) {//led
                 logger.debug("sheetName = " + sheet.getSheetName());
                 for (int rowNum = 3; rowNum <= sheet.getLastRowNum(); rowNum++) {
-                    logger.debug("rowNum=" + rowNum);
+                    //logger.debug("rowNum=" + rowNum);
                     Row row = sheet.getRow(rowNum);
 
                     Assets assets = new Assets();
@@ -279,9 +279,10 @@ public class FileUploadController {
                     assetsMapper.insertAssets(assets);
                     count++;
                 }
-            } else if ((sheet = workbook.getSheet("Sheet1")) != null) {//网络资产
+            }
+            if ((sheet = workbook.getSheet("Sheet1")) != null) {//网络资产
                 for (int rowNum = 1; rowNum <= sheet.getLastRowNum(); rowNum++) {
-                    logger.debug("rowNum=" + rowNum);
+                    //logger.debug("rowNum=" + rowNum);
                     Row row = sheet.getRow(rowNum);
 
                     Assets assets = new Assets();
@@ -306,6 +307,96 @@ public class FileUploadController {
                         json.add(item);
                     }
                     assets.setExtJson(gson.toJson(json));
+
+                    assetsMapper.insertAssets(assets);
+                    count++;
+                }
+            }
+            if ((sheet = workbook.getSheet("IDC")) != null) {
+                for (int rowNum = 1; rowNum <= sheet.getLastRowNum(); rowNum++) {
+                    //logger.debug("rowNum=" + rowNum);
+                    Row row = sheet.getRow(rowNum);
+
+                    Assets assets = new Assets();
+                    assets.setAssetsType("idc");
+                    assets.setSourceID(sourceID);
+
+                    assets.setName(getCellValueAsString(row.getCell(1)));
+                    assets.setOwner(getCellValueAsString(row.getCell(2)));
+                    assets.setAddress(getCellValueAsString(row.getCell(3)));
+                    assets.setStreet(getCellValueAsString(row.getCell(4)));
+                    if (row.getCell(5).getCellType() == CellType.NUMERIC)
+                        assets.setLongitude(row.getCell(5).getNumericCellValue());
+                    if (row.getCell(6).getCellType() == CellType.NUMERIC)
+                        assets.setLatitude(row.getCell(6).getNumericCellValue());
+                    assets.setLink(getCellValueAsString(row.getCell(7)));
+                    assets.setLinkPhone(getCellValueAsString(row.getCell(8)));
+                    assets.setStatus(getCellValueAsString(row.getCell(10)));
+                    List<HashMap<String, Object>> json = new ArrayList<>();
+
+                    int[] index = {11, 12, 13};
+                    String[] head = {"设备数量", "IP数量", "用户数量"};
+                    HashMap<String, Object> item;
+                    for (int i = 0; i < index.length; i++) {
+                        item = new HashMap<>();
+                        item.put("expandID", i + 1);
+                        item.put("key", head[i]);
+                        item.put("value", getCellValueAsString(row.getCell(index[i])));
+                        json.add(item);
+                    }
+                    assets.setExtJson(gson.toJson(json));
+
+                    assetsMapper.insertAssets(assets);
+                    count++;
+                }
+            }
+            if ((sheet = workbook.getSheet("网吧")) != null) {
+                for (int rowNum = 1; rowNum <= sheet.getLastRowNum(); rowNum++) {
+                    logger.debug("rowNum=" + rowNum);
+                    Row row = sheet.getRow(rowNum);
+
+                    Assets assets = new Assets();
+                    assets.setAssetsType("netbar");
+                    assets.setSourceID(sourceID);
+
+                    assets.setName(getCellValueAsString(row.getCell(1)));
+                    assets.setOwner(getCellValueAsString(row.getCell(2)));
+                    assets.setAddress(getCellValueAsString(row.getCell(3)));
+                    assets.setStreet(getCellValueAsString(row.getCell(4)));
+                    if (row.getCell(5).getCellType() == CellType.NUMERIC)
+                        assets.setLongitude(row.getCell(5).getNumericCellValue());
+                    if (row.getCell(6).getCellType() == CellType.NUMERIC)
+                        assets.setLatitude(row.getCell(6).getNumericCellValue());
+                    assets.setLink(getCellValueAsString(row.getCell(7)));
+                    assets.setLinkPhone(getCellValueAsString(row.getCell(8)));
+                    assets.setStatus(getCellValueAsString(row.getCell(10)));
+                    List<HashMap<String, Object>> json = new ArrayList<>();
+
+                    assetsMapper.insertAssets(assets);
+                    count++;
+                }
+            }
+            if ((sheet = workbook.getSheet("等保系统")) != null) {
+                for (int rowNum = 1; rowNum <= sheet.getLastRowNum(); rowNum++) {
+                    logger.debug("rowNum=" + rowNum);
+                    Row row = sheet.getRow(rowNum);
+
+                    Assets assets = new Assets();
+                    assets.setAssetsType("secsys");
+                    assets.setSourceID(sourceID);
+
+                    assets.setName(getCellValueAsString(row.getCell(1)));
+                    assets.setOwner(getCellValueAsString(row.getCell(2)));
+                    assets.setAddress(getCellValueAsString(row.getCell(3)));
+                    assets.setStreet(getCellValueAsString(row.getCell(4)));
+                    if (row.getCell(5).getCellType() == CellType.NUMERIC)
+                        assets.setLongitude(row.getCell(5).getNumericCellValue());
+                    if (row.getCell(6).getCellType() == CellType.NUMERIC)
+                        assets.setLatitude(row.getCell(6).getNumericCellValue());
+                    assets.setLink(getCellValueAsString(row.getCell(7)));
+                    assets.setLinkPhone(getCellValueAsString(row.getCell(8)));
+                    assets.setStatus(getCellValueAsString(row.getCell(10)));
+                    List<HashMap<String, Object>> json = new ArrayList<>();
 
                     assetsMapper.insertAssets(assets);
                     count++;
