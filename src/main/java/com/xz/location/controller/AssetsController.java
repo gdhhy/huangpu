@@ -7,6 +7,7 @@ import com.xz.location.dao.AssetsMapper;
 import com.xz.location.dao.UploadFileMapper;
 import com.xz.location.pojo.Assets;
 import com.xz.location.pojo.UploadFile;
+import com.xz.rbac.web.DeployRunning;
 import com.xz.upload.controller.FileUploadController;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,19 +16,21 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
+import java.io.*;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Controller
 @RequestMapping("/assets")
 
 public class AssetsController {
+    @Resource
+    private Properties configs;
     private final static Logger logger = LogManager.getLogger(FileUploadController.class);
     @Autowired
     private AssetsMapper assetsMapper;
@@ -297,5 +300,55 @@ public class AssetsController {
         }
 
         return gson.toJson(returnMap);
+    }
+
+    @RequestMapping(value = "assets", method = RequestMethod.GET, produces = "text/html;charset=UTF-8")
+    public String assets(ModelMap model) {
+        logger.debug("key1:" + configs.getProperty("amap_key1"));
+        model.addAttribute("key1", configs.getProperty("amap_key1"));
+        model.addAttribute("key2", configs.getProperty("amap_key2"));
+        return "location/assets";
+    }
+
+    @RequestMapping(value = "key", method = RequestMethod.GET, produces = "text/html;charset=UTF-8")
+    public String key(ModelMap model) {
+        //logger.debug("key1:" + configs.getProperty("amap_key1"));
+        model.addAttribute("key1", configs.getProperty("amap_key1"));
+        model.addAttribute("key2", configs.getProperty("amap_key2"));
+        return "location/key";
+    }
+
+    @ResponseBody
+    @Transactional
+    @RequestMapping(value = "/saveKey", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
+    public String saveKey(@RequestParam(value = "key1") String key1,
+                          @RequestParam(value = "key2") String key2) {
+        //logger.debug("key1:" + key1);
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Map<String, Object> map = new HashMap<>();
+        if (principal instanceof UserDetails) {
+            map.put("title", "保存地图KEY");
+            configs.setProperty("amap_key1", key1.trim());
+            configs.setProperty("amap_key2", key2.trim());
+            try {
+                OutputStream outputStream = new FileOutputStream(DeployRunning.getDir() + "WEB-INF" + File.separator + "classes" + File.separator + "config.properties");
+                configs.store(outputStream, "SAVE BY WEB");
+                outputStream.close();
+
+                map.put("succeed", true);
+                map.put("message", "保存地图KEY成功");
+            } catch (IOException e) {
+                e.printStackTrace();
+                map.put("succeed", false);
+                map.put("message", "保存地图KEY失败");
+            }
+
+        } else {
+            map.put("title", "保存地图KEY");
+            map.put("succeed", false);
+            map.put("message", "没登录用户信息，请重新登录！");
+        }
+
+        return gson.toJson(map);
     }
 }

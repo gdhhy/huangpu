@@ -86,7 +86,7 @@
                             if (data > 113.607677 || data < 113.398067 || row.latitude > 23.41208 || row.latitude < 23.030213) {
                                 return "<span style='color:red;font-weight: bold'>{0},{1}</span>".format(data, row.latitude);
                             } else
-                                return "<a href=\"\" style=' color:saddlebrown' onmouseout=\"hiddenPic();\" onmousemove=\"showPic(event,'https://restapi.amap.com/v3/staticmap?scale=2&markers=mid,0xFF0000,:{0},{1}&key=b772bf606b75644e7c2f3dcda3639896&radius&size=300*200');\">{2},{3}</a>".format(data, row.latitude, data, row.latitude);
+                                return "<a href=\"\" style=' color:saddlebrown' onmouseout=\"hiddenPic();\" onmousemove=\"showPic(event,'https://restapi.amap.com/v3/staticmap?scale=2&markers=mid,0xFF0000,:{0},{1}&key=${key2}&radius&size=300*200');\">{2},{3}</a>".format(data, row.latitude, data, row.latitude);
                         }
                     },
                     {
@@ -202,7 +202,7 @@
                     success: function (response, textStatus) {
                         var result = JSON.parse(response);
                         if (!result.succeed) {
-                            $("#errorText").html(result.errmsg);
+                            $("#errorText").html(result.message);
                             $("#dialog-error").removeClass('hide').dialog({
                                 modal: true,
                                 width: 600,
@@ -323,7 +323,7 @@
                         var result = JSON.parse(response);
                         if (!result.succeed) {
                             bootbox.alert({
-                                message: result.errmsg,
+                                message: result.message,
                                 callback: function () {
                                     $("#dialog-edit").dialog("close");
                                 }
@@ -409,7 +409,7 @@
         }
 
         var markers = [];
-        var url = 'https://restapi.amap.com/v3/geocode/geo?address={0}&output=json&key=b772bf606b75644e7c2f3dcda3639896';
+        var url = 'https://restapi.amap.com/v3/geocode/geo?address={0}&output=json&key=${key2}';
         var reg = /\d{2,}\.\d+/;
 
         function p1(addr, chinese, color) {
@@ -431,11 +431,11 @@
 
         var runTimes = 0;
 
-//https://restapi.amap.com/v3/staticmap?markers=large,0xFF0000,%E4%BD%8D:116.37359,39.92437|large,0xFF0000,%E5%9C%B0:116.47359,39.92437&key=b772bf606b75644e7c2f3dcda3639896&radius
+//https://restapi.amap.com/v3/staticmap?markers=large,0xFF0000,%E4%BD%8D:116.37359,39.92437|large,0xFF0000,%E5%9C%B0:116.47359,39.92437&key=${key2}&radius
         function runTwice() {
             runTimes++;
             let markerparam = "large,{0},{1}:{2},{3}";
-            let lastUrl = "https://restapi.amap.com/v3/staticmap?scale=2&size=200*200&key=b772bf606b75644e7c2f3dcda3639896&radius&markers="
+            let lastUrl = "https://restapi.amap.com/v3/staticmap?scale=2&size=200*200&key=${key2}&radius&markers=";
             if (runTimes === 2) {
                 if ($('#longitude').val() > 0 && $('#latitude').val() > 0) {
                     markers.push({label: "", color: '0xFF0000', lnglat: [$('#longitude').val(), $('#latitude').val()]});
@@ -464,7 +464,7 @@
             }
             if (addr.length > 2 && addr.indexOf("黄埔") < 0) //&&
                 addr = "黄埔区" + addr;
-            //https://restapi.amap.com/v3/staticmap?markers=large,0xFF0000,%E4%BD%8D:116.37359,39.92437|large,0xFF0000,%E5%9C%B0:116.47359,39.92437&key=b772bf606b75644e7c2f3dcda3639896&radius
+            //https://restapi.amap.com/v3/staticmap?markers=large,0xFF0000,%E4%BD%8D:116.37359,39.92437|large,0xFF0000,%E5%9C%B0:116.47359,39.92437&key=${key2}&radius
             $.getJSON(url.format(addr), function (ret) {
                 if (ret.status === "1") {
                     if (ret.geocodes.length === 1) {
@@ -475,7 +475,7 @@
                             $('#latitude').val(lnglat[1]);
 
                             let markerparam = "large,{0},{1}:{2},{3}";
-                            let lastUrl = "https://restapi.amap.com/v3/staticmap?scale=2&size=200*200&key=b772bf606b75644e7c2f3dcda3639896&radius&markers="
+                            let lastUrl = "https://restapi.amap.com/v3/staticmap?scale=2&size=200*200&key=${key2}&radius&markers=";
                             lastUrl += markerparam.format('0xE59866', '新', lnglat[0], lnglat[1]);
                             $('#img').attr("src", lastUrl);
                         } else {
@@ -530,7 +530,7 @@
              else*/
             p1(loc.name, "位", '0xFFFF00');
             p1(loc.address, "地", '0x00FF00');
-            // "https://restapi.amap.com/v3/staticmap?markers=large,0xFF0000,%E4%BD%8D:116.37359,39.92437|large,0xFF0000,%E5%9C%B0:116.47359,39.92437&key=b772bf606b75644e7c2f3dcda3639896&radius");
+            // "https://restapi.amap.com/v3/staticmap?markers=large,0xFF0000,%E4%BD%8D:116.37359,39.92437|large,0xFF0000,%E5%9C%B0:116.47359,39.92437&key=${key2}&radius");
             $("#dialog-edit").removeClass('hide').dialog({
                 resizable: false, width: 860, height: 620, modal: true, title: title,
                 //icon:'fa fa-key',

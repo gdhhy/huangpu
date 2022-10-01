@@ -5,19 +5,22 @@ import com.google.gson.GsonBuilder;
 import com.xz.location.dao.AssetsMapper;
 import com.xz.location.pojo.Assets;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import javax.annotation.Resource;
+import java.util.*;
 
 @Controller
 @RequestMapping("/map")
 
 public class MapController {
+    @Resource
+    private Properties configs;
     @Autowired
     private AssetsMapper assetsMapper;
 
@@ -69,7 +72,8 @@ public class MapController {
             map.put("style", 0);
             json.add(map);
         }
-
+        model.addAttribute("key1", configs.getProperty("amap_key1"));
+        model.addAttribute("key2", configs.getProperty("amap_key2"));
 
         model.addAttribute("assets", gson.toJson(json));
         return "map/massmarks";
@@ -214,7 +218,7 @@ public class MapController {
 
     @ResponseBody
     @RequestMapping(value = "getAssets", method = RequestMethod.GET, produces = "text/html;charset=UTF-8")
-    public String getAssets(  @RequestParam(value = "assetsID") Integer assetsID) {
+    public String getAssets(@RequestParam(value = "assetsID") Integer assetsID) {
         Map<String, Object> param = new HashMap<>();
         param.put("assetsID", assetsID);
 

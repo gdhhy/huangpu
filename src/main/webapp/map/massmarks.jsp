@@ -1,6 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!doctype html>
 <html lang="en">
 <head>
@@ -163,8 +162,7 @@
         padding: '2, 5',
     };
 </script>
-<script type="text/javascript" src="https://webapi.amap.com/maps?v=2.0&key=592ac591c3ad221629d4e47448a81436&plugin=AMap.Adaptor"></script>
-<%--<script type="text/javascript" src='https://webapi.amap.com/maps?v=2.0&key=592ac591c3ad221629d4e47448a81436'></script>--%>
+<script type="text/javascript" src="https://webapi.amap.com/maps?v=2.0&key=${key1}&plugin=AMap.Adaptor"></script>
 <script src="https://a.amap.com/jsapi_demos/static/demo-center/js/demoutils.js"></script>
 <script src="https://webapi.amap.com/ui/1.1/main.js?v=1.1.1"></script>
 <script src="/map/huangpu.js"></script>

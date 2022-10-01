@@ -42,7 +42,7 @@
 <%--
 <script src="//a.amap.com/jsapi_demos/static/china.js"></script>--%>
 <script type="text/javascript"
-        src="https://webapi.amap.com/maps?v=1.4.15&key=592ac591c3ad221629d4e47448a81436&plugin=AMap.MarkerClusterer"></script>
+        src="https://webapi.amap.com/maps?v=1.4.15&key=&plugin=AMap.MarkerClusterer"></script>
 <script src="https://a.amap.com/jsapi_demos/static/demo-center/js/demoutils.js"></script>
 <script type="text/javascript">
     var cluster, markers = [];

@@ -114,7 +114,7 @@
 
             <ul class="submenu">
                 <li class="">
-                    <a href="index.jspa?content=/location/assets.jsp&menuID=11" id="11">
+                    <a href="index.jspa?content=/assets/assets.jspa&menuID=11" id="11">
                         <i class="menu-icon fa fa-caret-right"></i>
                         <i class="fa fa-folder-o"></i>
                         <span class="menu-text">资产管理</span>
@@ -147,7 +147,14 @@
                         <b class="arrow"></b>
                     </li>
                 </sec:authorize>
-
+                <li class="">
+                    <a href="index.jspa?content=/assets/key.jspa&menuID=5" id="5">
+                        <i class="menu-icon fa fa-caret-right"></i>
+                        <i class="fa fa-key"></i>
+                        <span class="menu-text">地图KEY</span>
+                    </a>
+                    <b class="arrow"></b>
+                </li>
             </ul>
         </li>
         <li>
