@@ -66,7 +66,7 @@
             <form class="form-horizontal" role="form" id="keyForm">
                 <!-- #section:elements.form -->
                 <div class="form-group">
-                    <label class="col-sm-3 control-label no-padding-right" for="key1"> KEY 1 </label>
+                    <label class="col-sm-3 control-label no-padding-right" for="key1">JS API（展示）</label>
 
                     <div class="col-sm-9">
                         <input type="text" id="key1" name="key1" placeholder="key1" class="col-xs-10 col-sm-5" value='${key1}'/>
@@ -74,7 +74,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="col-sm-3 control-label no-padding-right" for="key2"> KEY 2</label>
+                    <label class="col-sm-3 control-label no-padding-right" for="key2">Web服务（后台）</label>
 
                     <div class="col-sm-9">
                         <input type="text" id="key2" name="key2" placeholder="key2" class="col-xs-10 col-sm-5" value="${key2}"/>

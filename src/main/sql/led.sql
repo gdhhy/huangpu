@@ -4,7 +4,7 @@ create table led
     assetsID     int AUTO_INCREMENT primary key,
     sourceID     int comment '上传excel文件源source的ID',
     location     varchar(255) comment '位置',   -- 共同
-    address      varchar(255) comment '地址',   -- 共同
+    address      varchar(1024) comment '地址',  -- 共同
     longitude    decimal(12, 8) comment '经度', -- 共同
     latitude     decimal(12, 8) comment '纬度', -- 共同
     size         varchar(255) comment '尺寸',
@@ -35,17 +35,17 @@ create table idc
 (
     assetsID    int auto_increment primary key,
     sourceID    int comment '上传excel文件源source的ID',
-    longitude   decimal(12, 8) comment '经度', -- 共同
-    latitude    decimal(12, 8) comment '纬度', -- 共同
+    longitude   decimal(12, 8) comment '经度',  -- 共同
+    latitude    decimal(12, 8) comment '纬度',  -- 共同
     owner       varchar(255) comment '企业名称',-- 共同=>owner  corpName
     webName     varchar(255) comment '网站名称',
     www         varchar(255) comment '官网',
     ipFrom      varchar(255) comment 'IP地址',
     ipTo        varchar(255) comment 'IP地址',
-    address     varchar(255) comment '企业地址', -- 共同 =>address corpAddress
-    street      varchar(255) comment '所属街道', -- 共同
-    link        varchar(255) comment '法人',   -- 共同=>link  legalPerson
-    linkPhone   varchar(255) comment '法人电话', -- 共同=>linkPhone  LegalPhone
+    address     varchar(1024) comment '企业地址', -- 共同 =>address corpAddress
+    street      varchar(255) comment '所属街道',  -- 共同
+    link        varchar(255) comment '法人',    -- 共同=>link  legalPerson
+    linkPhone   varchar(255) comment '法人电话',  -- 共同=>linkPhone  LegalPhone
     safeGrade   int comment '等保级别',
     fixPosition int comment '已定位（即是经纬度已解析）',
     color       varchar(255),
@@ -61,7 +61,7 @@ create table assets
     assetsType  varchar(255)   default '' comment 'idc、led、netbar、secsys',
     name        varchar(255)   default '' comment '网站名称',
     owner       varchar(255)   default '' comment '企业名称',-- 共同=>owner  corpName
-    address     varchar(255)   default '' comment '企业地址', -- 共同 =>address corpAddress
+    address     varchar(1024)  default '' comment '企业地址', -- 共同 =>address corpAddress
     longitude   decimal(12, 6) default -1 comment '经度', -- 共同
     latitude    decimal(12, 6) default -1 comment '纬度', -- 共同
     link        varchar(255)   default '' comment '联系人', -- 共同=>link  legalPerson
@@ -75,14 +75,18 @@ create table assets
     sourceID    int            default 0 comment '上传excel文件源source的ID',
     fixPosition int            default 0 comment '已定位（即是经纬度已解析）',
     deleted     int            default 0,
-    insertTime timestamp  default CURRENT_TIMESTAMP(),
-    updateTime datetime default CURRENT_TIMESTAMP()
+    insertTime  datetime       default CURRENT_TIMESTAMP(),
+    updateTime  datetime       default CURRENT_TIMESTAMP()
 ) engine = MyISAM;
-alter table assets add  insertTime timestamp  default CURRENT_TIMESTAMP();
-alter table assets add    updateTime datetime;
+alter table assets
+    add insertTime timestamp default CURRENT_TIMESTAMP();
+alter table assets
+    add updateTime datetime;
 
-		update assets set insertTime=now();
-		update assets set updateTime=now();
+update assets
+set insertTime=now();
+update assets
+set updateTime=now();
 create table street
 (
     streetID    int auto_increment primary key,
@@ -102,5 +106,29 @@ create table uploadfile
     uploadTime     timestamp,
     serverPath     varchar(255),
     serverFilename varchar(255),
-    username        varchar(100)
-)
+    username       varchar(100)
+);
+create table crowd
+(
+    crowdID     int auto_increment primary key,
+    location    varchar(255) comment '场所名称',             -- 共同
+    address     varchar(1024) comment '场所地址',            -- 共同
+    stayTime    varchar(1024) comment '场所地址',            -- 共同
+    longitude   decimal(12, 8) comment '经度',             -- 共同
+    latitude    decimal(12, 8) comment '纬度',             -- 共同
+    highRisk    int,
+    knit        int,
+    subknit     int,
+    important   int,
+    sourceID    int           default 0 comment '上传excel文件源source的ID',
+    fixPosition int           default 0 comment '已定位（即是经纬度已解析）',
+    deleted     int           default 0,
+    patient     varchar(100),
+    teams       varchar(1024),
+    street      varchar(255)  default '' comment '所属街道', -- 共同
+    extJson     varchar(8191) default '',
+    color       varchar(255),
+    status      varchar(20),
+    insertTime  datetime      default CURRENT_TIMESTAMP(),
+    updateTime  datetime      default CURRENT_TIMESTAMP()
+);

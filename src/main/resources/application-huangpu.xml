@@ -20,6 +20,7 @@
         <property name="url" value="jdbc:mysql://192.168.0.100:3307/led?useSSL=false&amp;characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull&amp;serverTimezone=GMT%2B8"/>
         <property name="password" value="Huang3102,"/>
         <property name="username" value="root"/>
+
         <property name="validationQuery" value="select 1"/>
         <property name="testWhileIdle" value="true"/>
         <property name="testOnBorrow" value="true"/>
@@ -49,6 +50,10 @@
     <bean id="assetsMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">
         <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
         <property name="mapperInterface" value="com.xz.location.dao.AssetsMapper"/>
+    </bean>
+    <bean id="crowdMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">
+        <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+        <property name="mapperInterface" value="com.xz.location.dao.CrowdMapper"/>
     </bean>
 
     <bean id="uploadFileMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">

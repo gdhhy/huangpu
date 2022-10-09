@@ -31,7 +31,7 @@ import java.util.*;
 public class AssetsController {
     @Resource
     private Properties configs;
-    private final static Logger logger = LogManager.getLogger(FileUploadController.class);
+    private final static Logger logger = LogManager.getLogger(AssetsController.class);
     @Autowired
     private AssetsMapper assetsMapper;
     @Autowired

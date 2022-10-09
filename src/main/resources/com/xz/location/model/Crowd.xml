@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+      <!--
+          crowdID     int auto_increment primary key,
+    location    varchar(255) comment '场所名称',             - - 共同
+    address     varchar(1024) comment '场所地址',            - - 共同
+    stayTime    varchar(1024) comment '场所地址',            - - 共同
+    longitude   decimal(12, 8) comment '经度',             - - 共同
+    latitude    decimal(12, 8) comment '纬度',             - - 共同
+    highRisk    int,
+    knit        int,
+    subknit     int,
+    important   int,
+    sourceID    int           default 0 comment '上传excel文件源source的ID',
+    fixPosition int           default 0 comment '已定位（即是经纬度已解析）',
+    deleted     int            default 0,
+    teams       varchar(1024),
+    street      varchar(255)  default '' comment '所属街道', - - 共同
+    extJson     varchar(8191) default '',
+    color       varchar(255),
+    status      varchar(20)-->
+<mapper namespace="com.xz.location.dao.CrowdMapper">
+    <!--<cache eviction="LRU" readOnly="false" flushInterval="60000" size="10000"/>-->
+    <resultMap id="ServerResult" type="com.xz.location.pojo.Crowd">
+        <result jdbcType="INTEGER" column="crowdID" property="crowdID"/>
+        <result jdbcType="VARCHAR" column="location" property="location"/>
+        <result jdbcType="VARCHAR" column="address" property="address"/>
+        <result jdbcType="VARCHAR" column="stayTime" property="stayTime"/>
+        <result jdbcType="DOUBLE" column="longitude" property="longitude"/>
+        <result jdbcType="DOUBLE" column="latitude" property="latitude"/>
+        <result jdbcType="INTEGER" column="highRisk" property="highRisk"/>
+        <result jdbcType="INTEGER" column="knit" property="knit"/>
+        <result jdbcType="INTEGER" column="subknit" property="subknit"/>
+        <result jdbcType="INTEGER" column="important" property="important"/>
+        <result jdbcType="INTEGER" column="sourceID" property="sourceID"/>
+        <result jdbcType="INTEGER" column="fixPosition" property="fixPosition"/>
+        <result jdbcType="INTEGER" column="deleted" property="deleted"/>
+        <result jdbcType="VARCHAR" column="patient" property="patient"/>
+        <result jdbcType="VARCHAR" column="teams" property="teams"/>
+        <result jdbcType="VARCHAR" column="street" property="street"/>
+        <result jdbcType="VARCHAR" column="extJson" property="extJson"/>
+        <result jdbcType="VARCHAR" column="color" property="color"/>
+        <result jdbcType="VARCHAR" column="status" property="status"/>
+    </resultMap>
+    <sql id="queryWhere">
+        <where>
+            <if test="param.crowdID>0">AND crowdID = #{param.crowdID:INTEGER}</if>
+            <if test="@com.xz.util.Ognl@isNotEmpty(param.street)">AND street = #{param.street:VARCHAR}</if>
+            <if test="param.coordinate=='fixed'">AND longitude>0.001 AND latitude>0.001</if>
+            <if test="param.coordinate=='unfixed'">AND (longitude &lt; 0.001 OR latitude &lt; 0.001)</if>
+            <if test="param.showDeleted=='false'">AND deleted=0</if>
+            <if test="@com.xz.util.Ognl@isNotEmpty(param.address)">AND address LIKE '%${param.address}%'</if>
+        </where>
+    </sql>
+    <select id="selectCrowd" parameterType="java.util.Map" resultMap="ServerResult">
+        SELECT crowdID,location,address,stayTime,longitude,latitude,highRisk,knit,subknit,important,sourceID,fixPosition,deleted,patient,teams,street,extJson,color,status FROM crowd
+        <include refid="queryWhere"/>
+        ORDER BY crowdID desc
+        <choose>
+            <when test="param.start>0 and param.limit >0">
+                limit #{param.start:INTEGER},#{param.limit:INTEGER}
+            </when>
+            <when test="param.limit >0">
+                limit #{param.limit:INTEGER}
+            </when>
+            <otherwise>
+                limit 1000
+            </otherwise>
+        </choose>
+    </select>
+    <select id="selectCrowdCount" parameterType="java.util.Map" resultType="int">
+        SELECT count(crowdID) FROM crowd
+        <include refid="queryWhere"/>
+    </select>
+    <update id="updateCrowd" flushCache="true">
+        update crowd
+        <set>
+            updateTime=now(),
+            <if test="pojo.location!=null">owner = #{pojo.location:VARCHAR},</if>
+            <if test="pojo.address!=null">address = #{pojo.address:VARCHAR},</if>
+            <if test="pojo.longitude>0">longitude = #{pojo.longitude:DOUBLE},</if>
+            <if test="pojo.latitude>0">latitude = #{pojo.latitude:DOUBLE},</if>
+            <if test="pojo.status!=null">status = #{pojo.status:VARCHAR},</if>
+            <if test="pojo.street!=null">street = #{pojo.street:VARCHAR},</if>
+            <if test="pojo.extJson!=null">extJson = #{pojo.extJson:VARCHAR},</if>
+            <if test="pojo.color!=null">color = #{pojo.color:VARCHAR},</if>
+            <if test="pojo.fixPosition>=0">fixPosition = #{pojo.fixPosition:INTEGER},</if>
+            <if test="pojo.deleted>=0">deleted = #{pojo.deleted:INTEGER},</if>
+        </set>
+        where crowdID = #{pojo.crowdID:INTEGER}
+    </update>
+    <insert id="insertCrowd" flushCache="true" useGeneratedKeys="true" keyProperty="pojo.crowdID">
+        INSERT INTO crowd (location,address,stayTime,longitude,latitude,
+                           highRisk,knit,subknit,important,sourceID,fixPosition,deleted,
+                           patient, teams,street,extJson,color,status)
+        VALUES (#{pojo.location:VARCHAR}, #{pojo.address:VARCHAR}, #{pojo.stayTime:VARCHAR}, #{pojo.longitude:DOUBLE}, #{pojo.latitude:DOUBLE},
+                #{pojo.highRisk:INTEGER},#{pojo.knit:INTEGER},#{pojo.subknit:INTEGER},#{pojo.important:INTEGER},#{pojo.sourceID:INTEGER},#{pojo.fixPosition:INTEGER},#{pojo.deleted:INTEGER},
+                #{pojo.patient:VARCHAR},  #{pojo.teams:VARCHAR}, #{pojo.street:VARCHAR}, #{pojo.extJson:VARCHAR}, #{pojo.color:VARCHAR}, #{pojo.status:VARCHAR})
+    </insert>
+    <delete id="deleteCrowd" parameterType="int">
+        UPDATE crowd
+        set deleted=1
+        WHERE crowdID = #{crowdID:INTEGER}
+    </delete>
+
+    <select id="selectStreetByCrowd" parameterType="java.util.Map" resultType="java.util.HashMap">
+        select A.streetID, A.streetName, A.latitude, A.longitude, if(B.cc is null, 0, B.cc) as cc
+        from street A
+                 left join
+             (select left(street, 2) street, count(street) cc
+              from crowd
+              where deleted = 0
+                and street is not null
+                and street != '黄埔区'
+              group by left(street, 2)) B
+             on A.streetName = B.street
+        WHERE A.latitude > 0
+          and A.longitude > 0
+    </select>
+</mapper>

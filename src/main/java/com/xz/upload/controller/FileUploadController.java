@@ -4,6 +4,7 @@ package com.xz.upload.controller;
  * Created by hhy on 2020-08-30
  */
 
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DateUtil;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -12,18 +13,21 @@ import com.xz.filter.dao.SourceMapper;
 import com.xz.filter.pojo.Source;
 import com.xz.location.GPSUtil;
 import com.xz.location.dao.AssetsMapper;
+import com.xz.location.dao.CrowdMapper;
 import com.xz.location.dao.UploadFileMapper;
 import com.xz.location.pojo.Assets;
+import com.xz.location.pojo.Crowd;
 import com.xz.location.pojo.UploadFile;
 import com.xz.rbac.web.DeployRunning;
 import com.xz.upload.pojo.FileBucket;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.util.IOUtils;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -57,6 +61,8 @@ public class FileUploadController {
     private SourceMapper sourceMapper;
     @Autowired
     private AssetsMapper assetsMapper;
+    @Autowired
+    private CrowdMapper crowdMapper;
     @Autowired
     private UploadFileMapper uploadFileMapper;
 
@@ -280,7 +286,7 @@ public class FileUploadController {
                     count++;
                 }
             }
-            if ((sheet = workbook.getSheet("Sheet1")) != null) {//网络资产
+            /*if ((sheet = workbook.getSheet("Sheet1")) != null) {//网络资产
                 for (int rowNum = 1; rowNum <= sheet.getLastRowNum(); rowNum++) {
                     //logger.debug("rowNum=" + rowNum);
                     Row row = sheet.getRow(rowNum);
@@ -311,7 +317,7 @@ public class FileUploadController {
                     assetsMapper.insertAssets(assets);
                     count++;
                 }
-            }
+            }*/
             if ((sheet = workbook.getSheet("IDC")) != null) {
                 for (int rowNum = 1; rowNum <= sheet.getLastRowNum(); rowNum++) {
                     //logger.debug("rowNum=" + rowNum);
@@ -400,6 +406,64 @@ public class FileUploadController {
 
                     assetsMapper.insertAssets(assets);
                     count++;
+                }
+            }
+            for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
+                logger.debug("sheetName:" + workbook.getSheetName(i));
+                if (workbook.getSheetName(i).contains("流调")) {
+                    sheet = workbook.getSheetAt(i);
+                    List<CellRangeAddress> cellRangeAddressList = sheet.getMergedRegions();
+                    for (CellRangeAddress ca : cellRangeAddressList) {
+                        if (ca.getFirstColumn() == ca.getLastColumn() && ca.getLastColumn() == 2) {//重点场所名称
+                            int firstR = ca.getFirstRow();
+                            int lastR = ca.getLastRow();
+                            //logger.debug("firstR:" + firstR + ",lastR:" + lastR);
+                            int highRisk = 0;
+                            int knit = 0;
+                            int subknit = 0;
+                            int important = 0;
+
+                            Row row = sheet.getRow(firstR);
+
+                            Crowd crowd = new Crowd();
+                            crowd.setSourceID(sourceID);
+                            crowd.setPatient(getCellValueAsString(row.getCell(1)));
+                            crowd.setLocation(getCellValueAsString(row.getCell(2)));
+                            crowd.setAddress(getCellValueAsString(row.getCell(3)));
+                            crowd.setStayTime(getCellValueAsString(row.getCell(4)));
+                            crowd.setTeams(getCellValueAsString(row.getCell(10)));
+                            crowd.setStreet(getCellValueAsString(row.getCell(11)));
+                            for (int j = firstR; j <= lastR; j++) {
+                                Row row2 = sheet.getRow(j);
+                                double num = 0;
+                                //logger.debug("row:" + j + ",col:" + 7 + ":" + getCellValueAsString(row2.getCell(7)));
+
+                                if (row2.getCell(7).getCellType() == CellType.STRING)
+                                    num = Convert.toInt(row2.getCell(7).getStringCellValue().replace("人", ""),0);
+                                if (row2.getCell(7).getCellType() == CellType.NUMERIC)
+                                    num = row2.getCell(7).getNumericCellValue() + 0;
+
+                                if (num > 0) {
+                                    if (getCellValueAsString(row2.getCell(6)).contains("高风险"))
+                                        highRisk += num;
+                                    if ("密接".equals(getCellValueAsString(row2.getCell(6))))
+                                        knit += num;
+                                    if ("次密接".equals(getCellValueAsString(row2.getCell(6))))
+                                        subknit += num;
+                                    if (getCellValueAsString(row2.getCell(6)).contains("重点"))
+                                        important += num;
+                                }
+                            }
+                            crowd.setHighRisk(highRisk);
+                            crowd.setKnit(knit);
+                            crowd.setSubknit(subknit);
+                            crowd.setImportant(important);
+
+                            crowdMapper.insertCrowd(crowd);
+                            count++;
+                        }
+                    }
+                    break;
                 }
             }
         } catch (IOException | NullPointerException e) {
