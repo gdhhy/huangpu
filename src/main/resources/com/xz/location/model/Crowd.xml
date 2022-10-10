@@ -1,26 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-      <!--
-          crowdID     int auto_increment primary key,
-    location    varchar(255) comment '场所名称',             - - 共同
-    address     varchar(1024) comment '场所地址',            - - 共同
-    stayTime    varchar(1024) comment '场所地址',            - - 共同
-    longitude   decimal(12, 8) comment '经度',             - - 共同
-    latitude    decimal(12, 8) comment '纬度',             - - 共同
-    highRisk    int,
-    knit        int,
-    subknit     int,
-    important   int,
-    sourceID    int           default 0 comment '上传excel文件源source的ID',
-    fixPosition int           default 0 comment '已定位（即是经纬度已解析）',
-    deleted     int            default 0,
-    teams       varchar(1024),
-    street      varchar(255)  default '' comment '所属街道', - - 共同
-    extJson     varchar(8191) default '',
-    color       varchar(255),
-    status      varchar(20)-->
+<!--
+    crowdID     int auto_increment primary key,
+location    varchar(255) comment '场所名称',             - - 共同
+address     varchar(1024) comment '场所地址',            - - 共同
+stayTime    varchar(1024) comment '场所地址',            - - 共同
+longitude   decimal(12, 8) comment '经度',             - - 共同
+latitude    decimal(12, 8) comment '纬度',             - - 共同
+highRisk    int,
+knit        int,
+subknit     int,
+important   int,
+sourceID    int           default 0 comment '上传excel文件源source的ID',
+fixPosition int           default 0 comment '已定位（即是经纬度已解析）',
+deleted     int            default 0,
+teams       varchar(1024),
+street      varchar(255)  default '' comment '所属街道', - - 共同
+extJson     varchar(8191) default '',
+color       varchar(255),
+status      varchar(20)-->
 <mapper namespace="com.xz.location.dao.CrowdMapper">
-    <!--<cache eviction="LRU" readOnly="false" flushInterval="60000" size="10000"/>-->
+    <cache eviction="LRU" readOnly="false" flushInterval="60000" size="10000"/>
     <resultMap id="CrowdResult" type="com.xz.location.pojo.Crowd">
         <result jdbcType="INTEGER" column="crowdID" property="crowdID"/>
         <result jdbcType="VARCHAR" column="location" property="location"/>
@@ -49,11 +49,13 @@
             <if test="param.coordinate=='fixed'">AND longitude>0.001 AND latitude>0.001</if>
             <if test="param.coordinate=='unfixed'">AND (longitude &lt; 0.001 OR latitude &lt; 0.001)</if>
             <if test="param.showDeleted=='false'">AND deleted=0</if>
+            <if test="param.inUse=='true'">AND status='在用'</if>
             <if test="@com.xz.util.Ognl@isNotEmpty(param.address)">AND address LIKE '%${param.address}%'</if>
         </where>
     </sql>
     <select id="selectCrowd" parameterType="java.util.Map" resultMap="CrowdResult">
-        SELECT crowdID,location,address,stayTime,longitude,latitude,highRisk,knit,subknit,important,sourceID,fixPosition,deleted,patient,teams,street,extJson,color,status FROM crowd
+        SELECT crowdID,location,address,stayTime,longitude,latitude,highRisk,knit,subknit,important,sourceID,fixPosition,deleted,patient,teams,street,extJson,color,status
+        FROM crowd
         <include refid="queryWhere"/>
         ORDER BY crowdID desc
         <choose>
@@ -67,6 +69,12 @@
                 limit 1000
             </otherwise>
         </choose>
+    </select>
+    <select id="selectCrowdSum" parameterType="java.util.Map" resultType="java.util.HashMap">
+        SELECT if(sum(highRisk) is null, 0, sum(highRisk)) highRisk, if(sum(knit) is null, 0, sum(knit)) knit,
+        if(sum(subknit) is null, 0, sum(subknit)) subknit, if(sum(important) is null, 0, sum(important)) important
+        FROM crowd
+        <include refid="queryWhere"/>
     </select>
     <select id="selectCrowdCount" parameterType="java.util.Map" resultType="int">
         SELECT count(crowdID) FROM crowd
@@ -82,12 +90,12 @@
             <if test="pojo.longitude>0">longitude = #{pojo.longitude:DOUBLE},</if>
             <if test="pojo.latitude>0">latitude = #{pojo.latitude:DOUBLE},</if>
 
-            <if test="pojo.highRisk>=0">highRisk = #{pojo.highRisk:INTEGER},</if>
-            <if test="pojo.knit>=0">knit = #{pojo.knit:INTEGER},</if>
-            <if test="pojo.subknit>=0">subknit = #{pojo.subknit:INTEGER},</if>
-            <if test="pojo.important>=0">important = #{pojo.important:INTEGER},</if>
-            <if test="pojo.fixPosition>=0">fixPosition = #{pojo.fixPosition:INTEGER},</if>
-            <if test="pojo.deleted>=0">deleted = #{pojo.deleted:INTEGER},</if>
+            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.highRisk)">highRisk = #{pojo.highRisk:INTEGER},</if>
+            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.knit)">knit = #{pojo.knit:INTEGER},</if>
+            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.subknit)">subknit = #{pojo.subknit:INTEGER},</if>
+            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.important)">important = #{pojo.important:INTEGER},</if>
+            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.fixPosition)">fixPosition = #{pojo.fixPosition:INTEGER},</if>
+            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.deleted)">deleted = #{pojo.deleted:INTEGER},</if>
 
             <if test="pojo.patient!=null">patient = #{pojo.patient:VARCHAR},</if>
             <if test="pojo.teams!=null">teams = #{pojo.teams:VARCHAR},</if>
@@ -99,12 +107,13 @@
         where crowdID = #{pojo.crowdID:INTEGER}
     </update>
     <insert id="insertCrowd" flushCache="true" useGeneratedKeys="true" keyProperty="pojo.crowdID">
-        INSERT INTO crowd (location,address,stayTime,longitude,latitude,
-                           highRisk,knit,subknit,important,sourceID,fixPosition,deleted,
-                           patient, teams,street,extJson,color,status)
+        INSERT INTO crowd (location, address, stayTime, longitude, latitude,
+                           highRisk, knit, subknit, important, sourceID, fixPosition, deleted,
+                           patient, teams, street, extJson, color, status)
         VALUES (#{pojo.location:VARCHAR}, #{pojo.address:VARCHAR}, #{pojo.stayTime:VARCHAR}, #{pojo.longitude:DOUBLE}, #{pojo.latitude:DOUBLE},
-                #{pojo.highRisk:INTEGER},#{pojo.knit:INTEGER},#{pojo.subknit:INTEGER},#{pojo.important:INTEGER},#{pojo.sourceID:INTEGER},#{pojo.fixPosition:INTEGER},#{pojo.deleted:INTEGER},
-                #{pojo.patient:VARCHAR},  #{pojo.teams:VARCHAR}, #{pojo.street:VARCHAR}, #{pojo.extJson:VARCHAR}, #{pojo.color:VARCHAR}, #{pojo.status:VARCHAR})
+                #{pojo.highRisk:INTEGER}, #{pojo.knit:INTEGER}, #{pojo.subknit:INTEGER}, #{pojo.important:INTEGER}, #{pojo.sourceID:INTEGER}, #{pojo.fixPosition:INTEGER},
+                #{pojo.deleted:INTEGER},
+                #{pojo.patient:VARCHAR}, #{pojo.teams:VARCHAR}, #{pojo.street:VARCHAR}, #{pojo.extJson:VARCHAR}, #{pojo.color:VARCHAR}, #{pojo.status:VARCHAR})
     </insert>
     <delete id="deleteCrowd" parameterType="int">
         UPDATE crowd
@@ -113,12 +122,21 @@
     </delete>
 
     <select id="selectStreetByCrowd" parameterType="java.util.Map" resultType="java.util.HashMap">
-        select A.streetID, A.streetName, A.latitude, A.longitude, if(B.cc is null, 0, B.cc) as cc
+        select A.streetID,
+               A.streetName,
+               A.latitude,
+               A.longitude,
+               if(B.cc is null, 0, B.cc) as cc,
+               highRisk,
+               knit,
+               subknit,
+               important
         from street A
                  left join
-             (select left(street, 2) street, count(street) cc
+             (select left(street, 2) street, count(street) cc, sum(highRisk) highRisk, sum(knit) knit, sum(subknit) subknit, sum(important) important
               from crowd
               where deleted = 0
+                and status = '在用'
                 and street is not null
                 and street != '黄埔区'
               group by left(street, 2)) B

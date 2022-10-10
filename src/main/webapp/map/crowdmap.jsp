@@ -1,18 +1,45 @@
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<!doctype html>
+﻿<!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
-    <title>黄埔区新冠流调地图</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>黄埔区新冠疫情流调地图</title>
     <link rel="stylesheet" href="https://a.amap.com/jsapi_demos/static/demo-center/css/demo-center.css"/>
     <style>
-        html, body, #container {
-            height: 100%;
+        html,
+        body,
+        #map {
             width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
         }
+
+        .demo-title {
+            position: absolute;
+            top: 25px;
+            left: 225px;
+            z-index: 1;
+        }
+
+        h1 {
+            font-size: 22px;
+            margin: 0;
+            color: grey;
+        }
+
+
+        /*左上角*/
+        .input-card .btn {
+            margin-right: 1.2rem;
+        }
+
+        .input-card .btn:last-child {
+            margin-right: 0;
+        }
+
+        /*以下：自定义信息窗口样式*/
 
         .content-window-card {
             position: relative;
@@ -85,51 +112,9 @@
             float: left;
             margin-right: 6px;
         }
-
-        /*右下角*/
-        .input-card .btn {
-            margin-right: 1.2rem;
-            width: 9rem;
-        }
-
-        .input-card .btn:last-child {
-            margin-right: 0;
-        }
-
-        .collision-btn.disable {
-            background-image: none;
-            color: lightgrey;
-            border-color: lightgrey;
-            cursor: not-allowed;
-        }
-
-        .collision-btn.disable:hover {
-            background-color: #fff;
-            border-color: lightgrey;
-        }
-
     </style>
 </head>
-<body>
-<div id="container" class="map" tabindex="0"></div>
 
-<div class="input-card" style="width:11rem;left:10px;top:10px;bottom:auto">
-    <h4>风险类型</h4>
-    <div id="coordinate">
-        <div class="input-item"><input id="highRisk" name="language" type="checkbox" checked="checked"><span class="input-text">高风险</span></div>
-        <div class="input-item"><input id="knit" name="language" type="checkbox" checked="checked"><span class="input-text">密接</span></div>
-        <div class="input-item"><input id="subknit" name="language" type="checkbox" checked="checked"><span class="input-text">次密接</span></div>
-        <div class="input-item"><input id="important" name="language" type="checkbox" checked="checked"><span class="input-text">重点人群</span></div>
-    </div>
-</div>
-<%--<div class="input-card">
-    <label style="color:grey">标注避让设置</label>
-    <div class="input-item">
-        <input id="allowCollision" type="button" class="btn collision-btn" onclick="allowCollisionFunc()"
-               value="标注避让">
-        <input id="notAllowCollision" type="button" class="btn collision-btn" onclick="notAllowCollisionFunc()" value="显示全部">
-    </div>
-</div>--%>
 <script type="text/javascript">
     String.prototype.format = function () {
         var args = arguments;
@@ -162,33 +147,77 @@
         padding: '2, 5',
     };
 </script>
-<script type="text/javascript" src="https://webapi.amap.com/maps?v=2.0&key=${key1}&plugin=AMap.Adaptor"></script>
+<body>
+<div class="input-card" style="width:13rem;left:10px;top:10px;bottom:auto;z-index: 100">
+    <h4 style="font-weight: bold">风险类型</h4>
+    <div id="coordinate">
+        <div class="input-item"><input id="highRisk" name="language" type="checkbox" checked="checked"><span class="input-text">高风险(${highRisk})</span></div>
+        <div class="input-item"><input id="knit" name="language" type="checkbox" checked="checked"><span class="input-text">密接(${knit})</span></div>
+        <div class="input-item"><input id="subknit" name="language" type="checkbox" checked="checked"><span class="input-text">次密接(${subknit})</span></div>
+        <div class="input-item"><input id="important" name="language" type="checkbox" checked="checked"><span class="input-text">重点人群(${important})</span></div>
+    </div>
+</div>
+<div class="input-card" style="width:30rem;left:10px;top:250px;bottom:auto;z-index: 100; "> <%--background: rgba(12,0,255,0.1)--%>
+    <h4 style="font-weight: bold">街道</h4>
+    <div id="coordinate2"></div>
+</div>
+<div class="demo-title">
+    <h1>黄埔区新冠疫情流调地图</h1>
+</div>
+<div id="map"></div>
+<script src="https://webapi.amap.com/maps?v=2.0&key=${key1}&plugin=AMap.Scale,AMap.ToolBar"></script>
+<script src="https://webapi.amap.com/loca?v=2.0.0&key=${key1}"></script>
 <script src="https://a.amap.com/jsapi_demos/static/demo-center/js/demoutils.js"></script>
 <script src="https://webapi.amap.com/ui/1.1/main.js?v=1.1.1"></script>
 <script src="/map/huangpu.js"></script>
-<script type="text/javascript">
+
+<script>
     AMapUI.loadUI(['control/BasicControl'], function (BasicControl) {
         var layerCtrl1 = new BasicControl.LayerSwitcher({
             position: 'tr'
         });
-        var map = new AMap.Map('container', {
-            showIndoorMap: false,
-            resizeEnable: true,
+        var map = new AMap.Map('map', {
+            zoom: 12,
+            showLabel: false,
             viewMode: '2D', // 默认使用 2D 模式，如果希望使用带有俯仰角的 3D 模式，请设置 viewMode: '3D',
-            center: [113.5141753, 23.2296782],
+            center: [113.4841753, 23.2096782],
             layers: layerCtrl1.getEnabledLayers(),
-            // layers: [new AMap.TileLayer.Satellite()],
-            zoom: 11, pitch: 60/*,
-  mapStyle: 'amap://styles/macaron' */ //https://lbs.amap.com/demo/javascript-api/example/personalized-map/set-theme-style
+            pitch: 60
+            //mapStyle: 'amap://styles/45311ae996a8bea0da10ad5151f72979',
         });
         map.addControl(layerCtrl1);
-        map.on('zoomstart', closeInfoWindow);
-        map.on('zoomchange', closeInfoWindow);
-        map.on('zoomend', closeInfoWindow);
+        var tool = new AMap.ToolBar();//+-缩放工具
+        tool.addTo(map);
+
+        var loca = new Loca.Container({
+            map,
+        });
+
+        var geo = new Loca.GeoJSONSource({
+            url: '/crowdmap/crowd.jspa',
+        });
+
+        //呼吸点
+        var breath = new Loca.ScatterLayer({
+            zIndex: 121,
+        });
+        breath.setSource(geo);
+        breath.setStyle({
+            unit: 'px',
+            //size: [50, 50],
+            size: (index, f) => {
+                var n = Math.log(f.properties['highRisk'] + f.properties['knit'] + f.properties['subknit'] + f.properties['important']) * 10;
+                return [n, n];
+            },
+            texture: 'https://a.amap.com/Loca/static/loca-v2/demos/images/breath_red.png',
+            animate: true,
+            duration: 1000,
+        });
+        loca.add(breath);
+        loca.animate.start();
+        //呼吸点结束
 
         //街道边界
-        //http://datav.aliyun.com/portal/school/atlas/area_selector
-        //https://geo.datav.aliyun.com/areas_v3/bound/440112.json
         function addPolygon(data, color, zoom) {
             let polygon = new AMap.Polygon({
                 path: data,
@@ -207,48 +236,33 @@
                     fillOpacity: 0.5,
                     fillColor: '#b6d8d4'
                 })
-            })
+            });
             polygon.on('mouseout', () => {
                 polygon.setOptions({
                     fillOpacity: 0.2,
                     fillColor: color
                 })
-            })
+            });
             map.add(polygon);
         }
 
-        /*addPolygon(luogang, '#ccebc5', [1, 15]);
-        addPolygon(lianghe, 'LightBLue', [1, 15]);
-        addPolygon(hongshan, 'LightBLue', [1, 15]);
-        addPolygon(dasha, 'Khaki', [1, 15]);
-        addPolygon(nangang, 'LightBLue', [1, 15]);
-        addPolygon(yonghe, 'LightBLue', [1, 15]);
-        addPolygon(wenchong, 'pink', [1, 15]);
-        addPolygon(changzhou, 'LightBLue', [1, 15]);
-        addPolygon(yuzhu, 'pink', [1, 15]);
-        addPolygon(xiagang, 'Khaki', [1, 15]);
-        addPolygon(suidong, 'pink', [1, 15]);
-        addPolygon(huangpustreet, '#ccebc5', [1, 15]);
-        addPolygon(jiulong, 'snow', [1, 15]);*/
-        //addPolygon(zhongcun, 'snow', [1, 20]);//番禺钟村
         addPolygon(huangpudistrinct, 'LightBLue', [1, 13]);
         //街道边界结束
-
         //信息窗体开始
         //构建自定义信息窗体
-        function createInfoWindow(title, titleColor, content) {
+        function createInfoWindow(title, content) {
             var info = document.createElement("div");
             info.className = "custom-info input-card content-window-card";
 
             //可以通过下面的方式修改自定义窗体的宽高
-            info.style.width = "300px";
+            info.style.width = "430px";
             // 定义顶部标题
             var top = document.createElement("div");
             var titleD = document.createElement("div");
             var closeX = document.createElement("img");
             top.className = "info-top";
             //top.style.mixBlendMode ="difference";用了背景颜色会随机
-            top.style.backgroundColor = titleColor;
+            //top.style.backgroundColor = 'grey';
             titleD.innerHTML = title;
             closeX.src = "https://webapi.amap.com/images/close2.gif";
             closeX.onclick = closeInfoWindow;
@@ -282,29 +296,6 @@
             map.clearInfoWindow();
         }
 
-        function createImageWindow(imageUrl) {
-            var imageDiv = document.createElement("div");
-            imageDiv.className = "custom-info input-card content-window-card";
-            imageDiv.style.width = "400px";
-            imageDiv.style.zIndex = "100";
-            imageDiv.innerHTML = "<img border='0' style='object-fit: cover;width:400px;height: 300px' src=\"/upload/" + imageUrl + "\">";
-            // imageDiv.style.display = "";
-
-            // 定义底部内容
-            var bottom = document.createElement("div");
-            bottom.className = "info-bottom";
-            bottom.style.position = 'relative';
-            bottom.style.top = '0px';
-            bottom.style.margin = '0 auto';
-            var sharp = document.createElement("img");
-            sharp.src = "https://webapi.amap.com/images/sharp.png";
-            bottom.appendChild(sharp);
-            imageDiv.appendChild(bottom);
-            return imageDiv;
-        }
-
-        //信息窗体结束
-
         //街道label开始
         //var allowCollision = false;
         var layer = new AMap.LabelsLayer({
@@ -316,12 +307,14 @@
         });
         // 图层添加到地图
         map.add(layer);
+        var streetJson;
 
         function loadStreetMarker(type) {
             layer.clear();
             // 初始化 labelMarker 街道的label
             ajax('/crowdmap/getStreet3.jspa?assetsType={0}'.format(type), function (err, json) {
                 if (!err) {
+                    streetJson = json;
                     var markers = [];
                     json.forEach(function (item) {
                         //item.icon = icon; 注释掉，icon也注释掉，以后有需要再加上
@@ -329,127 +322,116 @@
 
                         var labelMarker = new AMap.LabelMarker(item);
                         markers.push(labelMarker);
+
+                        if (item.highRisk + item.knit + item.subknit + item.important > 0)
+                            $('#coordinate2').append(('<div class="input-item"><input id="{0}" name="crowd" type="radio">' +
+                                '<span class="input-text"><span style="font-weight: bold" >{1}：</span>高风险：{2}，密接：{3}，次密：{4}，重点：{5}</span></div>')
+                                .format(item.name, item.streetName, item.highRisk, item.knit, item.subknit, item.important));
                     });
                     // 将 marker 添加到图层
                     layer.add(markers);
+
+                    //绑定街道radio点击事件
+                    var radios = document.querySelectorAll("#coordinate2 input");
+                    radios.forEach(function (ratio) {
+                        ratio.onclick = changeCenterZoom;
+                    });
+                }
+            });
+        } // 街道的label结束
+        loadStreetMarker("");
+
+        function changeCenterZoom() {
+            var streetID = this.id;
+            streetJson.forEach(function (item) {
+                if (item.name === streetID) {
+                    map.setCenter(item.position);
+                    map.setZoom(15);
                 }
             });
         }
 
-        //map.setFitView(null, false, [100, 150, 10, 10]);
+        //绑定风险类型checkbox点击事件，重新累加风险人群数量
+        var radios2 = document.querySelectorAll("#coordinate input");
+        radios2.forEach(function (ratio) {
+            ratio.onclick = refreshCount;
+        });
 
-        // 街道的label结束
+        function refreshCount() {
+            breath.setStyle({
+                unit: 'px',
+                size: (index, f) => {
+                    let ss = 0;
+                    if ($('#highRisk').is(':checked')) ss += f.properties['highRisk'];
+                    if ($('#knit').is(':checked')) ss += f.properties['knit'];
+                    if ($('#subknit').is(':checked')) ss += f.properties['subknit'];
+                    if ($('#important').is(':checked')) ss += f.properties['important'];
+                    let n = Math.log(ss) * 10;
+                    return [n, n];
+                },
+                texture: 'https://a.amap.com/Loca/static/loca-v2/demos/images/breath_red.png',
+                animate: true,
+                duration: 1000,
+            });
+        }
 
-        //大量信息点使用的图标
-        // JSAPI 2.0 支持显示设置 zIndex, zIndex 越大约靠前，默认按顺序排列
+
+//添加marker标记
         var style = [{
-            url: '/assets/images/led.png',
-            anchor: new AMap.Pixel(6, 6), zIndex: 3,
-            size: new AMap.Size(32, 22)
+            url: 'https://webapi.amap.com/images/mass/mass2.png',
+            anchor: new AMap.Pixel(3, 3),
+            size: new AMap.Size(5, 5),
+            zIndex: 1,
         }, {
-            url: '/assets/images/idc.png',
+            url: 'https://webapi.amap.com/images/mass/mass0.png',
+            anchor: new AMap.Pixel(6, 6),
+            size: new AMap.Size(11, 11),
+            zIndex: 3,
+        }, {
+            url: 'https://webapi.amap.com/images/mass/mass1.png',
             anchor: new AMap.Pixel(4, 4),
-            size: new AMap.Size(24, 24),
+            size: new AMap.Size(7, 7),
             zIndex: 2,
-        }, {
-            url: '/assets/images/netbar.png',
-            anchor: new AMap.Pixel(3, 3),
-            size: new AMap.Size(32, 32),
-            zIndex: 1,
-        }, {
-            url: '/assets/images/secsys.png',
-            anchor: new AMap.Pixel(3, 3),
-            size: new AMap.Size(24, 24),
-            zIndex: 1,
         }];
-        //
-        /*  function setStyle(multiIcon) {
-              if (multiIcon) {
-                  mass.setStyle(style);
-              } else {
-                  mass.setStyle(style[2]);
-              }
-          }*/
-
         var mass;
 
         function loadMassPoints() {
-            var type = this.id;
-            if (!type) type = 'led';
             closeInfoWindow();
             // layer.hide();
             if (mass) mass.clear();
 
-            loadStreetMarker(type);
-            ajax('/crowdmap/getCrowdList.jspa?assetsType={0}'.format(type), function (err, json) {
+            //loadStreetMarker( );
+            ajax('/crowdmap/getCrowdList.jspa', function (err, json) {
                 if (!err) {
                     mass = new AMap.MassMarks(json, {opacity: 0.8, zIndex: 111, cursor: 'pointer', style: style});
-                    // var marker = new AMap.Marker({content: ' ', map: map});
                     mass.on('mouseover', function (e) {
-                        //console.log("click：" + e.data.imageUrl);
-                        ajax('/crowdmap/getCrowd.jspa?&assetsID={0}'.format(e.data.id), function (err, json) {
-                            if (!err) {
-                                var extJson = JSON.parse(json.extJson);
-
-                                var title = "", hh = '<p>状态：<span style="color: #0288d1;font-weight:bold;">{status}</span></p>' +
-                                    '<p>地址：<span style="color: #0288d1;font-weight:bold;">{address}</span></p>' +
-                                    '<p>街道：<span style="color: #0288d1;font-weight:bold;">{street}</span></p>';
-                                if (type === 'led') {
-                                    hh += '<p>业主：<span style="color: #0288d1;font-weight:bold;">{owner}</span></p>' +
-                                        '<p>联系人及电话：<span style="color: #0288d1;font-weight:bold;">{link}，{linkPhone}</span></p>';
-
-                                    title = '<span style="font-size:11px;color:white;">{0}</span>'.format(json.name);
-                                } else {
-                                    hh += '<p>法定代表人及电话：<span style="color: #0288d1;font-weight:bold;">{link}</span></p>';
-
-                                    title = '<span style="font-size:11px;color:white">{0}</span>'.format(json.owner);
-                                }
-
-                                let line = '<p>{key}：<span style="color: #0288d1;font-weight:bold;">{value}</span></p>';
-                                if (extJson)
-                                    extJson.forEach(function (obj, index, array) {
-                                        if (obj.value)
-                                            hh += line.signMix(obj);
-                                    });
-
-                                var infoWindow = new AMap.InfoWindow({
-                                    isCustom: true, //使用自定义窗体
-                                    content: createInfoWindow(title, json.color, hh.signMix(json)),
-                                    offset: new AMap.Pixel(20, -20)
-                                });
-                                infoWindow.open(map, [json.longitude, json.latitude]);
-                            } else {
-                                log.error('获取资产位置信息失败！')
-                            }
+                        /*  console.log("click：" + e.data.id);
+                          console.log("teams：" + e.data.teams);*/
+                        //var title = '<span style="font-size:11px;;color:#F00">{0}</span>'.format(e.data.location);
+                        var hh = '<p>病人：<span style="color: #0288d1;font-weight:bold;">{patient}</span></p>' +
+                            '<p>地址：<span style="color: #0288d1;font-weight:bold;">{address}</span></p>' +
+                            '<p>停留时段：<span style="color: #0288d1;font-weight:bold;">{stayTime}</span></p>' +
+                            '<p>高风险：<span style="color: #F00;font-weight:bold;">{highRisk}</span>，' +
+                            '密接：<span style="color: #F00;font-weight:bold;">{knit}</span>，' +
+                            '次密接：<span style="color: #F00;font-weight:bold;">{subknit}</span>，' +
+                            '重点：<span style="color: #F00;font-weight:bold;">{important}</span></p>';
+                        var infoWindow = new AMap.InfoWindow({
+                            isCustom: true, //使用自定义窗体
+                            content: createInfoWindow(e.data.location, hh.signMix(e.data)),
+                            offset: new AMap.Pixel(20, -20)
                         });
+                        infoWindow.open(map, e.data.lnglat);
                     });
                     mass.on('mouseout', function (e) {
                         closeInfoWindow();
                     });
-                    mass.on('click', function (e) {
-                        closeInfoWindow();//关掉信息窗口，显示图片
-                        if (e.data.imageUrl) {
-                            // console.log("e.data:" + e.data.imageUrl);
-                            var imageWindow = new AMap.InfoWindow({
-                                isCustom: true, //使用自定义窗体
-                                content: createImageWindow(e.data.imageUrl),
-                                offset: new AMap.Pixel(20, -20)
-                            });
-                            imageWindow.open(map, [e.data.longitude, e.data.latitude]);
-                        }
-                    });
+
                     mass.setMap(map);
                 }
             });
         }
 
         loadMassPoints();
-
-        //绑定radio点击事件
-        var radios = document.querySelectorAll("#coordinate input");
-        radios.forEach(function (ratio) {
-            ratio.onclick = loadMassPoints;
-        });
     });
 </script>
 </body>

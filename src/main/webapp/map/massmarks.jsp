@@ -108,19 +108,35 @@
             border-color: lightgrey;
         }
 
+        .demo-title {
+            position: absolute;
+            top: 25px;
+            left: 225px;
+            z-index: 1;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin: 0;
+            color: grey;
+        }
     </style>
 </head>
 <body>
 <div id="container" class="map" tabindex="0"></div>
 
 <div class="input-card" style="width:11rem;left:10px;top:10px;bottom:auto">
-    <h4>资产类型</h4>
+    <h4 style="font-weigt:bold">资产类型</h4>
     <div id="coordinate">
         <div class="input-item"><input id="led" name="language" type="radio" checked="checked"><span class="input-text">LED</span></div>
         <div class="input-item"><input id="idc" name="language" type="radio"><span class="input-text">IDC</span></div>
         <div class="input-item"><input id="netbar" name="language" type="radio"><span class="input-text">网吧</span></div>
         <div class="input-item"><input id="secsys" name="language" type="radio"><span class="input-text">等保系统</span></div>
     </div>
+</div>
+<div class="demo-title">
+    <h1>黄埔区资产地图</h1>
+    <!--<h3>中国城市各人口数量，总GDP数量和人均GDP排行情况</h3>-->
 </div>
 <%--<div class="input-card">
     <label style="color:grey">标注避让设置</label>
@@ -178,7 +194,7 @@
             center: [113.5141753, 23.2296782],
             layers: layerCtrl1.getEnabledLayers(),
             // layers: [new AMap.TileLayer.Satellite()],
-            zoom: 11, pitch: 60/*,
+            zoom: 11.7, pitch: 60/*,
   mapStyle: 'amap://styles/macaron' */ //https://lbs.amap.com/demo/javascript-api/example/personalized-map/set-theme-style
         });
         map.addControl(layerCtrl1);
@@ -207,13 +223,13 @@
                     fillOpacity: 0.5,
                     fillColor: '#b6d8d4'
                 })
-            })
+            });
             polygon.on('mouseout', () => {
                 polygon.setOptions({
                     fillOpacity: 0.2,
                     fillColor: color
                 })
-            })
+            });
             map.add(polygon);
         }
 
@@ -312,7 +328,7 @@
             zIndex: 1000,
             // collision: false,
             // 设置 allowCollision：true，可以让标注避让用户的标注
-            allowCollision:false
+            allowCollision: false
         });
         // 图层添加到地图
         map.add(layer);
@@ -426,10 +442,11 @@
                     mass.on('mouseout', function (e) {
                         closeInfoWindow();
                     });
+                    //点击显示图片
                     mass.on('click', function (e) {
                         closeInfoWindow();//关掉信息窗口，显示图片
                         if (e.data.imageUrl) {
-                           // console.log("e.data:" + e.data.imageUrl);
+                            // console.log("e.data:" + e.data.imageUrl);
                             var imageWindow = new AMap.InfoWindow({
                                 isCustom: true, //使用自定义窗体
                                 content: createImageWindow(e.data.imageUrl),

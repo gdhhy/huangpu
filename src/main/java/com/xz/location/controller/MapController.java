@@ -52,30 +52,10 @@ public class MapController {
     }*/
 
     @RequestMapping(value = "massmarks", method = RequestMethod.GET, produces = "text/html;charset=UTF-8")
-    public String massmarks(@RequestParam(value = "assetsType", required = false, defaultValue = "led") String assetsType,
-                            @RequestParam(value = "street", required = false, defaultValue = "") String street, ModelMap model) {
-        Map<String, Object> param = new HashMap<>();
-        param.put("start", 0);
-        param.put("limit", 999999);
-        param.put("street", street);
-        param.put("assetsType", assetsType);
-        param.put("coordinate", "fixed");
-        ArrayList<HashMap<String, Object>> json = new ArrayList<>();
-
-        List<Assets> assetses = assetsMapper.selectAssets(param);
-        for (Assets assets : assetses) {
-            double[] lnglat = {assets.getLongitude(), assets.getLatitude()};
-            HashMap<String, Object> map = new HashMap(3);
-            map.put("lnglat", lnglat);
-            map.put("name", assets.getName());
-            map.put("id", assets.getAssetsID());
-            map.put("style", 0);
-            json.add(map);
-        }
+    public String massmarks(ModelMap model) {
         model.addAttribute("key1", configs.getProperty("amap_key1"));
         model.addAttribute("key2", configs.getProperty("amap_key2"));
 
-        model.addAttribute("assets", gson.toJson(json));
         return "map/massmarks";
     }
 

@@ -28,16 +28,16 @@ public class Assets implements Serializable {
     private double latitude = 0;//OK
     private String link;//OK
     private String linkPhone;//OK
-    private int imageID;
+    private Integer imageID;
     private String imageUrl;
     private String status;
     private String street;//OK
     private String color;
     private String extJson;
     private String imageJson;
-    private int sourceID;
+    private Integer sourceID;
     private boolean fixPosition;
-    private int deleted;//1未删除，默认0
+    private Integer deleted;//1未删除，默认0
 
     public int getAssetsID() {
         return assetsID;
@@ -111,11 +111,11 @@ public class Assets implements Serializable {
         this.linkPhone = linkPhone;
     }
 
-    public int getImageID() {
+    public Integer getImageID() {
         return imageID;
     }
 
-    public void setImageID(int imageID) {
+    public void setImageID(Integer imageID) {
         this.imageID = imageID;
     }
 
@@ -159,11 +159,19 @@ public class Assets implements Serializable {
         this.extJson = extJson;
     }
 
-    public int getSourceID() {
+    public String getImageJson() {
+        return imageJson;
+    }
+
+    public void setImageJson(String imageJson) {
+        this.imageJson = imageJson;
+    }
+
+    public Integer getSourceID() {
         return sourceID;
     }
 
-    public void setSourceID(int sourceID) {
+    public void setSourceID(Integer sourceID) {
         this.sourceID = sourceID;
     }
 
@@ -175,19 +183,11 @@ public class Assets implements Serializable {
         this.fixPosition = fixPosition;
     }
 
-    public int getDeleted() {
+    public Integer getDeleted() {
         return deleted;
     }
 
-    public void setDeleted(int deleted) {
+    public void setDeleted(Integer deleted) {
         this.deleted = deleted;
-    }
-
-    public String getImageJson() {
-        return imageJson;
-    }
-
-    public void setImageJson(String imageJson) {
-        this.imageJson = imageJson;
     }
 }

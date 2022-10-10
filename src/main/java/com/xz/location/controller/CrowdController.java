@@ -143,7 +143,7 @@ public class CrowdController {
         HashMap postMap = gson.fromJson(postJson, HashMap.class);
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Map<String, Object> map = new HashMap<>();
-        map.put("title", "设置资产颜色");
+        map.put("title", "设置流调颜色");
         if (principal instanceof UserDetails) {
             Crowd crowd = new Crowd();
             crowd.setCrowdID(Integer.parseInt(postMap.get("crowdID").toString()));
@@ -166,7 +166,7 @@ public class CrowdController {
                            @RequestParam(value = "value") String value) {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Map<String, Object> map = new HashMap<>();
-        map.put("title", "设置资产属性");
+        map.put("title", "设置流调属性");
         int result = -1;
         if (principal instanceof UserDetails) {
             Crowd crowd = new Crowd();
@@ -200,7 +200,7 @@ public class CrowdController {
         Map<String, Object> param = new HashMap<>();
         param.put("crowdID", Integer.parseInt(keys[0]));
         Map<String, Object> returnMap = new HashMap<>();
-        returnMap.put("title", "设置资产扩展信息");
+        returnMap.put("title", "设置流调扩展信息");
         if (principal instanceof UserDetails) {
             List<Crowd> crowd1 = crowdMapper.selectCrowd(param);
             int result = -1;
@@ -216,7 +216,7 @@ public class CrowdController {
 
                             crowd.setExtJson(gson.toJson(keyValueList));
                             result = crowdMapper.updateCrowd(crowd);
-                            returnMap.put("message", "更新资产扩展信息成功");
+                            returnMap.put("message", "更新流调扩展信息成功");
                             break;
                         }
                     }
@@ -231,7 +231,7 @@ public class CrowdController {
                     keyValueList.add(map);
                     crowd.setExtJson(gson.toJson(keyValueList));
                     result = crowdMapper.updateCrowd(crowd);
-                    returnMap.put("message", "增加资产扩展信息成功");
+                    returnMap.put("message", "增加流调扩展信息成功");
                 }
 
                 returnMap.put("succeed", result > 0);
@@ -266,7 +266,7 @@ public class CrowdController {
         param.put("crowdID", crowdID);
 
         Map<String, Object> returnMap = new HashMap<>();
-        returnMap.put("title", "删除资产扩展信息");
+        returnMap.put("title", "删除流调扩展信息");
 
         List<Crowd> crowd1 = crowdMapper.selectCrowd(param);
         int result = -1;
@@ -281,12 +281,12 @@ public class CrowdController {
 
                     crowd.setExtJson(gson.toJson(keyValueList));
                     result = crowdMapper.updateCrowd(crowd);
-                    returnMap.put("message", "删除资产扩展信息成功");
+                    returnMap.put("message", "删除流调扩展信息成功");
                     break;
                 }
             }
             returnMap.put("succeed", true);
-            if (result == -1) returnMap.put("message", "没找到该资产的扩展信息");
+            if (result == -1) returnMap.put("message", "没找到该流调的扩展信息");
         } else {
             returnMap.put("succeed", false);
             returnMap.put("message", "参数错误，找不到主键：" + crowdID);

@@ -30,19 +30,19 @@ public class Crowd implements Serializable {
     private String stayTime;
     private double longitude = 0; //OK
     private double latitude = 0;//OK
-    private int highRisk=0;
-    private int knit=0;
-    private int subknit=0;
-    private int important=0;
-    private int sourceID;
-    private int fixPosition;
+    private Integer highRisk;
+    private Integer knit;
+    private Integer subknit;
+    private Integer important;
+    private Integer sourceID;
+    private Integer fixPosition;
     private String patient;
     private String teams;
     private String street;//OK
     private String extJson;
     private String color;
     private String status;
-    private int deleted;
+    private Integer deleted;
 
     public int getCrowdID() {
         return crowdID;
@@ -92,51 +92,51 @@ public class Crowd implements Serializable {
         this.latitude = latitude;
     }
 
-    public int getHighRisk() {
+    public Integer getHighRisk() {
         return highRisk;
     }
 
-    public void setHighRisk(int highRisk) {
+    public void setHighRisk(Integer highRisk) {
         this.highRisk = highRisk;
     }
 
-    public int getKnit() {
+    public Integer getKnit() {
         return knit;
     }
 
-    public void setKnit(int knit) {
+    public void setKnit(Integer knit) {
         this.knit = knit;
     }
 
-    public int getSubknit() {
+    public Integer getSubknit() {
         return subknit;
     }
 
-    public void setSubknit(int subknit) {
+    public void setSubknit(Integer subknit) {
         this.subknit = subknit;
     }
 
-    public int getImportant() {
+    public Integer getImportant() {
         return important;
     }
 
-    public void setImportant(int important) {
+    public void setImportant(Integer important) {
         this.important = important;
     }
 
-    public int getSourceID() {
+    public Integer getSourceID() {
         return sourceID;
     }
 
-    public void setSourceID(int sourceID) {
+    public void setSourceID(Integer sourceID) {
         this.sourceID = sourceID;
     }
 
-    public int getFixPosition() {
+    public Integer getFixPosition() {
         return fixPosition;
     }
 
-    public void setFixPosition(int fixPosition) {
+    public void setFixPosition(Integer fixPosition) {
         this.fixPosition = fixPosition;
     }
 
@@ -188,11 +188,11 @@ public class Crowd implements Serializable {
         this.status = status;
     }
 
-    public int getDeleted() {
+    public Integer getDeleted() {
         return deleted;
     }
 
-    public void setDeleted(int deleted) {
+    public void setDeleted(Integer deleted) {
         this.deleted = deleted;
     }
 }

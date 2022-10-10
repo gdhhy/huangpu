@@ -10,6 +10,8 @@ import java.util.Map;
 public interface CrowdMapper {
     List<Crowd> selectCrowd(@Param("param") Map<String, Object> param);
 
+    HashMap<String, Object> selectCrowdSum(@Param("param") Map<String, Object> param);
+
     int selectCrowdCount(@Param("param") Map<String, Object> param);
 
     int updateCrowd(@Param("pojo") Crowd crowd);

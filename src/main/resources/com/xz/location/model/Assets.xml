@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.xz.location.dao.AssetsMapper">
-    <!--<cache eviction="LRU" readOnly="false" flushInterval="60000" size="10000"/>-->
+    <cache eviction="LRU" readOnly="false" flushInterval="60000" size="10000"/>
     <resultMap id="AssetsResult" type="com.xz.location.pojo.Assets">
         <result jdbcType="INTEGER" column="assetsID" property="assetsID"/>
         <result jdbcType="VARCHAR" column="assetsType" property="assetsType"/>
@@ -66,14 +66,14 @@
             <if test="pojo.latitude>0">latitude = #{pojo.latitude:DOUBLE},</if>
             <if test="pojo.link!=null">link = #{pojo.link:VARCHAR},</if>
             <if test="pojo.linkPhone!=null">linkPhone = #{pojo.linkPhone:VARCHAR},</if>
-            <if test="pojo.imageID>=0">imageID = #{pojo.imageID:INTEGER},</if>
+            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.imageID)">imageID = #{pojo.imageID:INTEGER},</if>
             <if test="pojo.imageUrl!=null">imageUrl = #{pojo.imageUrl:VARCHAR},</if>
             <if test="pojo.status!=null">status = #{pojo.status:VARCHAR},</if>
             <if test="pojo.street!=null">street = #{pojo.street:VARCHAR},</if>
             <if test="pojo.extJson!=null">extJson = #{pojo.extJson:VARCHAR},</if>
             <if test="pojo.color!=null">color = #{pojo.color:VARCHAR},</if>
-            <if test="pojo.fixPosition>=0">fixPosition = #{pojo.fixPosition:INTEGER},</if>
-            <if test="pojo.deleted>=0">deleted = #{pojo.deleted:INTEGER},</if>
+            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.fixPosition)">fixPosition = #{pojo.fixPosition:INTEGER},</if>
+            <if test="@com.xz.util.Ognl@isNotEmpty(pojo.deleted)">deleted = #{pojo.deleted:INTEGER},</if>
         </set>
         where assetsID = #{pojo.assetsID:INTEGER}
     </update>
