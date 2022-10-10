@@ -21,7 +21,7 @@
     status      varchar(20)-->
 <mapper namespace="com.xz.location.dao.CrowdMapper">
     <!--<cache eviction="LRU" readOnly="false" flushInterval="60000" size="10000"/>-->
-    <resultMap id="ServerResult" type="com.xz.location.pojo.Crowd">
+    <resultMap id="CrowdResult" type="com.xz.location.pojo.Crowd">
         <result jdbcType="INTEGER" column="crowdID" property="crowdID"/>
         <result jdbcType="VARCHAR" column="location" property="location"/>
         <result jdbcType="VARCHAR" column="address" property="address"/>
@@ -52,7 +52,7 @@
             <if test="@com.xz.util.Ognl@isNotEmpty(param.address)">AND address LIKE '%${param.address}%'</if>
         </where>
     </sql>
-    <select id="selectCrowd" parameterType="java.util.Map" resultMap="ServerResult">
+    <select id="selectCrowd" parameterType="java.util.Map" resultMap="CrowdResult">
         SELECT crowdID,location,address,stayTime,longitude,latitude,highRisk,knit,subknit,important,sourceID,fixPosition,deleted,patient,teams,street,extJson,color,status FROM crowd
         <include refid="queryWhere"/>
         ORDER BY crowdID desc
@@ -76,16 +76,25 @@
         update crowd
         <set>
             updateTime=now(),
-            <if test="pojo.location!=null">owner = #{pojo.location:VARCHAR},</if>
+            <if test="pojo.location!=null">location = #{pojo.location:VARCHAR},</if>
             <if test="pojo.address!=null">address = #{pojo.address:VARCHAR},</if>
+            <if test="pojo.stayTime!=null">stayTime = #{pojo.stayTime:VARCHAR},</if>
             <if test="pojo.longitude>0">longitude = #{pojo.longitude:DOUBLE},</if>
             <if test="pojo.latitude>0">latitude = #{pojo.latitude:DOUBLE},</if>
-            <if test="pojo.status!=null">status = #{pojo.status:VARCHAR},</if>
+
+            <if test="pojo.highRisk>=0">highRisk = #{pojo.highRisk:INTEGER},</if>
+            <if test="pojo.knit>=0">knit = #{pojo.knit:INTEGER},</if>
+            <if test="pojo.subknit>=0">subknit = #{pojo.subknit:INTEGER},</if>
+            <if test="pojo.important>=0">important = #{pojo.important:INTEGER},</if>
+            <if test="pojo.fixPosition>=0">fixPosition = #{pojo.fixPosition:INTEGER},</if>
+            <if test="pojo.deleted>=0">deleted = #{pojo.deleted:INTEGER},</if>
+
+            <if test="pojo.patient!=null">patient = #{pojo.patient:VARCHAR},</if>
+            <if test="pojo.teams!=null">teams = #{pojo.teams:VARCHAR},</if>
             <if test="pojo.street!=null">street = #{pojo.street:VARCHAR},</if>
             <if test="pojo.extJson!=null">extJson = #{pojo.extJson:VARCHAR},</if>
             <if test="pojo.color!=null">color = #{pojo.color:VARCHAR},</if>
-            <if test="pojo.fixPosition>=0">fixPosition = #{pojo.fixPosition:INTEGER},</if>
-            <if test="pojo.deleted>=0">deleted = #{pojo.deleted:INTEGER},</if>
+            <if test="pojo.status!=null">status = #{pojo.status:VARCHAR},</if>
         </set>
         where crowdID = #{pojo.crowdID:INTEGER}
     </update>

@@ -9,7 +9,7 @@
     <!-- basic styles -->
 
     <link rel="stylesheet" href="/components/bootstrap-3.3.7-dist/css/bootstrap.min.css"/>
-    <link rel="stylesheet" href="/components/font-awesome-4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" href="/components/font-awesome-4.7.0/css/font-awesome.min.css"/>
 
     <%--<link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">--%>
 
@@ -154,14 +154,21 @@
                                     </p><br/><br/>
 
                                     <div class="clearfix">
-                                        <button type="button" class="width-35 pull-left btn btn-sm btn-danger col-sm-4" onclick="location='/map/massmarks.jspa'">
+                                        <button type="button" class="width-35 pull-left btn btn-sm btn-primary col-sm-4" onclick="location='/map/massmarks.jspa'">
                                             <i class="icon-lightbulb"></i>
                                             资产地图
                                         </button>
                                         <span class="col-sm-2"></span>
-                                        <button type="button" class="width-35 pull-right btn btn-sm btn-danger col-sm-4" onclick="location='${mainUrl}'">
+                                        <button type="button" class="width-35 pull-right btn btn-sm btn-success col-sm-4" onclick="location='${mainUrl}'">
                                             <i class="icon-lightbulb"></i>
                                             管理后台
+                                        </button>
+                                    </div>
+                                    <br/>
+                                    <div class="clearfix">
+                                        <button type="button" class="width-35 pull-left btn btn-sm btn-pink col-sm-4" onclick="location='/crowdmap/crowdmap.jspa'">
+                                            <i class="icon-lightbulb"></i>
+                                            流调地图
                                         </button>
                                     </div>
                                 </div><!-- /widget-main -->

@@ -30,10 +30,10 @@ public class Crowd implements Serializable {
     private String stayTime;
     private double longitude = 0; //OK
     private double latitude = 0;//OK
-    private int highRisk;
-    private int knit;
-    private int subknit;
-    private int important;
+    private int highRisk=0;
+    private int knit=0;
+    private int subknit=0;
+    private int important=0;
     private int sourceID;
     private int fixPosition;
     private String patient;

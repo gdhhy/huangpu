@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
-    <title>黄埔区资产位置信息</title>
+    <title>黄埔区新冠流调地图</title>
     <link rel="stylesheet" href="https://a.amap.com/jsapi_demos/static/demo-center/css/demo-center.css"/>
     <style>
         html, body, #container {
@@ -114,12 +114,12 @@
 <div id="container" class="map" tabindex="0"></div>
 
 <div class="input-card" style="width:11rem;left:10px;top:10px;bottom:auto">
-    <h4>资产类型</h4>
+    <h4>风险类型</h4>
     <div id="coordinate">
-        <div class="input-item"><input id="led" name="language" type="radio" checked="checked"><span class="input-text">LED</span></div>
-        <div class="input-item"><input id="idc" name="language" type="radio"><span class="input-text">IDC</span></div>
-        <div class="input-item"><input id="netbar" name="language" type="radio"><span class="input-text">网吧</span></div>
-        <div class="input-item"><input id="secsys" name="language" type="radio"><span class="input-text">等保系统</span></div>
+        <div class="input-item"><input id="highRisk" name="language" type="checkbox" checked="checked"><span class="input-text">高风险</span></div>
+        <div class="input-item"><input id="knit" name="language" type="checkbox" checked="checked"><span class="input-text">密接</span></div>
+        <div class="input-item"><input id="subknit" name="language" type="checkbox" checked="checked"><span class="input-text">次密接</span></div>
+        <div class="input-item"><input id="important" name="language" type="checkbox" checked="checked"><span class="input-text">重点人群</span></div>
     </div>
 </div>
 <%--<div class="input-card">
@@ -312,7 +312,7 @@
             zIndex: 1000,
             // collision: false,
             // 设置 allowCollision：true，可以让标注避让用户的标注
-            allowCollision:false
+            allowCollision: false
         });
         // 图层添加到地图
         map.add(layer);
@@ -320,7 +320,7 @@
         function loadStreetMarker(type) {
             layer.clear();
             // 初始化 labelMarker 街道的label
-            ajax('/map/getStreet3.jspa?assetsType={0}'.format(type), function (err, json) {
+            ajax('/crowdmap/getStreet3.jspa?assetsType={0}'.format(type), function (err, json) {
                 if (!err) {
                     var markers = [];
                     json.forEach(function (item) {
@@ -381,13 +381,13 @@
             if (mass) mass.clear();
 
             loadStreetMarker(type);
-            ajax('/map/getAssetsList.jspa?assetsType={0}'.format(type), function (err, json) {
+            ajax('/crowdmap/getCrowdList.jspa?assetsType={0}'.format(type), function (err, json) {
                 if (!err) {
                     mass = new AMap.MassMarks(json, {opacity: 0.8, zIndex: 111, cursor: 'pointer', style: style});
                     // var marker = new AMap.Marker({content: ' ', map: map});
                     mass.on('mouseover', function (e) {
                         //console.log("click：" + e.data.imageUrl);
-                        ajax('/map/getAssets.jspa?&assetsID={0}'.format(e.data.id), function (err, json) {
+                        ajax('/crowdmap/getCrowd.jspa?&assetsID={0}'.format(e.data.id), function (err, json) {
                             if (!err) {
                                 var extJson = JSON.parse(json.extJson);
 
@@ -429,7 +429,7 @@
                     mass.on('click', function (e) {
                         closeInfoWindow();//关掉信息窗口，显示图片
                         if (e.data.imageUrl) {
-                           // console.log("e.data:" + e.data.imageUrl);
+                            // console.log("e.data:" + e.data.imageUrl);
                             var imageWindow = new AMap.InfoWindow({
                                 isCustom: true, //使用自定义窗体
                                 content: createImageWindow(e.data.imageUrl),

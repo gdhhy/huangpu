@@ -3,7 +3,7 @@
 
 <mapper namespace="com.xz.location.dao.AssetsMapper">
     <!--<cache eviction="LRU" readOnly="false" flushInterval="60000" size="10000"/>-->
-    <resultMap id="ServerResult" type="com.xz.location.pojo.Assets">
+    <resultMap id="AssetsResult" type="com.xz.location.pojo.Assets">
         <result jdbcType="INTEGER" column="assetsID" property="assetsID"/>
         <result jdbcType="VARCHAR" column="assetsType" property="assetsType"/>
         <result jdbcType="VARCHAR" column="name" property="name"/>
@@ -35,7 +35,7 @@
             <if test="@com.xz.util.Ognl@isNotEmpty(param.address)">AND address LIKE '%${param.address}%'</if>
         </where>
     </sql>
-    <select id="selectAssets" parameterType="java.util.Map" resultMap="ServerResult">
+    <select id="selectAssets" parameterType="java.util.Map" resultMap="AssetsResult">
         SELECT assetsID,assetsType,name,owner,address,longitude,latitude,link,linkPhone,imageID,imageUrl,status,street,extJson,color,sourceID,fixPosition,deleted FROM assets
         <include refid="queryWhere"/>
         ORDER BY assetsID desc

@@ -116,8 +116,19 @@
                 <li class="">
                     <a href="index.jspa?content=/assets/assets.jspa&menuID=11" id="11">
                         <i class="menu-icon fa fa-caret-right"></i>
-                        <i class="fa fa-folder-o"></i>
+                        <i class="fa fa-road"></i>
                         <span class="menu-text">资产管理</span>
+                    </a>
+
+                    <b class="arrow"></b>
+                </li>
+            </ul>
+            <ul class="submenu">
+                <li class="">
+                    <a href="index.jspa?content=/crowd/crowd.jspa&menuID=12" id="12">
+                        <i class="menu-icon fa fa-caret-right"></i>
+                        <i class="fa fa-bug"></i>
+                        <span class="menu-text">流调管理</span>
                     </a>
 
                     <b class="arrow"></b>

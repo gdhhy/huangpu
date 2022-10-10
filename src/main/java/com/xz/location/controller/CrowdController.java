@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.xz.location.dao.CrowdMapper;
-import com.xz.location.dao.UploadFileMapper;
 import com.xz.location.pojo.Crowd;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,24 +12,25 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Controller
 @RequestMapping("/crowd")
 
 public class CrowdController {
     private final static Logger logger = LogManager.getLogger(CrowdController.class);
+    @Resource
+    private Properties configs;
     @Autowired
     private CrowdMapper crowdMapper;
-    @Autowired
-    private UploadFileMapper uploadFileMapper;
+    /*@Autowired
+    private UploadFileMapper uploadFileMapper;*/
 
     private Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm").serializeNulls().create();
 
@@ -294,5 +294,10 @@ public class CrowdController {
 
         return gson.toJson(returnMap);
     }
-
+    @RequestMapping(value = "crowd", method = RequestMethod.GET, produces = "text/html;charset=UTF-8")
+    public String crowd(ModelMap model) {
+        model.addAttribute("key1", configs.getProperty("amap_key1"));
+        model.addAttribute("key2", configs.getProperty("amap_key2"));
+        return "location/crowd";
+    }
 }

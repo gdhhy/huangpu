@@ -26,7 +26,7 @@ public class MapController {
 
     private Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm").serializeNulls().create();
 
-    @RequestMapping(value = "cluster", method = RequestMethod.GET, produces = "text/html;charset=UTF-8")
+   /* @RequestMapping(value = "cluster", method = RequestMethod.GET, produces = "text/html;charset=UTF-8")
     public String cluster(@RequestParam(value = "assets", required = false, defaultValue = "led") String assetsType,
                           @RequestParam(value = "street", required = false, defaultValue = "") String street, ModelMap model) {
         Map<String, Object> param = new HashMap<>();
@@ -49,7 +49,7 @@ public class MapController {
 
         model.addAttribute("assets", gson.toJson(json));
         return "map/cluster";
-    }
+    }*/
 
     @RequestMapping(value = "massmarks", method = RequestMethod.GET, produces = "text/html;charset=UTF-8")
     public String massmarks(@RequestParam(value = "assetsType", required = false, defaultValue = "led") String assetsType,
@@ -162,7 +162,7 @@ public class MapController {
         return "var LabelsData = [" + String.join(",", labels) + "]";
     }*/
 
-    @ResponseBody
+    /*@ResponseBody
     @RequestMapping(value = "getStreet2", method = RequestMethod.GET, produces = "text/javascript;charset=UTF-8")
     public String getStreet2(@RequestParam(value = "assets", required = false, defaultValue = "led") String assets) {
         Map<String, Object> param = new HashMap<>();
@@ -187,7 +187,7 @@ public class MapController {
         }
 
         return "var streetLabel = [" + String.join(",", labels) + "]";
-    }
+    }*/
 
     @ResponseBody
     @RequestMapping(value = "getStreet3", method = RequestMethod.GET, produces = "text/javascript;charset=UTF-8")
