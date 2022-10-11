@@ -157,7 +157,7 @@
         <div class="input-item"><input id="important" name="language" type="checkbox" checked="checked"><span class="input-text">重点人群(${important})</span></div>
     </div>
 </div>
-<div class="input-card" style="width:30rem;left:10px;top:250px;bottom:auto;z-index: 100; "> <%--background: rgba(12,0,255,0.1)--%>
+<div class="input-card" style="width:31rem;left:10px;top:250px;bottom:auto;z-index: 100; "> <%--background: rgba(12,0,255,0.1)--%>
     <h4 style="font-weight: bold">街道</h4>
     <div id="coordinate2"></div>
 </div>
@@ -186,23 +186,45 @@
             //mapStyle: 'amap://styles/45311ae996a8bea0da10ad5151f72979',
         });
         map.addControl(layerCtrl1);
-        var tool = new AMap.ToolBar();//+-缩放工具
-        tool.addTo(map);
+       /* var tool = new AMap.ToolBar();//+-缩放工具
+        tool.addTo(map);*/
 
         var loca = new Loca.Container({
             map,
         });
-
-        var geo = new Loca.GeoJSONSource({
-            url: '/crowdmap/crowd.jspa',
+        // 图例
+        var lengend = new Loca.Legend({
+            loca: loca,
+            title: {
+                label: '图列',
+                fontColor: 'rgba(9,0,255,0.4)',
+                fontSize: '16px',
+            },
+            style: {
+                backgroundColor: 'rgba(0,0,255,0.2)',
+                right: '20px',
+                bottom: '30px',
+                fontSize: '12px',
+            },
+            dataMap: [
+                {label: '有高风险、密接', color: 'red'},
+                {label: '无高风险、密接', color: 'orange'}
+            ],
+        });
+        //呼吸点
+        var geoR = new Loca.GeoJSONSource({
+            url: '/crowdmap/crowd.jspa?color=red',
+        });
+        var geoY = new Loca.GeoJSONSource({
+            url: '/crowdmap/crowd.jspa?color=yellow',
         });
 
-        //呼吸点
-        var breath = new Loca.ScatterLayer({
+
+        var breathRed = new Loca.ScatterLayer({
             zIndex: 121,
         });
-        breath.setSource(geo);
-        breath.setStyle({
+        breathRed.setSource(geoR);
+        breathRed.setStyle({
             unit: 'px',
             //size: [50, 50],
             size: (index, f) => {
@@ -213,7 +235,24 @@
             animate: true,
             duration: 1000,
         });
-        loca.add(breath);
+
+        var breathYellow = new Loca.ScatterLayer({
+            zIndex: 121,
+        });
+        breathYellow.setSource(geoY);
+        breathYellow.setStyle({
+            unit: 'px',
+            //size: [50, 50],
+            size: (index, f) => {
+                var n = Math.log(f.properties['highRisk'] + f.properties['knit'] + f.properties['subknit'] + f.properties['important']) * 10;
+                return [n, n];
+            },
+            texture: 'https://a.amap.com/Loca/static/loca-v2/demos/images/breath_yellow.png',
+            animate: true,
+            duration: 1000,
+        });
+        loca.add(breathRed);
+        loca.add(breathYellow);
         loca.animate.start();
         //呼吸点结束
 
@@ -248,6 +287,102 @@
 
         addPolygon(huangpudistrinct, 'LightBLue', [1, 13]);
         //街道边界结束
+
+        //街道label开始
+        //var allowCollision = false;
+        var layer = new AMap.LabelsLayer({
+            zooms: [3, 20],
+            zIndex: 1000,
+            // collision: false,
+            // 设置 allowCollision：true，可以让标注避让用户的标注
+            allowCollision: false
+        });
+        // 图层添加到地图
+        map.add(layer);
+        var streetJson;
+
+        function loadStreetMarker() {
+            layer.clear();
+            // 初始化 labelMarker 街道的label
+            ajax('/crowdmap/getStreet3.jspa', function (err, json) {
+                if (!err) {
+                    streetJson = json;
+                    var markers = [];
+                    json.forEach(function (item) {
+                        //item.icon = icon; 注释掉，icon也注释掉，以后有需要再加上
+                        item.text.style = textStyle;
+
+                        var labelMarker = new AMap.LabelMarker(item);
+                        markers.push(labelMarker);
+
+                        if (item.highRisk + item.knit + item.subknit + item.important > 0)
+                            $('#coordinate2').append(('<div class="input-item"><input id="{0}" name="crowd" type="radio">' +
+                                '<span class="input-text"><span style="font-weight: bold" >{1}：</span>高风险：{2}，密接：{3}，次密：{4}，重点：{5}</span></div>')
+                                .format(item.name, item.streetName, item.highRisk, item.knit, item.subknit, item.important));
+                    });
+                    // 将 marker 添加到图层
+                    layer.add(markers);
+
+                    //绑定街道radio点击事件
+                    var radios = document.querySelectorAll("#coordinate2 input");
+                    radios.forEach(function (ratio) {
+                        ratio.onclick = changeCenterZoom;
+                    });
+                }
+            });
+        } // 街道的label结束
+        loadStreetMarker();
+
+        function changeCenterZoom() {
+            var streetID = this.id;
+            streetJson.forEach(function (item) {
+                if (item.name === streetID) {
+                    map.setCenter(item.position);
+                    map.setZoom(15);
+                }
+            });
+        }
+
+        //绑定风险类型checkbox点击事件，重新累加风险人群数量
+        var radios2 = document.querySelectorAll("#coordinate input");
+        radios2.forEach(function (ratio) {
+            ratio.onclick = refreshCount;
+        });
+
+        function refreshCount() {
+            breathRed.setStyle({
+                unit: 'px',
+                size: (index, f) => {
+                    let ss = 0;
+                    if ($('#highRisk').is(':checked')) ss += f.properties['highRisk'];
+                    if ($('#knit').is(':checked')) ss += f.properties['knit'];
+                    if ($('#subknit').is(':checked')) ss += f.properties['subknit'];
+                    if ($('#important').is(':checked')) ss += f.properties['important'];
+                    let n = Math.log(ss) * 10;
+                    return [n, n];
+                },
+                texture: 'https://a.amap.com/Loca/static/loca-v2/demos/images/breath_red.png',
+                // texture: 'https://a.amap.com/Loca/static/loca-v2/demos/images/breath_yellow.png',
+                animate: true,
+                duration: 1000,
+            });
+            breathYellow.setStyle({
+                unit: 'px',
+                size: (index, f) => {
+                    let ss = 0;
+                    if ($('#highRisk').is(':checked')) ss += f.properties['highRisk'];
+                    if ($('#knit').is(':checked')) ss += f.properties['knit'];
+                    if ($('#subknit').is(':checked')) ss += f.properties['subknit'];
+                    if ($('#important').is(':checked')) ss += f.properties['important'];
+                    let n = Math.log(ss) * 10;
+                    return [n, n];
+                },
+                texture: 'https://a.amap.com/Loca/static/loca-v2/demos/images/breath_yellow.png',
+                animate: true,
+                duration: 1000,
+            });
+        }
+
         //信息窗体开始
         //构建自定义信息窗体
         function createInfoWindow(title, content) {
@@ -296,102 +431,11 @@
             map.clearInfoWindow();
         }
 
-        //街道label开始
-        //var allowCollision = false;
-        var layer = new AMap.LabelsLayer({
-            zooms: [3, 20],
-            zIndex: 1000,
-            // collision: false,
-            // 设置 allowCollision：true，可以让标注避让用户的标注
-            allowCollision: false
-        });
-        // 图层添加到地图
-        map.add(layer);
-        var streetJson;
-
-        function loadStreetMarker(type) {
-            layer.clear();
-            // 初始化 labelMarker 街道的label
-            ajax('/crowdmap/getStreet3.jspa?assetsType={0}'.format(type), function (err, json) {
-                if (!err) {
-                    streetJson = json;
-                    var markers = [];
-                    json.forEach(function (item) {
-                        //item.icon = icon; 注释掉，icon也注释掉，以后有需要再加上
-                        item.text.style = textStyle;
-
-                        var labelMarker = new AMap.LabelMarker(item);
-                        markers.push(labelMarker);
-
-                        if (item.highRisk + item.knit + item.subknit + item.important > 0)
-                            $('#coordinate2').append(('<div class="input-item"><input id="{0}" name="crowd" type="radio">' +
-                                '<span class="input-text"><span style="font-weight: bold" >{1}：</span>高风险：{2}，密接：{3}，次密：{4}，重点：{5}</span></div>')
-                                .format(item.name, item.streetName, item.highRisk, item.knit, item.subknit, item.important));
-                    });
-                    // 将 marker 添加到图层
-                    layer.add(markers);
-
-                    //绑定街道radio点击事件
-                    var radios = document.querySelectorAll("#coordinate2 input");
-                    radios.forEach(function (ratio) {
-                        ratio.onclick = changeCenterZoom;
-                    });
-                }
-            });
-        } // 街道的label结束
-        loadStreetMarker("");
-
-        function changeCenterZoom() {
-            var streetID = this.id;
-            streetJson.forEach(function (item) {
-                if (item.name === streetID) {
-                    map.setCenter(item.position);
-                    map.setZoom(15);
-                }
-            });
-        }
-
-        //绑定风险类型checkbox点击事件，重新累加风险人群数量
-        var radios2 = document.querySelectorAll("#coordinate input");
-        radios2.forEach(function (ratio) {
-            ratio.onclick = refreshCount;
-        });
-
-        function refreshCount() {
-            breath.setStyle({
-                unit: 'px',
-                size: (index, f) => {
-                    let ss = 0;
-                    if ($('#highRisk').is(':checked')) ss += f.properties['highRisk'];
-                    if ($('#knit').is(':checked')) ss += f.properties['knit'];
-                    if ($('#subknit').is(':checked')) ss += f.properties['subknit'];
-                    if ($('#important').is(':checked')) ss += f.properties['important'];
-                    let n = Math.log(ss) * 10;
-                    return [n, n];
-                },
-                texture: 'https://a.amap.com/Loca/static/loca-v2/demos/images/breath_red.png',
-                animate: true,
-                duration: 1000,
-            });
-        }
-
-
-//添加marker标记
         var style = [{
             url: 'https://webapi.amap.com/images/mass/mass2.png',
             anchor: new AMap.Pixel(3, 3),
             size: new AMap.Size(5, 5),
             zIndex: 1,
-        }, {
-            url: 'https://webapi.amap.com/images/mass/mass0.png',
-            anchor: new AMap.Pixel(6, 6),
-            size: new AMap.Size(11, 11),
-            zIndex: 3,
-        }, {
-            url: 'https://webapi.amap.com/images/mass/mass1.png',
-            anchor: new AMap.Pixel(4, 4),
-            size: new AMap.Size(7, 7),
-            zIndex: 2,
         }];
         var mass;
 
@@ -400,13 +444,10 @@
             // layer.hide();
             if (mass) mass.clear();
 
-            //loadStreetMarker( );
             ajax('/crowdmap/getCrowdList.jspa', function (err, json) {
                 if (!err) {
                     mass = new AMap.MassMarks(json, {opacity: 0.8, zIndex: 111, cursor: 'pointer', style: style});
                     mass.on('mouseover', function (e) {
-                        /*  console.log("click：" + e.data.id);
-                          console.log("teams：" + e.data.teams);*/
                         //var title = '<span style="font-size:11px;;color:#F00">{0}</span>'.format(e.data.location);
                         var hh = '<p>病人：<span style="color: #0288d1;font-weight:bold;">{patient}</span></p>' +
                             '<p>地址：<span style="color: #0288d1;font-weight:bold;">{address}</span></p>' +
@@ -414,7 +455,7 @@
                             '<p>高风险：<span style="color: #F00;font-weight:bold;">{highRisk}</span>，' +
                             '密接：<span style="color: #F00;font-weight:bold;">{knit}</span>，' +
                             '次密接：<span style="color: #F00;font-weight:bold;">{subknit}</span>，' +
-                            '重点：<span style="color: #F00;font-weight:bold;">{important}</span></p>';
+                            '重点人群：<span style="color: #F00;font-weight:bold;">{important}</span></p>';//purple
                         var infoWindow = new AMap.InfoWindow({
                             isCustom: true, //使用自定义窗体
                             content: createInfoWindow(e.data.location, hh.signMix(e.data)),

@@ -182,6 +182,7 @@ public class MapController {
                 "\"zooms\": [10, 20]," +
                 "\"opacity\": 1," +
                 "\"zIndex\": 8," +
+                "\"count\": %d," +
                 //"\"icon\"," +
                 "\"text\": {" +
                 "\"content\":\"%s(%d)\"," +
@@ -190,7 +191,7 @@ public class MapController {
                 "\"style\":\"\"" + //在jsp 的html重新设定
                 "}}";
         for (HashMap<String, Object> label : streets) {
-            labels.add(String.format(elements, label.get("streetID"), label.get("longitude"), label.get("latitude"), label.get("streetName"), label.get("cc")));
+            labels.add(String.format(elements, label.get("streetID"), label.get("longitude"), label.get("latitude"), label.get("cc"), label.get("streetName"), label.get("cc")));
         }
 
         return "[" + String.join(",", labels) + "]";

@@ -134,6 +134,10 @@
         <div class="input-item"><input id="secsys" name="language" type="radio"><span class="input-text">等保系统</span></div>
     </div>
 </div>
+<div class="input-card" style="width:12rem;left:10px;top:250px;bottom:auto;z-index: 100; ">
+    <h4 style="font-weight: bold">街道(数量)</h4>
+    <div id="coordinate2"></div>
+</div>
 <div class="demo-title">
     <h1>黄埔区资产地图</h1>
     <!--<h3>中国城市各人口数量，总GDP数量和人均GDP排行情况</h3>-->
@@ -332,12 +336,15 @@
         });
         // 图层添加到地图
         map.add(layer);
+        var streetJson;
 
         function loadStreetMarker(type) {
             layer.clear();
+            $('#coordinate2').empty();
             // 初始化 labelMarker 街道的label
             ajax('/map/getStreet3.jspa?assetsType={0}'.format(type), function (err, json) {
                 if (!err) {
+                    streetJson = json;
                     var markers = [];
                     json.forEach(function (item) {
                         //item.icon = icon; 注释掉，icon也注释掉，以后有需要再加上
@@ -345,9 +352,31 @@
 
                         var labelMarker = new AMap.LabelMarker(item);
                         markers.push(labelMarker);
+
+
+                        if (item.count > 0)
+                            $('#coordinate2').append(('<div class="input-item"><input id="{0}" name="crowd" type="radio">' +
+                                '<span class="input-text">{1}</span></div>')
+                                .format(item.name, item.text.content));
                     });
                     // 将 marker 添加到图层
                     layer.add(markers);
+
+                    //绑定街道radio点击事件
+                    var radios = document.querySelectorAll("#coordinate2 input");
+                    radios.forEach(function (ratio) {
+                        ratio.onclick = changeCenterZoom;
+                    });
+                }
+            });
+        }
+
+        function changeCenterZoom() {
+            var streetID = this.id;
+            streetJson.forEach(function (item) {
+                if (item.name === streetID) {
+                    map.setCenter(item.position);
+                    map.setZoom(15);
                 }
             });
         }

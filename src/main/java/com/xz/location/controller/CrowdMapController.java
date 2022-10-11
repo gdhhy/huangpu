@@ -108,10 +108,11 @@ public class CrowdMapController {
 
     @ResponseBody
     @RequestMapping(value = "crowd", method = RequestMethod.GET, produces = "text/html;charset=UTF-8")
-    public String crowd() {
+    public String crowd(@RequestParam(value = "color", required = false, defaultValue = "") String color) {
         Map<String, Object> param = new HashMap<>();
         param.put("start", 0);
         param.put("showDeleted", "false");
+        param.put("color", color);
         param.put("inUse", "true");
         param.put("limit", 999999);
         param.put("coordinate", "fixed");//已有坐标的资产

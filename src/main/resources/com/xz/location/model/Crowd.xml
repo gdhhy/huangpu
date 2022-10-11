@@ -49,6 +49,8 @@ status      varchar(20)-->
             <if test="param.coordinate=='fixed'">AND longitude>0.001 AND latitude>0.001</if>
             <if test="param.coordinate=='unfixed'">AND (longitude &lt; 0.001 OR latitude &lt; 0.001)</if>
             <if test="param.showDeleted=='false'">AND deleted=0</if>
+            <if test="param.color=='red'">AND (highRisk>0 or knit>0)</if>
+            <if test="param.color=='yellow'">AND (highRisk=0 and knit=0)</if>
             <if test="param.inUse=='true'">AND status='在用'</if>
             <if test="@com.xz.util.Ognl@isNotEmpty(param.address)">AND address LIKE '%${param.address}%'</if>
         </where>
