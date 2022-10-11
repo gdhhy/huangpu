@@ -111,11 +111,10 @@ status      varchar(20)-->
     <insert id="insertCrowd" flushCache="true" useGeneratedKeys="true" keyProperty="pojo.crowdID">
         INSERT INTO crowd (location, address, stayTime, longitude, latitude,
                            highRisk, knit, subknit, important, sourceID, fixPosition, deleted,
-                           patient, teams, street, extJson, color, status)
+                           patient, teams, street, status)
         VALUES (#{pojo.location:VARCHAR}, #{pojo.address:VARCHAR}, #{pojo.stayTime:VARCHAR}, #{pojo.longitude:DOUBLE}, #{pojo.latitude:DOUBLE},
-                #{pojo.highRisk:INTEGER}, #{pojo.knit:INTEGER}, #{pojo.subknit:INTEGER}, #{pojo.important:INTEGER}, #{pojo.sourceID:INTEGER}, #{pojo.fixPosition:INTEGER},
-                #{pojo.deleted:INTEGER},
-                #{pojo.patient:VARCHAR}, #{pojo.teams:VARCHAR}, #{pojo.street:VARCHAR}, #{pojo.extJson:VARCHAR}, #{pojo.color:VARCHAR}, #{pojo.status:VARCHAR})
+                #{pojo.highRisk:INTEGER}, #{pojo.knit:INTEGER}, #{pojo.subknit:INTEGER}, #{pojo.important:INTEGER}, #{pojo.sourceID:INTEGER}, #{pojo.fixPosition:INTEGER}, 0,
+                #{pojo.patient:VARCHAR}, #{pojo.teams:VARCHAR}, #{pojo.street:VARCHAR}, '在用')
     </insert>
     <delete id="deleteCrowd" parameterType="int">
         UPDATE crowd

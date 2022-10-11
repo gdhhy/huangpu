@@ -128,6 +128,7 @@ create table crowd
     street      varchar(255)  default '' comment '所属街道', -- 共同
     extJson     varchar(8191) default '',
     color       varchar(255),
+    drapAddress varchar(1024),                           -- 地图拖曳选择返回的地址
     status      varchar(20),
     insertTime  datetime      default CURRENT_TIMESTAMP(),
     updateTime  datetime      default CURRENT_TIMESTAMP()

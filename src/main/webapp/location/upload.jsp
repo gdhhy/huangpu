@@ -6,7 +6,7 @@
 <script src="../assets/js/jquery.validate.min.js"></script>
 
 <%--<link rel="stylesheet" href="../components/jquery-ui/jquery-ui.css" />--%>
-<link rel="stylesheet" href="../components/font-awesome-4.7.0/css/font-awesome.min.css" />
+<link rel="stylesheet" href="../components/font-awesome-4.7.0/css/font-awesome.min.css"/>
 <link rel="stylesheet" href="../jQuery-File-Upload-master/css/jquery.fileupload.css">
 <script type="text/javascript">
     jQuery(function ($) {
@@ -148,6 +148,7 @@
                 <div class="col-xs-12">备注：
                     <ul>
                         <li style="height: 30px">仅支xls、xlsx格式文件上传</li>
+                        <li style="height: 30px">流调工作表名字含有“流调”两字，数据从第3行开始，模板<a href="/temp/梁善为重点场所流调一览表（3个）（10月3日22时00分报).xls">下载</a></li>
                         <li style="height: 30px">LED格式工作表名字为“总表”，数据从第4行开始，模板<a href="/temp/全区 LED 电子显示屏情况表（新).xls">下载</a></li>
                         <li style="height: 30px">IDC格式工作表名字为“IDC”，数据从第2行开始，模板<a href="/temp/IDC.xlsx">下载</a></li>
                         <li style="height: 30px">网吧格式工作表名字为“网吧”，数据从第2行开始，模板<a href="/temp/网吧.xlsx">下载</a></li>
