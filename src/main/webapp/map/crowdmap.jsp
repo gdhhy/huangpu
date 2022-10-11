@@ -168,22 +168,21 @@
 <script src="https://webapi.amap.com/maps?v=2.0&key=${key1}&plugin=AMap.Scale,AMap.ToolBar"></script>
 <script src="https://webapi.amap.com/loca?v=2.0.0&key=${key1}"></script>
 <script src="https://a.amap.com/jsapi_demos/static/demo-center/js/demoutils.js"></script>
-<script src="https://webapi.amap.com/ui/1.1/main.js?v=1.1.1"></script>
+<script src="https://webapi.amap.com/ui/1.1/main.js?v=1.1.2"></script>
 <script src="/map/huangpu.js"></script>
 
 <script>
+    var map = new AMap.Map('map', {
+        zoom: 12,
+        showLabel: true,
+        viewMode: '2D', // 默认使用 2D 模式，如果希望使用带有俯仰角的 3D 模式，请设置 viewMode: '3D',
+        center: [113.4841753, 23.2096782],
+        pitch: 60
+        //mapStyle: 'amap://styles/45311ae996a8bea0da10ad5151f72979',
+    });
     AMapUI.loadUI(['control/BasicControl'], function (BasicControl) {
         var layerCtrl1 = new BasicControl.LayerSwitcher({
             position: 'tr'
-        });
-        var map = new AMap.Map('map', {
-            zoom: 12,
-            showLabel: false,
-            viewMode: '2D', // 默认使用 2D 模式，如果希望使用带有俯仰角的 3D 模式，请设置 viewMode: '3D',
-            center: [113.4841753, 23.2096782],
-            layers: layerCtrl1.getEnabledLayers(),
-            pitch: 60
-            //mapStyle: 'amap://styles/45311ae996a8bea0da10ad5151f72979',
         });
         map.addControl(layerCtrl1);
        /* var tool = new AMap.ToolBar();//+-缩放工具
@@ -463,9 +462,9 @@
                         });
                         infoWindow.open(map, e.data.lnglat);
                     });
-                    mass.on('mouseout', function (e) {
+                   /* mass.on('mouseout', function (e) {
                         closeInfoWindow();
-                    });
+                    });*/
 
                     mass.setMap(map);
                 }

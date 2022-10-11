@@ -184,23 +184,24 @@
 </script>
 <script type="text/javascript" src="https://webapi.amap.com/maps?v=2.0&key=${key1}&plugin=AMap.Adaptor"></script>
 <script src="https://a.amap.com/jsapi_demos/static/demo-center/js/demoutils.js"></script>
-<script src="https://webapi.amap.com/ui/1.1/main.js?v=1.1.1"></script>
+<script src="https://webapi.amap.com/ui/1.1/main.js?v=1.1.2"></script>
 <script src="/map/huangpu.js"></script>
 <script type="text/javascript">
+    var map = new AMap.Map('container', {
+        showIndoorMap: false,
+        resizeEnable: true,
+        viewMode: '2D', // 默认使用 2D 模式，如果希望使用带有俯仰角的 3D 模式，请设置 viewMode: '3D',
+        center: [113.5141753, 23.2296782],
+        //layers: layerCtrl1.getEnabledLayers(),这行从卫星地图切换普通地图，丢失地名、路名
+        // layers: [new AMap.TileLayer.Satellite()],
+        zoom: 11.7, pitch: 60/*,
+  mapStyle: 'amap://styles/macaron' */ //https://lbs.amap.com/demo/javascript-api/example/personalized-map/set-theme-style
+    });
     AMapUI.loadUI(['control/BasicControl'], function (BasicControl) {
         var layerCtrl1 = new BasicControl.LayerSwitcher({
             position: 'tr'
         });
-        var map = new AMap.Map('container', {
-            showIndoorMap: false,
-            resizeEnable: true,
-            viewMode: '2D', // 默认使用 2D 模式，如果希望使用带有俯仰角的 3D 模式，请设置 viewMode: '3D',
-            center: [113.5141753, 23.2296782],
-            layers: layerCtrl1.getEnabledLayers(),
-            // layers: [new AMap.TileLayer.Satellite()],
-            zoom: 11.7, pitch: 60/*,
-  mapStyle: 'amap://styles/macaron' */ //https://lbs.amap.com/demo/javascript-api/example/personalized-map/set-theme-style
-        });
+
         map.addControl(layerCtrl1);
         map.on('zoomstart', closeInfoWindow);
         map.on('zoomchange', closeInfoWindow);

@@ -294,10 +294,32 @@ public class CrowdController {
 
         return gson.toJson(returnMap);
     }
+
     @RequestMapping(value = "crowd", method = RequestMethod.GET, produces = "text/html;charset=UTF-8")
     public String crowd(ModelMap model) {
         model.addAttribute("key1", configs.getProperty("amap_key1"));
         model.addAttribute("key2", configs.getProperty("amap_key2"));
         return "location/crowd";
+    }
+
+    @RequestMapping(value = "drap", method = RequestMethod.GET, produces = "text/html;charset=UTF-8")
+    public String drap(@RequestParam("crowdID") int crowdID, ModelMap model) {
+        Map<String, Object> param = new HashMap<>();
+        param.put("crowdID", crowdID);
+        List<Crowd> crowd1 = crowdMapper.selectCrowd(param);
+        if (crowd1.size() == 1) {
+            model.addAttribute("longitude", crowd1.get(0).getLongitude());
+            model.addAttribute("latitude", crowd1.get(0).getLatitude());
+            model.addAttribute("address", crowd1.get(0).getAddress());
+            model.addAttribute("location", crowd1.get(0).getLocation());
+            model.addAttribute("zoom", 16);
+        } else {
+            model.addAttribute("longitude", 113.5141753);
+            model.addAttribute("latitude", 23.2296782);
+            model.addAttribute("zoom", 11.7);
+        }
+        model.addAttribute("key1", configs.getProperty("amap_key1"));
+        model.addAttribute("key2", configs.getProperty("amap_key2"));
+        return "location/drap";
     }
 }
