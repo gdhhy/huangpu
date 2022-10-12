@@ -162,8 +162,9 @@
                     <a href="index.jspa?content=/assets/key.jspa&menuID=5" id="5">
                         <i class="menu-icon fa fa-caret-right"></i>
                         <i class="fa fa-key"></i>
-                        <span class="menu-text">地图KEY</span>
+                        <span class="menu-text">参数设置</span>
                     </a>
+
                     <b class="arrow"></b>
                 </li>
             </ul>

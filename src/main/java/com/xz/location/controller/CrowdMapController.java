@@ -62,6 +62,13 @@ public class CrowdMapController {
         model.addAttribute("key1", configs.getProperty("amap_key1"));
         model.addAttribute("key2", configs.getProperty("amap_key2"));
 
+        model.addAttribute("longitudeMin", configs.getProperty("longitudeMin"));
+        model.addAttribute("longitudeMax", configs.getProperty("longitudeMax"));
+        model.addAttribute("latitudeMin", configs.getProperty("latitudeMin"));
+        model.addAttribute("latitudeMax", configs.getProperty("latitudeMax"));
+       /* model.addAttribute("geoJsonR", crowd("red"));
+        model.addAttribute("geoJsonY", crowd("yellow"));*/
+
         model.addAttribute("crowd", gson.toJson(json));
         return "map/crowdmap";
     }
@@ -122,8 +129,9 @@ public class CrowdMapController {
         for (Crowd crowd : crowdes) {
             double[] lnglat = {crowd.getLongitude(), crowd.getLatitude()};
             HashMap<String, Object> prop = new HashMap<>(10);
-            prop.put("名称", crowd.getLocation());
-            prop.put("地址", crowd.getAddress());
+          /*  prop.put("street", crowd.getStreet());
+            prop.put("location", crowd.getLocation());
+            prop.put("address", crowd.getAddress());*/
           /*  properties.put("longitude", crowd.getLongitude());
             properties.put("latitude", crowd.getLatitude());*/
             prop.put("highRisk", crowd.getHighRisk());
@@ -152,6 +160,10 @@ public class CrowdMapController {
     @RequestMapping(value = "getStreet3", method = RequestMethod.GET, produces = "text/javascript;charset=UTF-8")
     public String getStreet3() {
         Map<String, Object> param = new HashMap<>();
+        param.put("longitudeMin", configs.getProperty("longitudeMin"));
+        param.put("longitudeMax", configs.getProperty("longitudeMax"));
+        param.put("latitudeMin", configs.getProperty("latitudeMin"));
+        param.put("latitudeMax", configs.getProperty("latitudeMax"));
         List<HashMap<String, Object>> streets = crowdMapper.selectStreetByCrowd(param);
         List<String> labels = new ArrayList<>();
 

@@ -17,7 +17,7 @@
                     cache: false,
                     success: function (response, textStatus) {
                         var result = JSON.parse(response);
-                            bootbox.alert({message: result.message,  className: 'rubberBand animated'});
+                        bootbox.alert({message: result.message, className: 'rubberBand animated'});
                     },
                     error: function (response, textStatus) {/*能够接收404,500等错误*/
                         bootbox.alert({message: response.responseText});
@@ -39,31 +39,24 @@
 <div class="page-content">
     <div class="page-header">
         <h1>
-            地图KEY
+            参数设置
             <small>
                 <i class="icon-double-angle-right"></i>
-                设置
+
             </small>
         </h1>
     </div><!-- /.page-header -->
 
     <div class="row">
         <div class="col-xs-12">
-            <!-- PAGE CONTENT BEGINS -->
-            <div class="alert alert-block alert-success">
-                <button type="button" class="close" data-dismiss="alert">
-                    <i class="icon-remove"></i>
-                </button>
-
-                <i class="icon-ok green"></i>
-
-                参见：
-                <strong class="green">
-                    <a href="https://console.amap.com/dev/key/app" target="_blank"> https://console.amap.com/dev/key/app</a>
-                </strong>。
-            </div>
-
             <form class="form-horizontal" role="form" id="keyForm">
+                <!-- PAGE CONTENT BEGINS -->
+                <div class="alert alert-block alert-success">
+                    高德地图KEY设置，参见：
+                    <strong class="green">
+                        <a href="https://console.amap.com/dev/key/app" target="_blank"> https://console.amap.com/dev/key/app</a>
+                    </strong>。
+                </div>
                 <!-- #section:elements.form -->
                 <div class="form-group">
                     <label class="col-sm-3 control-label no-padding-right" for="key1">JS API（展示）</label>
@@ -78,6 +71,43 @@
 
                     <div class="col-sm-9">
                         <input type="text" id="key2" name="key2" placeholder="key2" class="col-xs-10 col-sm-5" value="${key2}"/>
+                    </div>
+                </div>
+
+                <!-- PAGE CONTENT BEGINS -->
+                <div class="alert alert-block alert-info small">
+                    设置本行政区经纬度范围，超出范围的，不显示。
+
+                </div>
+                <!-- #section:elements.form -->
+                <div class="form-group">
+                    <label class="col-sm-3 control-label no-padding-right" for="key1">经度最小值</label>
+
+                    <div class="col-sm-9">
+                        <input type="text" id="longitudeMin" name="longitudeMin" placeholder="经度最小值" class="col-xs-10 col-sm-5" value='${longitudeMin}'/>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-3 control-label no-padding-right" for="key2">经度最大值</label>
+
+                    <div class="col-sm-9">
+                        <input type="text" id="longitudeMax" name="longitudeMax" placeholder="经度最大值" class="col-xs-10 col-sm-5" value="${longitudeMax}"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label no-padding-right" for="key1">纬度最小值</label>
+
+                    <div class="col-sm-9">
+                        <input type="text" id="latitudeMin" name="latitudeMin" placeholder="纬度最小值" class="col-xs-10 col-sm-5" value='${latitudeMin}'/>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-3 control-label no-padding-right" for="key2">纬度最大值</label>
+
+                    <div class="col-sm-9">
+                        <input type="text" id="latitudeMax" name="latitudeMax" placeholder="纬度最大值" class="col-xs-10 col-sm-5" value="${latitudeMax}"/>
                     </div>
                 </div>
                 <div class="clearfix form-actions">

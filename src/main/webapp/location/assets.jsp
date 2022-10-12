@@ -83,7 +83,7 @@
                     {"orderable": false, className: 'text-center', "targets": 2, title: '地址（百度坐标）'},
                     {
                         "orderable": false, className: 'text-center', "targets": 3, title: '经纬度（高德坐标）', width: 120, render: function (data, type, row, meta) {
-                            if (data > 113.607677 || data < 113.398067 || row.latitude > 23.41208 || row.latitude < 23.030213) {
+                            if (data > ${longitudeMax} || data < ${longitudeMin} || row.latitude > ${latitudeMax} || row.latitude < ${latitudeMin}) {
                                 return "<span style='color:red;font-weight: bold'>{0},{1}</span>".format(data, row.latitude);
                             } else
                                 return "<a href=\"\" style=' color:saddlebrown' onmouseout=\"hiddenPic();\" onmousemove=\"showPic(event,'https://restapi.amap.com/v3/staticmap?scale=2&markers=mid,0xFF0000,:{0},{1}&key=${key2}&radius&size=300*200');\">{2},{3}</a>".format(data, row.latitude, data, row.latitude);
@@ -296,8 +296,8 @@
             ignore: "",
             rules: {
                 //name: {required: true},
-                latitude: {max: 23.41208, min: 23.030213, required: true},
-                longitude: {max: 113.607677, min: 113.398067, required: true}
+                latitude: {max: ${latitudeMax}, min: ${latitudeMin}, required: true},
+                longitude: {max:  ${longitudeMax}, min:  ${longitudeMin}, required: true}
             },
             highlight: function (e) {
                 $(e).closest('.form-group').removeClass('has-info').addClass('has-error');

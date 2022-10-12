@@ -372,12 +372,30 @@
             });
         }
 
+        var currStreetMarker = [];
+
         function changeCenterZoom() {
             var streetID = this.id;
-            streetJson.forEach(function (item) {
-                if (item.name === streetID) {
-                    map.setCenter(item.position);
-                    map.setZoom(15);
+            currStreetMarker.length = 0;
+            streetJson.forEach(function (street) {
+                if (street.name === streetID) {
+                    var massData = mass.getData();
+                    massData.forEach(function (point) {
+                        //console.log(point.lnglat[0], +point.lnglat[1]);
+                        if (street.streetName === point.street && !(point.lnglat[0] > ${longitudeMax} || point.lnglat[0] < ${longitudeMin} || point.lnglat[1] > ${latitudeMax} || point.lnglat[1] < ${latitudeMin})) {
+                            currStreetMarker.push(new AMap.Marker({
+                                position: point.lnglat,
+                                icon: "https://webapi.amap.com/images/mass/mass2.png"
+                            }));
+                        }
+                    });
+
+                    if (currStreetMarker.length > 0)
+                        map.setFitView(currStreetMarker);
+                    else {
+                        map.setCenter(street.position);
+                        map.setZoom(15);
+                    }
                 }
             });
         }

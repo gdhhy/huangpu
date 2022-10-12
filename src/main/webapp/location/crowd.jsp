@@ -17,10 +17,6 @@
 <link rel="stylesheet" href="../components/font-awesome-4.7.0/css/font-awesome.min.css"/>
 <link href="https://cdn.datatables.net/responsive/2.3.0/css/responsive.dataTables.min.css" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/bootstrap-editable.css"/>
-<%--<script src="../components/dropzone/dist/dropzone.js"></script>
-<link rel="stylesheet" href="../components/dropzone/dist/dropzone.css"/>--%>
-<script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
-<link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css"/>
 <style>
     table.dataTable tbody tr.deletedClass {
         background-color: #d7d5d5;
@@ -55,8 +51,6 @@
         document.getElementById("Layer1").style.display = "none";
     }
 
-    Dropzone.autoDiscover = false;
-
     var editor;
     jQuery(function ($) {
         var myTable = $('#dynamic-table')
@@ -83,7 +77,7 @@
                     {"orderable": false, className: 'text-center', "targets": 3, title: '场所地址'},
                     {
                         "orderable": false, className: 'text-center', "targets": 4, title: '经纬度（高德坐标）', width: 120, render: function (data, type, row, meta) {
-                            if (data > 113.607677 || data < 113.398067 || row.latitude > 23.41208 || row.latitude < 23.030213) {
+                            if (data > ${longitudeMax} || data < ${longitudeMin} || row.latitude > ${latitudeMax} || row.latitude < ${latitudeMin}) {
                                 return "<span style='color:red;font-weight: bold'>{0},{1}</span>".format(data, row.latitude);
                             } else
                                 return "<a href=\"\" style=' color:saddlebrown' onmouseout=\"hiddenPic();\" onmousemove=\"showPic(event,'https://restapi.amap.com/v3/staticmap?scale=2&markers=mid,0xFF0000,:{0},{1}&key=${key2}&radius&size=300*200');\">{2},{3}</a>".format(data, row.latitude, data, row.latitude);
@@ -128,6 +122,9 @@
                             return '<div class="hidden-sm hidden-xs action-buttons">' +
                                 '<a class="hasLink" title="编辑" href="#" data-Url="javascript:editCrowd({0});">'.format(row["crowdID"]) +
                                 '<i class="ace-icon glyphicon glyphicon-edit green bigger-120"></i>' +
+                                '</a> ' +
+                                '<a target="_blank" title="定位" href="/crowd/drap.jspa?crowdID={0}">'.format(row["crowdID"]) +
+                                '<i class="ace-icon glyphicon glyphicon-map-marker blue bigger-120"></i>' +
                                 '</a> ' +
                                 deleteHtml +
                                 '</div>';
@@ -281,8 +278,8 @@
             ignore: "",
             rules: {
                 //name: {required: true},
-                latitude: {max: 23.41208, min: 23.030213, required: true},
-                longitude: {max: 113.607677, min: 113.398067, required: true}
+                latitude: {max: ${latitudeMax}, min: ${latitudeMin}, required: true},
+                longitude: {max:  ${longitudeMax}, min:  ${longitudeMin}, required: true}
             },
             highlight: function (e) {
                 $(e).closest('.form-group').removeClass('has-info').addClass('has-error');
@@ -529,71 +526,11 @@
                             $('#dialog-edit').dialog('close');
                         }
                     }],
-                title_html: true,
-                close: function (event, ui) {
-                    if (dz) {
-                        dz.removeAllFiles(true);
-                        dz.destroy();
-                    }
-                }
-            });
-
-            // var dz = $("div#dropzone").dropzone({
-            var dz = new Dropzone("div#dropzone", {//https://blog.csdn.net/jinxhj2010/article/details/107683026
-                url: '/upload/uploadImage.jspa',
-                autoProcessQueue: true,// 如果为false，文件将被添加到队列中，但不会自动处理队列。
-                uploadMultiple: false, // 是否在一个请求中发送多个文件。
-                parallelUploads: 3, // 并行处理多少个文件上传
-                maxFiles: 1, // 用于限制此Dropzone将处理的最大文件数
-                maxFilesize: 20,
-                acceptedFiles: ".jpg,.jpeg,.png",
-                /*addRemoveLinks: true,
-                 dictRemoveFile: '删除',*/
-                dictDefaultMessage: "拖拉图片文件到这里或者点击",
-                dictFallbackMessage: "你的浏览器不支持拖拉文件来上传",
-                dictMaxFilesExceeded: "文件数量过多",
-                dictFileTooBig: "可添加的最大文件大小为{{maxFilesize}}Mb，当前文件大小为{{filesize}}Mb ",
-                thumbnail: function (file, dataUrl) {
-                    if (file.previewElement) {
-                        $(file.previewElement).removeClass("dz-file-preview");
-                        var images = $(file.previewElement).find("[data-dz-thumbnail]").each(function () {
-                            var thumbnailElement = this;
-                            thumbnailElement.alt = file.name;
-                            thumbnailElement.src = dataUrl;
-                        });
-                        setTimeout(function () {
-                            $(file.previewElement).addClass("dz-image-preview");
-                        }, 1);
-                    }
-                },
-                init: function () { // dropzone初始化时调用您可以在此处添加事件侦听器
-                    let myDropzone = this;
-                    myDropzone.removeAllFiles();//gzhhy发现的，负责会保留上一次加载的图片
-                    this.on("addedfile", function (file) {
-                        var removeButton = Dropzone.createElement("<button class='btn btn-sm btn-block'>移除</button>");
-                        removeButton.addEventListener("click", function (e) {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            myDropzone.removeFile(file);
-                            //todo 从服务器删除
-
-                        });
-                        file.previewElement.appendChild(removeButton);
-                    });
-
-
-                }
+                title_html: true
             });
         }
 
         $.fn.editable.defaults.mode = 'inline';
-
-        let table;
-
-
-        $('#addRow').on('click', function () {
-            table.rows.add([{"orderID": table.page.info().recordsDisplay + 1, "key": "", "value": "", "expandID": Math.floor(Math.random() * 2147483647)}]).draw();
-        });
     });
 </script>
 <!-- #section:basics/content.breadcrumbs -->
@@ -722,7 +659,7 @@
                 <div class="form-group" style="margin-bottom: 3px;margin-top: 3px">
                     <label class="col-xs-2 control-label no-padding-right" for="patient">病例姓名</label>
                     <div class="col-xs-4">
-                        <input type="text" id="patient" name="patient" style="width: 100%"  placeholder="病例姓名"/>
+                        <input type="text" id="patient" name="patient" style="width: 100%" placeholder="病例姓名"/>
                     </div>
 
                 </div>
@@ -769,7 +706,7 @@
                 <div class="form-group" style="margin-bottom: 3px;margin-top: 3px">
                     <label class="col-xs-2 control-label no-padding-right" for="stayTime">逗留时段</label>
                     <div class="col-xs-10">
-                        <input rows="3" type="text" id="stayTime" name="stayTime" style="width: 100%"  placeholder="逗留时段"/>
+                        <input rows="3" type="text" id="stayTime" name="stayTime" style="width: 100%" placeholder="逗留时段"/>
                     </div>
                 </div>
             </div>
@@ -785,7 +722,8 @@
                         <input type="text" id="knit" name="knit" style="width: 100%" placeholder="密接"/>
                     </div>
                 </div>
-            </div>  <div class="row">
+            </div>
+            <div class="row">
                 <div class="form-group" style="margin-bottom: 3px;margin-top: 3px">
                     <label class="col-xs-2 control-label no-padding-right" for="subknit">次密接</label>
                     <div class="col-xs-4">

@@ -8,7 +8,6 @@ import com.xz.location.dao.UploadFileMapper;
 import com.xz.location.pojo.Assets;
 import com.xz.location.pojo.UploadFile;
 import com.xz.rbac.web.DeployRunning;
-import com.xz.upload.controller.FileUploadController;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +19,10 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.*;
@@ -304,47 +306,62 @@ public class AssetsController {
 
     @RequestMapping(value = "assets", method = RequestMethod.GET, produces = "text/html;charset=UTF-8")
     public String assets(ModelMap model) {
-        logger.debug("key1:" + configs.getProperty("amap_key1"));
-        model.addAttribute("key1", configs.getProperty("amap_key1"));
-        model.addAttribute("key2", configs.getProperty("amap_key2"));
+        putConfigs(model);
         return "location/assets";
     }
 
     @RequestMapping(value = "key", method = RequestMethod.GET, produces = "text/html;charset=UTF-8")
     public String key(ModelMap model) {
         //logger.debug("key1:" + configs.getProperty("amap_key1"));
+        putConfigs(model);
+        return "location/key";
+    }
+
+    private void putConfigs(ModelMap model) {
         model.addAttribute("key1", configs.getProperty("amap_key1"));
         model.addAttribute("key2", configs.getProperty("amap_key2"));
-        return "location/key";
+
+        model.addAttribute("longitudeMin", configs.getProperty("longitudeMin"));
+        model.addAttribute("longitudeMax", configs.getProperty("longitudeMax"));
+        model.addAttribute("latitudeMin", configs.getProperty("latitudeMin"));
+        model.addAttribute("latitudeMax", configs.getProperty("latitudeMax"));
     }
 
     @ResponseBody
     @Transactional
     @RequestMapping(value = "/saveKey", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
     public String saveKey(@RequestParam(value = "key1") String key1,
-                          @RequestParam(value = "key2") String key2) {
+                          @RequestParam(value = "key2") String key2,
+                          @RequestParam(value = "longitudeMin") String longitudeMin,
+                          @RequestParam(value = "longitudeMax") String longitudeMax,
+                          @RequestParam(value = "latitudeMin") String latitudeMin,
+                          @RequestParam(value = "latitudeMax") String latitudeMax) {
         //logger.debug("key1:" + key1);
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Map<String, Object> map = new HashMap<>();
         if (principal instanceof UserDetails) {
-            map.put("title", "保存地图KEY");
+            map.put("title", "保存系统参数");
             configs.setProperty("amap_key1", key1.trim());
             configs.setProperty("amap_key2", key2.trim());
+            configs.setProperty("longitudeMin", longitudeMin.trim());
+            configs.setProperty("longitudeMax", longitudeMax.trim());
+            configs.setProperty("latitudeMin", latitudeMin.trim());
+            configs.setProperty("latitudeMax", latitudeMax.trim());
             try {
                 OutputStream outputStream = new FileOutputStream(DeployRunning.getDir() + "WEB-INF" + File.separator + "classes" + File.separator + "config.properties");
                 configs.store(outputStream, "SAVE BY WEB");
                 outputStream.close();
 
                 map.put("succeed", true);
-                map.put("message", "保存地图KEY成功");
+                map.put("message", "保存系统参数成功");
             } catch (IOException e) {
                 e.printStackTrace();
                 map.put("succeed", false);
-                map.put("message", "保存地图KEY失败");
+                map.put("message", "保存系统参数失败");
             }
 
         } else {
-            map.put("title", "保存地图KEY");
+            map.put("title", "保存系统参数");
             map.put("succeed", false);
             map.put("message", "没登录用户信息，请重新登录！");
         }

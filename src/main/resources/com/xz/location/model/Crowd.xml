@@ -140,6 +140,7 @@ status      varchar(20)-->
                 and status = '在用'
                 and street is not null
                 and street != '黄埔区'
+                and longitude &lt; #{longitudeMax:DOUBLE} and longitude >  #{longitudeMin:DOUBLE}  and latitude &lt;  #{latitudeMax:DOUBLE}  and latitude >  #{latitudeMin:DOUBLE}
               group by left(street, 2)) B
              on A.streetName = B.street
         WHERE A.latitude > 0

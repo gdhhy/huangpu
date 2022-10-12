@@ -142,20 +142,23 @@ public class FileUploadController {
                     if (".xls".equals(ext) || ".xlsx".equals(ext)) {
                         sourceMapper.insertSource(source);
                         source.setHtmlCount(parseExcel(saveFile, source.getSourceID()));
+                        sourceMapper.updateSource(source);
                         logger.debug("sourceID:" + source.getSourceID());
                     }
 
                     resultMap.put("success", true);
                     resultMap.put("url", source.getServerPath() + File.separator + source.getServerFilename());
+                    resultMap.put("message", "成功上传记录数：" + source.getHtmlCount());
                 } else {
                     resultMap.put("success", false);
-                    resultMap.put("error", "文件曾被上传，上传时间：" + DateUtil.format(sources.get(0).getUploadTime(), "yyyy-MM-dd HH:mm"));
+                    resultMap.put("message", "文件曾被上传，上传时间：" + DateUtil.format(sources.get(0).getUploadTime(), "yyyy-MM-dd HH:mm"));
                 }
             } catch (IOException e) {
                 resultMap.put("error", e.getMessage());
             }
 
             resultMap.putIfAbsent("success", false);
+            resultMap.putIfAbsent("message", "未知错误，联系软件开发者。");
         }
 
         return gson.toJson(resultMap);
@@ -439,7 +442,7 @@ public class FileUploadController {
                                 //logger.debug("row:" + j + ",col:" + 7 + ":" + getCellValueAsString(row2.getCell(7)));
 
                                 if (row2.getCell(7).getCellType() == CellType.STRING)
-                                    num = Convert.toInt(row2.getCell(7).getStringCellValue().replace("人", ""),0);
+                                    num = Convert.toInt(row2.getCell(7).getStringCellValue().replace("人", ""), 0);
                                 if (row2.getCell(7).getCellType() == CellType.NUMERIC)
                                     num = row2.getCell(7).getNumericCellValue() + 0;
 

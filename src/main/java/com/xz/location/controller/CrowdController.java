@@ -297,11 +297,18 @@ public class CrowdController {
 
     @RequestMapping(value = "crowd", method = RequestMethod.GET, produces = "text/html;charset=UTF-8")
     public String crowd(ModelMap model) {
-        model.addAttribute("key1", configs.getProperty("amap_key1"));
-        model.addAttribute("key2", configs.getProperty("amap_key2"));
+        putConfigs(model);
         return "location/crowd";
     }
+    private void putConfigs(ModelMap model) {
+        model.addAttribute("key1", configs.getProperty("amap_key1"));
+        model.addAttribute("key2", configs.getProperty("amap_key2"));
 
+        model.addAttribute("longitudeMin", configs.getProperty("longitudeMin"));
+        model.addAttribute("longitudeMax", configs.getProperty("longitudeMax"));
+        model.addAttribute("latitudeMin", configs.getProperty("latitudeMin"));
+        model.addAttribute("latitudeMax", configs.getProperty("latitudeMax"));
+    }
     @RequestMapping(value = "drap", method = RequestMethod.GET, produces = "text/html;charset=UTF-8")
     public String drap(@RequestParam("crowdID") int crowdID, ModelMap model) {
         Map<String, Object> param = new HashMap<>();
@@ -318,8 +325,7 @@ public class CrowdController {
             model.addAttribute("latitude", 23.2296782);
             model.addAttribute("zoom", 11.7);
         }
-        model.addAttribute("key1", configs.getProperty("amap_key1"));
-        model.addAttribute("key2", configs.getProperty("amap_key2"));
+        putConfigs(model);
         return "location/drap";
     }
 }

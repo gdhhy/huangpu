@@ -87,9 +87,12 @@
             if (data.result.success) {
                 var link = $('<a>').attr('target', '_blank').prop('href', data.result.url);
                 $(data.context.children()[0]).wrap(link);
+
+                var message = $('<span class="text-success"/>').text(data.result.message);
+                $(data.context.children()[0]).append(message);
             } else {
-                var error = $('<span class="text-danger"/>').text(data.result.error);
-                $(data.context.children()[0]).append(error);
+                var message = $('<span class="text-danger"/>').text(data.result.message);
+                $(data.context.children()[0]).append(message);
             }
             // });
         }).on('fileuploadfail', function (e, data) {

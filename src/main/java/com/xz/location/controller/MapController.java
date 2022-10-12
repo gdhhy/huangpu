@@ -5,12 +5,12 @@ import com.google.gson.GsonBuilder;
 import com.xz.location.dao.AssetsMapper;
 import com.xz.location.pojo.Assets;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
 import java.util.*;
@@ -56,6 +56,11 @@ public class MapController {
         model.addAttribute("key1", configs.getProperty("amap_key1"));
         model.addAttribute("key2", configs.getProperty("amap_key2"));
 
+        model.addAttribute("longitudeMin", configs.getProperty("longitudeMin"));
+        model.addAttribute("longitudeMax", configs.getProperty("longitudeMax"));
+        model.addAttribute("latitudeMin", configs.getProperty("latitudeMin"));
+        model.addAttribute("latitudeMax", configs.getProperty("latitudeMax"));
+
         return "map/massmarks";
     }
 
@@ -75,6 +80,7 @@ public class MapController {
             HashMap<String, Object> map = new HashMap(3);
             map.put("lnglat", lnglat);
             map.put("name", assets.getName());
+            map.put("street", assets.getStreet());
             map.put("imageUrl", assets.getImageUrl());
             map.put("longitude", assets.getLongitude());
             map.put("latitude", assets.getLatitude());
@@ -174,6 +180,11 @@ public class MapController {
     public String getStreet3(@RequestParam(value = "assetsType", required = false, defaultValue = "led") String assetsType) {
         Map<String, Object> param = new HashMap<>();
         param.put("assetsType", assetsType);
+
+        param.put("longitudeMin", configs.getProperty("longitudeMin"));
+        param.put("longitudeMax", configs.getProperty("longitudeMax"));
+        param.put("latitudeMin", configs.getProperty("latitudeMin"));
+        param.put("latitudeMax", configs.getProperty("latitudeMax"));
         List<HashMap<String, Object>> streets = assetsMapper.selectStreetByAssets(param);
         List<String> labels = new ArrayList<>();
 
@@ -184,6 +195,7 @@ public class MapController {
                 "\"zIndex\": 8," +
                 "\"count\": %d," +
                 //"\"icon\"," +
+                "\"streetName\":\"%s\"," +
                 "\"text\": {" +
                 "\"content\":\"%s(%d)\"," +
                 "\"direction\": \"right\"," +
@@ -191,7 +203,7 @@ public class MapController {
                 "\"style\":\"\"" + //在jsp 的html重新设定
                 "}}";
         for (HashMap<String, Object> label : streets) {
-            labels.add(String.format(elements, label.get("streetID"), label.get("longitude"), label.get("latitude"), label.get("cc"), label.get("streetName"), label.get("cc")));
+            labels.add(String.format(elements, label.get("streetID"), label.get("longitude"), label.get("latitude"), label.get("cc"), label.get("streetName"), label.get("streetName"), label.get("cc")));
         }
 
         return "[" + String.join(",", labels) + "]";

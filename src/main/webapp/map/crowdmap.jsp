@@ -185,8 +185,8 @@
             position: 'tr'
         });
         map.addControl(layerCtrl1);
-       /* var tool = new AMap.ToolBar();//+-缩放工具
-        tool.addTo(map);*/
+        /* var tool = new AMap.ToolBar();//+-缩放工具
+         tool.addTo(map);*/
 
         var loca = new Loca.Container({
             map,
@@ -332,12 +332,40 @@
         } // 街道的label结束
         loadStreetMarker();
 
+        var currStreetMarker = [];
+
         function changeCenterZoom() {
-            var streetID = this.id;
-            streetJson.forEach(function (item) {
-                if (item.name === streetID) {
-                    map.setCenter(item.position);
-                    map.setZoom(15);
+            var streetID = this.id;//黄埔_1、黄埔_2
+            currStreetMarker.length = 0;
+            streetJson.forEach(function (street) {
+                if (street.name === streetID) {
+                    var massData = mass.getData();
+                    massData.forEach(function (point) {
+                        //console.log(street.streetName + "," + point.street);
+                        //if (street.streetName === point.street) {
+                        if (street.streetName === point.street && !(point.lnglat[0] > ${longitudeMax} || point.lnglat[0] < ${longitudeMin} || point.lnglat[1] > ${latitudeMax} || point.lnglat[1] < ${latitudeMin})) {
+                            /*var hh = '<p>病人：<span style="color: #0288d1;font-weight:bold;">{patient}</span></p>' +
+                                '<p>地址：<span style="color: #0288d1;font-weight:bold;">{address}</span></p>' +
+                                '<p>停留时段：<span style="color: #0288d1;font-weight:bold;">{stayTime}</span></p>' +
+                                '<p>高风险：<span style="color: #F00;font-weight:bold;">{highRisk}</span>，' +
+                                '密接：<span style="color: #F00;font-weight:bold;">{knit}</span>，' +
+                                '次密接：<span style="color: #F00;font-weight:bold;">{subknit}</span>，' +
+                                '重点人群：<span style="color: #F00;font-weight:bold;">{important}</span></p>';//purple
+                            var infoWindow = new AMap.InfoWindow({
+                                isCustom: true, //使用自定义窗体
+                                content: createInfoWindow(point.location, hh.signMix(point)),
+                                offset: new AMap.Pixel(20, -20)
+                            });
+                            infoWindow.open(map, point.lnglat);*/
+                            currStreetMarker.push(new AMap.Marker({
+                                position: point.lnglat,
+                                icon: "https://webapi.amap.com/images/mass/mass2.png"
+                            }));
+                        }
+                    });
+                    map.setFitView(currStreetMarker);
+                    /* map.setCenter(street.position);
+                     map.setZoom(15);*/
                 }
             });
         }
@@ -462,9 +490,10 @@
                         });
                         infoWindow.open(map, e.data.lnglat);
                     });
-                   /* mass.on('mouseout', function (e) {
-                        closeInfoWindow();
-                    });*/
+                    /* mass.on('mouseout', function (e) {
+                         closeInfoWindow();
+                     });*/
+
 
                     mass.setMap(map);
                 }
