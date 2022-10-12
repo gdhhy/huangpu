@@ -191,7 +191,7 @@
         showIndoorMap: false,
         resizeEnable: true,
         viewMode: '2D', // 默认使用 2D 模式，如果希望使用带有俯仰角的 3D 模式，请设置 viewMode: '3D',
-        center: [113.5141753, 23.2296782],
+        center: [${huangpuCenter}],
         //layers: layerCtrl1.getEnabledLayers(),这行从卫星地图切换普通地图，丢失地名、路名
         // layers: [new AMap.TileLayer.Satellite()],
         zoom: 11.7, pitch: 60/*,
@@ -337,7 +337,6 @@
         });
         // 图层添加到地图
         map.add(layer);
-        var streetJson;
 
         function loadStreetMarker(type) {
             layer.clear();
@@ -345,7 +344,6 @@
             // 初始化 labelMarker 街道的label
             ajax('/map/getStreet3.jspa?assetsType={0}'.format(type), function (err, json) {
                 if (!err) {
-                    streetJson = json;
                     var markers = [];
                     json.forEach(function (item) {
                         //item.icon = icon; 注释掉，icon也注释掉，以后有需要再加上
@@ -356,9 +354,9 @@
 
 
                         if (item.count > 0)
-                            $('#coordinate2').append(('<div class="input-item"><input id="{0}" name="crowd" type="radio">' +
-                                '<span class="input-text">{1}</span></div>')
-                                .format(item.name, item.text.content));
+                            $('#coordinate2').append(('<div class="input-item"><input id="{0}" name="crowd"  data-street="{1}" type="radio">' +
+                                '<span class="input-text">{2}</span></div>')
+                                .format(item.name, item.streetName, item.text.content));
                     });
                     // 将 marker 添加到图层
                     layer.add(markers);
@@ -366,38 +364,34 @@
                     //绑定街道radio点击事件
                     var radios = document.querySelectorAll("#coordinate2 input");
                     radios.forEach(function (ratio) {
-                        ratio.onclick = changeCenterZoom;
+                        ratio.onclick = fitView;
                     });
                 }
             });
         }
 
-        var currStreetMarker = [];
+        var fitMarker = [];
 
-        function changeCenterZoom() {
-            var streetID = this.id;
-            currStreetMarker.length = 0;
-            streetJson.forEach(function (street) {
-                if (street.name === streetID) {
-                    var massData = mass.getData();
-                    massData.forEach(function (point) {
-                        //console.log(point.lnglat[0], +point.lnglat[1]);
-                        if (street.streetName === point.street && !(point.lnglat[0] > ${longitudeMax} || point.lnglat[0] < ${longitudeMin} || point.lnglat[1] > ${latitudeMax} || point.lnglat[1] < ${latitudeMin})) {
-                            currStreetMarker.push(new AMap.Marker({
-                                position: point.lnglat,
-                                icon: "https://webapi.amap.com/images/mass/mass2.png"
-                            }));
-                        }
-                    });
+        function fitView() {
+            let streetName = $(this).attr("data-street");
+            if (fitMarker.length > 0)
+                map.remove(fitMarker);
+            fitMarker.length = 0;
 
-                    if (currStreetMarker.length > 0)
-                        map.setFitView(currStreetMarker);
-                    else {
-                        map.setCenter(street.position);
-                        map.setZoom(15);
-                    }
+            var massData = mass.getData();
+            massData.forEach(function (point) {
+                //console.log(point.lnglat[0], +point.lnglat[1]);
+                if (streetName === point.street && !(point.lnglat[0] > ${longitudeMax} || point.lnglat[0] < ${longitudeMin} || point.lnglat[1] > ${latitudeMax} || point.lnglat[1] < ${latitudeMin})) {
+                    fitMarker.push(new AMap.Marker({
+                        position: point.lnglat,
+                        icon: "https://webapi.amap.com/images/mass/mass2.png"
+                    }));
                 }
             });
+
+            map.setFitView(fitMarker);
+            if (fitMarker.length === 1)
+                map.setCenter(filtMarker[0].position);
         }
 
         //map.setFitView(null, false, [100, 150, 10, 10]);

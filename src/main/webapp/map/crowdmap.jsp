@@ -176,7 +176,7 @@
         zoom: 12,
         showLabel: true,
         viewMode: '2D', // 默认使用 2D 模式，如果希望使用带有俯仰角的 3D 模式，请设置 viewMode: '3D',
-        center: [113.4841753, 23.2096782],
+        center: [${huangpuCenter}],
         pitch: 60
         //mapStyle: 'amap://styles/45311ae996a8bea0da10ad5151f72979',
     });
@@ -298,14 +298,12 @@
         });
         // 图层添加到地图
         map.add(layer);
-        var streetJson;
 
         function loadStreetMarker() {
             layer.clear();
             // 初始化 labelMarker 街道的label
             ajax('/crowdmap/getStreet3.jspa', function (err, json) {
                 if (!err) {
-                    streetJson = json;
                     var markers = [];
                     json.forEach(function (item) {
                         //item.icon = icon; 注释掉，icon也注释掉，以后有需要再加上
@@ -315,9 +313,9 @@
                         markers.push(labelMarker);
 
                         if (item.highRisk + item.knit + item.subknit + item.important > 0)
-                            $('#coordinate2').append(('<div class="input-item"><input id="{0}" name="crowd" type="radio">' +
-                                '<span class="input-text"><span style="font-weight: bold" >{1}：</span>高风险：{2}，密接：{3}，次密：{4}，重点：{5}</span></div>')
-                                .format(item.name, item.streetName, item.highRisk, item.knit, item.subknit, item.important));
+                            $('#coordinate2').append(('<div class="input-item"><input id="{0}" name="crowd" type="radio" data-street="{1}">' +
+                                '<span class="input-text"><span style="font-weight: bold" >{2}：</span>高风险：{3}，密接：{4}，次密：{5}，重点：{6}</span></div>')
+                                .format(item.name, item.streetName, item.streetName, item.highRisk, item.knit, item.subknit, item.important));
                     });
                     // 将 marker 添加到图层
                     layer.add(markers);
@@ -325,49 +323,51 @@
                     //绑定街道radio点击事件
                     var radios = document.querySelectorAll("#coordinate2 input");
                     radios.forEach(function (ratio) {
-                        ratio.onclick = changeCenterZoom;
+                        ratio.onclick = fitView;
                     });
                 }
             });
         } // 街道的label结束
         loadStreetMarker();
 
-        var currStreetMarker = [];
+        var fitMarker = [];
 
-        function changeCenterZoom() {
-            var streetID = this.id;//黄埔_1、黄埔_2
-            currStreetMarker.length = 0;
-            streetJson.forEach(function (street) {
-                if (street.name === streetID) {
-                    var massData = mass.getData();
-                    massData.forEach(function (point) {
-                        //console.log(street.streetName + "," + point.street);
-                        //if (street.streetName === point.street) {
-                        if (street.streetName === point.street && !(point.lnglat[0] > ${longitudeMax} || point.lnglat[0] < ${longitudeMin} || point.lnglat[1] > ${latitudeMax} || point.lnglat[1] < ${latitudeMin})) {
-                            /*var hh = '<p>病人：<span style="color: #0288d1;font-weight:bold;">{patient}</span></p>' +
-                                '<p>地址：<span style="color: #0288d1;font-weight:bold;">{address}</span></p>' +
-                                '<p>停留时段：<span style="color: #0288d1;font-weight:bold;">{stayTime}</span></p>' +
-                                '<p>高风险：<span style="color: #F00;font-weight:bold;">{highRisk}</span>，' +
-                                '密接：<span style="color: #F00;font-weight:bold;">{knit}</span>，' +
-                                '次密接：<span style="color: #F00;font-weight:bold;">{subknit}</span>，' +
-                                '重点人群：<span style="color: #F00;font-weight:bold;">{important}</span></p>';//purple
-                            var infoWindow = new AMap.InfoWindow({
-                                isCustom: true, //使用自定义窗体
-                                content: createInfoWindow(point.location, hh.signMix(point)),
-                                offset: new AMap.Pixel(20, -20)
-                            });
-                            infoWindow.open(map, point.lnglat);*/
-                            currStreetMarker.push(new AMap.Marker({
-                                position: point.lnglat,
-                                icon: "https://webapi.amap.com/images/mass/mass2.png"
-                            }));
-                        }
-                    });
-                    map.setFitView(currStreetMarker);
-                    /* map.setCenter(street.position);
-                     map.setZoom(15);*/
+        function fitView() {
+            let streetName = $(this).attr("data-street");
+            if (fitMarker.length > 0)
+                map.remove(fitMarker);
+            fitMarker.length = 0;
+
+            var massData = mass.getData();
+            massData.forEach(function (point) {
+                if (streetName === point.street && !(point.lnglat[0] > ${longitudeMax} || point.lnglat[0] < ${longitudeMin} || point.lnglat[1] > ${latitudeMax} || point.lnglat[1] < ${latitudeMin})) {
+                    fitMarker.push(new AMap.Marker({
+                        position: point.lnglat,
+                        icon: "https://webapi.amap.com/images/mass/mass2.png"
+                    }));
                 }
             });
+            map.setFitView(fitMarker);
+            if (fitMarker.length === 1)
+                map.setCenter(filtMarker[0].position);
+
+            /*massData.forEach(function (point) {
+                if (streetName === point.street && !(point.lnglat[0] > ${longitudeMax} || point.lnglat[0] < ${longitudeMin} || point.lnglat[1] > ${latitudeMax} || point.lnglat[1] < ${latitudeMin})) {
+                    var hh = '<p>病人：<span style="color: #0288d1;font-weight:bold;">{patient}</span></p>' +
+                        '<p>地址：<span style="color: #0288d1;font-weight:bold;">{address}</span></p>' +
+                        '<p>停留时段：<span style="color: #0288d1;font-weight:bold;">{stayTime}</span></p>' +
+                        '<p>高风险：<span style="color: #F00;font-weight:bold;">{highRisk}</span>，' +
+                        '密接：<span style="color: #F00;font-weight:bold;">{knit}</span>，' +
+                        '次密接：<span style="color: #F00;font-weight:bold;">{subknit}</span>，' +
+                        '重点人群：<span style="color: #F00;font-weight:bold;">{important}</span></p>';//purple
+                    var infoWindow = new AMap.InfoWindow({
+                        isCustom: true, //使用自定义窗体
+                        content: createInfoWindow(point.location, hh.signMix(point)),
+                        offset: new AMap.Pixel(20, -20)
+                    });
+                    infoWindow.open(map, point.lnglat);
+                }
+            });*/
         }
 
         //绑定风险类型checkbox点击事件，重新累加风险人群数量
@@ -493,7 +493,6 @@
                     /* mass.on('mouseout', function (e) {
                          closeInfoWindow();
                      });*/
-
 
                     mass.setMap(map);
                 }

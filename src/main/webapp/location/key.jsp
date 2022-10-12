@@ -73,6 +73,13 @@
                         <input type="text" id="key2" name="key2" placeholder="key2" class="col-xs-10 col-sm-5" value="${key2}"/>
                     </div>
                 </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label no-padding-right" for="key3">拖曳选点</label>
+
+                    <div class="col-sm-9">
+                        <input type="text" id="key3" name="key3" placeholder="key3" class="col-xs-10 col-sm-5" value="${key3}"/>
+                    </div>
+                </div>
 
                 <!-- PAGE CONTENT BEGINS -->
                 <div class="alert alert-block alert-info small">
@@ -81,7 +88,7 @@
                 </div>
                 <!-- #section:elements.form -->
                 <div class="form-group">
-                    <label class="col-sm-3 control-label no-padding-right" for="key1">经度最小值</label>
+                    <label class="col-sm-3 control-label no-padding-right" for="longitudeMin">经度最小值</label>
 
                     <div class="col-sm-9">
                         <input type="text" id="longitudeMin" name="longitudeMin" placeholder="经度最小值" class="col-xs-10 col-sm-5" value='${longitudeMin}'/>
@@ -89,14 +96,14 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="col-sm-3 control-label no-padding-right" for="key2">经度最大值</label>
+                    <label class="col-sm-3 control-label no-padding-right" for="longitudeMax">经度最大值</label>
 
                     <div class="col-sm-9">
                         <input type="text" id="longitudeMax" name="longitudeMax" placeholder="经度最大值" class="col-xs-10 col-sm-5" value="${longitudeMax}"/>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="col-sm-3 control-label no-padding-right" for="key1">纬度最小值</label>
+                    <label class="col-sm-3 control-label no-padding-right" for="latitudeMin">纬度最小值</label>
 
                     <div class="col-sm-9">
                         <input type="text" id="latitudeMin" name="latitudeMin" placeholder="纬度最小值" class="col-xs-10 col-sm-5" value='${latitudeMin}'/>
@@ -104,10 +111,17 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="col-sm-3 control-label no-padding-right" for="key2">纬度最大值</label>
+                    <label class="col-sm-3 control-label no-padding-right" for="latitudeMax">纬度最大值</label>
 
                     <div class="col-sm-9">
                         <input type="text" id="latitudeMax" name="latitudeMax" placeholder="纬度最大值" class="col-xs-10 col-sm-5" value="${latitudeMax}"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label no-padding-right" for="huangpuCenter">黄埔区中心点</label>
+
+                    <div class="col-sm-9">
+                        <input type="text" id="huangpuCenter" name="huangpuCenter" placeholder="纬度最大值" class="col-xs-10 col-sm-5" value="${huangpuCenter}"/>
                     </div>
                 </div>
                 <div class="clearfix form-actions">

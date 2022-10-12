@@ -61,11 +61,13 @@ public class CrowdMapController {
 
         model.addAttribute("key1", configs.getProperty("amap_key1"));
         model.addAttribute("key2", configs.getProperty("amap_key2"));
+        model.addAttribute("key3", configs.getProperty("amap_key3"));
 
         model.addAttribute("longitudeMin", configs.getProperty("longitudeMin"));
         model.addAttribute("longitudeMax", configs.getProperty("longitudeMax"));
         model.addAttribute("latitudeMin", configs.getProperty("latitudeMin"));
         model.addAttribute("latitudeMax", configs.getProperty("latitudeMax"));
+        model.addAttribute("huangpuCenter", configs.getProperty("huangpuCenter"));
        /* model.addAttribute("geoJsonR", crowd("red"));
         model.addAttribute("geoJsonY", crowd("yellow"));*/
 

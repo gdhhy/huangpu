@@ -22,6 +22,11 @@
         background-color: #d7d5d5;
     }
 
+    table.dataTable tbody tr.selected {
+        color: white !important;
+        background-color: #eeeeee !important;
+    }
+
     table.dataTable tbody tr.myodd {
         background-color: #bce8f1;
     }</style>
@@ -113,7 +118,7 @@
                          }
                      },*/
                     {
-                        "orderable": false, 'searchable': false, 'targets': 9, title: '操作', width: 80,
+                        "orderable": false, 'searchable': false, 'targets': 9, title: '操作', width: 100,
                         render: function (data, type, row, meta) {
                             let deleteHtml = row["deleted"] === 0 ? '<a class="hasLink" title="删除" href="#" data-Url="javascript:deleteCrowd({0},\'{1}\',\'{2}\',\'{3}\');">'
                                     .format(row["crowdID"], row["location"], row["address"], $('#crowd option:selected').text()) +
@@ -123,8 +128,11 @@
                                 '<a class="hasLink" title="编辑" href="#" data-Url="javascript:editCrowd({0});">'.format(row["crowdID"]) +
                                 '<i class="ace-icon glyphicon glyphicon-edit green bigger-120"></i>' +
                                 '</a> ' +
-                                '<a target="_blank" title="定位" href="/crowd/drap.jspa?crowdID={0}">'.format(row["crowdID"]) +
+                               /* '<a target="_blank" title="定位" href="/crowd/drap.jspa?crowdID={0}">'.format(row["crowdID"]) +
                                 '<i class="ace-icon glyphicon glyphicon-map-marker blue bigger-120"></i>' +
+                                '</a> ' +*/
+                                '<a class="hasLink" title="新窗口定位" data-Url="javascript:drapWindow({0});">'.format(row["crowdID"]) +
+                                '<i class="ace-icon glyphicon glyphicon-new-window purple bigger-120"></i>' +
                                 '</a> ' +
                                 deleteHtml +
                                 '</div>';
@@ -181,7 +189,7 @@
                 $(this).val($(this).attr("data-color"));
             });
             $('#dynamic-table tr').find('#skin-colorpicker').ace_colorpicker().on('change', function () {
-                var submitData = {crowdID: $(this).attr("data-id"), color: this.value};
+                var submitData = {objectID: $(this).attr("data-id"), color: this.value};
                 $.ajax({
                     type: "POST",
                     url: "/crowd/saveColor.jspa",
@@ -335,6 +343,21 @@
                 saveUrl = "/crowd/saveCrowd.jspa";
                 showCrowdDialog(ret);
             });
+        }
+        function drapWindow(crowdID) {
+            var iWidth = window.screen.availWidth * .9; //弹出窗口的宽度;
+            var iHeight = window.screen.availHeight * .85; //弹出窗口的高度;
+            var iTop = (window.screen.availHeight - 30 - iHeight) / 2; //获得窗口的垂直位置;
+            var iLeft = (window.screen.availWidth - 20 - iWidth) / 2; //获得窗口的水平位置;
+            let myWindow = window.open('/crowd/drap.jspa?crowdID=' + crowdID, 'crowd_' + crowdID, 'height=' + iHeight + ',innerHeight=' + iHeight + ',width=' + iWidth + ',innerWidth=' + iWidth + ',top=' + iTop + ',left=' + iLeft + ',toolbar=no,menubar=no,scrollbars=auto,resizeable=no,location=no,status=no');
+            myWindow.focus();
+
+            var loop = setInterval(function () {
+                if (myWindow.closed) {
+                    clearInterval(loop);
+                    myTable.ajax.reload(null, false);//null为callback,false是是否回到第一页
+                }
+            }, 500);
         }
 
         function deleteCrowd(crowdID, location, address, crowdText) {
@@ -793,12 +816,11 @@
     <p id="errorText">失败，请稍后再试，或与系统管理员联系。</p>
 </div>
 
-<div class="modal fade" id="loadingModal">
-    <div style="width: 200px;height:20px; z-index: 20000; position: absolute; text-align: center; left: 50%; top: 50%;margin-left:-100px;margin-top:-10px">
-        <div class="progress progress-striped active" style="margin-bottom: 0;">
-            <div class="progress-bar" style="width: 100%;" id="loadingText">正在抽取……</div>
-        </div>
-    </div>
-</div>
+
 <div id="Layer1" style="display: none; position: absolute; z-index: 100;">
+</div>
+<div id="dialog-drap" class="hide" style="z-index: 99999999">
+    <iframe name="tabIframe" id="ifm80" src="/crowd/drap.jspa?crowdID=19" width="100%" frameborder="no" border="0" marginwidth="0" marginheight="0" scrolling="yes"
+            allowtransparency="yes">
+    </iframe>
 </div>

@@ -2,7 +2,6 @@ package com.xz.location.controller;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
 import com.xz.location.dao.CrowdMapper;
 import com.xz.location.pojo.Crowd;
 import org.apache.logging.log4j.LogManager;
@@ -17,8 +16,10 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.lang.reflect.Method;
-import java.lang.reflect.Type;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 @Controller
 @RequestMapping("/crowd")
@@ -80,39 +81,6 @@ public class CrowdController {
         } else return "";
     }
 
-    @ResponseBody
-    @RequestMapping(value = "getCrowdExpand", method = RequestMethod.GET, produces = "text/html;charset=UTF-8")
-    public String getCrowdExpand(@RequestParam(value = "crowdID") Integer crowdID, @RequestParam(value = "draw", required = false, defaultValue = "1") Integer draw) {
-        Map<String, Object> param = new HashMap<>();
-        param.put("crowdID", crowdID);
-        Map<String, Object> result = new HashMap<>();
-        result.put("draw", draw);
-        List<Crowd> crowd1 = crowdMapper.selectCrowd(param);
-        if (crowd1.size() == 1) {
-            Crowd crowd = crowd1.get(0);
-
-            Type listType = new TypeToken<List<HashMap<String, Object>>>() {
-            }.getType();
-            List<HashMap<String, Object>> json = gson.fromJson(crowd.getExtJson(), listType);
-
-            if (json != null) {
-                int k = 0;
-                for (HashMap<String, Object> map : json)
-                    map.put("orderID", ++k);
-
-                result.put("data", json);
-                result.put("iTotalRecords", json.size());
-                result.put("iTotalDisplayRecords", json.size());
-            }
-        }
-        if (result.get("data") == null) {
-            result.put("data", new ArrayList<>());
-            result.put("iTotalRecords", 0);
-            result.put("iTotalDisplayRecords", 0);
-        }
-
-        return gson.toJson(result);
-    }
 
     @ResponseBody
     @Transactional
@@ -141,13 +109,21 @@ public class CrowdController {
     @RequestMapping(value = "/saveColor", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
     public String saveColor(@RequestBody String postJson) {
         HashMap postMap = gson.fromJson(postJson, HashMap.class);
+
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Map<String, Object> map = new HashMap<>();
         map.put("title", "设置流调颜色");
         if (principal instanceof UserDetails) {
             Crowd crowd = new Crowd();
-            crowd.setCrowdID(Integer.parseInt(postMap.get("crowdID").toString()));
-            crowd.setColor(postMap.get("color").toString());
+            crowd.setCrowdID(Integer.parseInt(postMap.get("objectID").toString()));
+            if (postMap.get("color") != null)
+                crowd.setColor(postMap.get("color").toString());
+            if (postMap.get("longitude") != null)
+                crowd.setLongitude(Double.parseDouble(postMap.get("longitude").toString()));
+            if (postMap.get("latitude") != null)
+                crowd.setLatitude(Double.parseDouble(postMap.get("latitude").toString()));
+            if (postMap.get("street") != null)
+                crowd.setStreet(postMap.get("street").toString());
             int result = crowdMapper.updateCrowd(crowd);
 
             map.put("succeed", result > 0);
@@ -190,64 +166,6 @@ public class CrowdController {
     }
 
     @ResponseBody
-    @RequestMapping(value = "/saveExtKeyValue", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
-    public String saveExtKeyValue(@RequestParam(value = "pk") String pk,
-                                  @RequestParam(value = "name") String name,
-                                  @RequestParam(value = "value") String value) {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String[] keys = pk.split("-");
-
-        Map<String, Object> param = new HashMap<>();
-        param.put("crowdID", Integer.parseInt(keys[0]));
-        Map<String, Object> returnMap = new HashMap<>();
-        returnMap.put("title", "设置流调扩展信息");
-        if (principal instanceof UserDetails) {
-            List<Crowd> crowd1 = crowdMapper.selectCrowd(param);
-            int result = -1;
-            if (crowd1.size() == 1) {
-                Crowd crowd = crowd1.get(0);
-                Type listType = new TypeToken<List<HashMap<String, Object>>>() {
-                }.getType();
-                List<HashMap<String, Object>> keyValueList = gson.fromJson(crowd.getExtJson(), listType);
-                if (keyValueList != null)
-                    for (HashMap<String, Object> map : keyValueList) {
-                        if (Math.abs(Integer.parseInt(keys[1]) - (Double) map.get("expandID")) < 0.001) {
-                            map.put(name, value);
-
-                            crowd.setExtJson(gson.toJson(keyValueList));
-                            result = crowdMapper.updateCrowd(crowd);
-                            returnMap.put("message", "更新流调扩展信息成功");
-                            break;
-                        }
-                    }
-                //}
-                if (result == -1) {
-                    if (keyValueList == null)
-                        keyValueList = new ArrayList<>();
-                    HashMap<String, Object> map = new HashMap<>();//增加一次需要两次saveExtKeyValue
-                    map.put("expandID", Integer.parseInt(keys[1]));
-                    map.put(name, value);
-                    map.put(name.equals("key") ? "name" : "key", "");
-                    keyValueList.add(map);
-                    crowd.setExtJson(gson.toJson(keyValueList));
-                    result = crowdMapper.updateCrowd(crowd);
-                    returnMap.put("message", "增加流调扩展信息成功");
-                }
-
-                returnMap.put("succeed", result > 0);
-            } else {
-                returnMap.put("succeed", false);
-                returnMap.put("message", "参数错误，找不到主键：" + keys[0]);
-            }
-        } else {
-            returnMap.put("succeed", false);
-            returnMap.put("message", "没登录用户信息，请重新登录！");
-        }
-
-        return gson.toJson(returnMap);
-    }
-
-    @ResponseBody
     @RequestMapping(value = "/deleteCrowd", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
     public String deleteCrowd(@RequestParam("crowdID") int crowdID) {
         Map<String, Object> returnMap = new HashMap<>();
@@ -259,72 +177,47 @@ public class CrowdController {
         return gson.toJson(returnMap);
     }
 
-    @ResponseBody
-    @RequestMapping(value = "/deleteCrowdExpand", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
-    public String deleteCrowdExpand(@RequestParam("crowdID") int crowdID, @RequestParam("expandID") int expandID) {
-        Map<String, Object> param = new HashMap<>();
-        param.put("crowdID", crowdID);
-
-        Map<String, Object> returnMap = new HashMap<>();
-        returnMap.put("title", "删除流调扩展信息");
-
-        List<Crowd> crowd1 = crowdMapper.selectCrowd(param);
-        int result = -1;
-        if (crowd1.size() == 1) {
-            Crowd crowd = crowd1.get(0);
-            Type listType = new TypeToken<List<HashMap<String, Object>>>() {
-            }.getType();
-            List<HashMap<String, Object>> keyValueList = gson.fromJson(crowd.getExtJson(), listType);
-            for (HashMap<String, Object> map : keyValueList) {
-                if (Math.abs(expandID - (Double) map.get("expandID")) < 0.001) {
-                    keyValueList.remove(map);
-
-                    crowd.setExtJson(gson.toJson(keyValueList));
-                    result = crowdMapper.updateCrowd(crowd);
-                    returnMap.put("message", "删除流调扩展信息成功");
-                    break;
-                }
-            }
-            returnMap.put("succeed", true);
-            if (result == -1) returnMap.put("message", "没找到该流调的扩展信息");
-        } else {
-            returnMap.put("succeed", false);
-            returnMap.put("message", "参数错误，找不到主键：" + crowdID);
-        }
-
-        return gson.toJson(returnMap);
-    }
-
     @RequestMapping(value = "crowd", method = RequestMethod.GET, produces = "text/html;charset=UTF-8")
     public String crowd(ModelMap model) {
         putConfigs(model);
         return "location/crowd";
     }
+
     private void putConfigs(ModelMap model) {
         model.addAttribute("key1", configs.getProperty("amap_key1"));
         model.addAttribute("key2", configs.getProperty("amap_key2"));
+        model.addAttribute("key3", configs.getProperty("amap_key3"));
 
         model.addAttribute("longitudeMin", configs.getProperty("longitudeMin"));
         model.addAttribute("longitudeMax", configs.getProperty("longitudeMax"));
         model.addAttribute("latitudeMin", configs.getProperty("latitudeMin"));
         model.addAttribute("latitudeMax", configs.getProperty("latitudeMax"));
+        model.addAttribute("huangpuCenter", configs.getProperty("huangpuCenter"));
     }
+
     @RequestMapping(value = "drap", method = RequestMethod.GET, produces = "text/html;charset=UTF-8")
     public String drap(@RequestParam("crowdID") int crowdID, ModelMap model) {
         Map<String, Object> param = new HashMap<>();
         param.put("crowdID", crowdID);
         List<Crowd> crowd1 = crowdMapper.selectCrowd(param);
         if (crowd1.size() == 1) {
+            //if (crowd1.get(0).getLongitude() > 0.0001 && crowd1.get(0).getLatitude() > 0.0001) {
             model.addAttribute("longitude", crowd1.get(0).getLongitude());
             model.addAttribute("latitude", crowd1.get(0).getLatitude());
+            //}
             model.addAttribute("address", crowd1.get(0).getAddress());
             model.addAttribute("location", crowd1.get(0).getLocation());
+            model.addAttribute("street", crowd1.get(0).getStreet());
+            model.addAttribute("objectID", crowdID);
             model.addAttribute("zoom", 16);
         } else {
+            model.addAttribute("zoom", 11.7);
             model.addAttribute("longitude", 113.5141753);
             model.addAttribute("latitude", 23.2296782);
-            model.addAttribute("zoom", 11.7);
         }
+
+        model.addAttribute("savePath", "crowd");
+
         putConfigs(model);
         return "location/drap";
     }

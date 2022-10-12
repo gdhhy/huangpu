@@ -53,13 +53,7 @@ public class MapController {
 
     @RequestMapping(value = "massmarks", method = RequestMethod.GET, produces = "text/html;charset=UTF-8")
     public String massmarks(ModelMap model) {
-        model.addAttribute("key1", configs.getProperty("amap_key1"));
-        model.addAttribute("key2", configs.getProperty("amap_key2"));
-
-        model.addAttribute("longitudeMin", configs.getProperty("longitudeMin"));
-        model.addAttribute("longitudeMax", configs.getProperty("longitudeMax"));
-        model.addAttribute("latitudeMin", configs.getProperty("latitudeMin"));
-        model.addAttribute("latitudeMax", configs.getProperty("latitudeMax"));
+        putConfigs(model);
 
         return "map/massmarks";
     }
@@ -220,5 +214,46 @@ public class MapController {
             return gson.toJson(assets1.get(0));
 
         return "{}";
+    }
+
+    private void putConfigs(ModelMap model) {
+        model.addAttribute("key1", configs.getProperty("amap_key1"));
+        model.addAttribute("key2", configs.getProperty("amap_key2"));
+        model.addAttribute("key3", configs.getProperty("amap_key3"));
+
+        model.addAttribute("longitudeMin", configs.getProperty("longitudeMin"));
+        model.addAttribute("longitudeMax", configs.getProperty("longitudeMax"));
+        model.addAttribute("latitudeMin", configs.getProperty("latitudeMin"));
+        model.addAttribute("latitudeMax", configs.getProperty("latitudeMax"));
+
+        model.addAttribute("huangpuCenter", configs.getProperty("huangpuCenter"));
+    }
+
+    @RequestMapping(value = "drap", method = RequestMethod.GET, produces = "text/html;charset=UTF-8")
+    public String drap(@RequestParam("assetsID") int assetsID, ModelMap model) {
+        Map<String, Object> param = new HashMap<>();
+        param.put("assetsID", assetsID);
+        List<Assets> assets1 = assetsMapper.selectAssets(param);
+        if (assets1.size() == 1) {
+            //if (assets1.get(0).getLongitude() > 0.0001 && assets1.get(0).getLatitude() > 0.0001) {
+            model.addAttribute("longitude", assets1.get(0).getLongitude());
+            model.addAttribute("latitude", assets1.get(0).getLatitude());
+            //}
+            model.addAttribute("address", assets1.get(0).getAddress());
+            model.addAttribute("street", assets1.get(0).getStreet());
+            model.addAttribute("location", assets1.get(0).getName());
+            model.addAttribute("objectID", assetsID);
+            model.addAttribute("zoom", 16);
+        } else {
+            model.addAttribute("zoom", 11.7);
+            model.addAttribute("longitude", 113.5141753);
+            model.addAttribute("latitude", 23.2296782);
+        }
+
+
+        model.addAttribute("savePath", "assets");
+
+        putConfigs(model);
+        return "location/drap";
     }
 }

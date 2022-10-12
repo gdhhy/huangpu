@@ -155,8 +155,15 @@ public class AssetsController {
         map.put("title", "设置资产颜色");
         if (principal instanceof UserDetails) {
             Assets assets = new Assets();
-            assets.setAssetsID(Integer.parseInt(postMap.get("assetsID").toString()));
-            assets.setColor(postMap.get("color").toString());
+            assets.setAssetsID(Integer.parseInt(postMap.get("objectID").toString()));
+            if (postMap.get("color") != null)
+                assets.setColor(postMap.get("color").toString());
+            if (postMap.get("longitude") != null)
+                assets.setLongitude(Double.parseDouble(postMap.get("longitude").toString()));
+            if (postMap.get("latitude") != null)
+                assets.setLatitude(Double.parseDouble(postMap.get("latitude").toString()));
+            if (postMap.get("street") != null)
+                assets.setStreet(postMap.get("street").toString());
             int result = assetsMapper.updateAssets(assets);
 
             map.put("succeed", result > 0);
@@ -320,11 +327,13 @@ public class AssetsController {
     private void putConfigs(ModelMap model) {
         model.addAttribute("key1", configs.getProperty("amap_key1"));
         model.addAttribute("key2", configs.getProperty("amap_key2"));
+        model.addAttribute("key3", configs.getProperty("amap_key3"));
 
         model.addAttribute("longitudeMin", configs.getProperty("longitudeMin"));
         model.addAttribute("longitudeMax", configs.getProperty("longitudeMax"));
         model.addAttribute("latitudeMin", configs.getProperty("latitudeMin"));
         model.addAttribute("latitudeMax", configs.getProperty("latitudeMax"));
+        model.addAttribute("huangpuCenter", configs.getProperty("huangpuCenter"));
     }
 
     @ResponseBody
@@ -332,10 +341,12 @@ public class AssetsController {
     @RequestMapping(value = "/saveKey", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
     public String saveKey(@RequestParam(value = "key1") String key1,
                           @RequestParam(value = "key2") String key2,
+                          @RequestParam(value = "key3") String key3,
                           @RequestParam(value = "longitudeMin") String longitudeMin,
                           @RequestParam(value = "longitudeMax") String longitudeMax,
                           @RequestParam(value = "latitudeMin") String latitudeMin,
-                          @RequestParam(value = "latitudeMax") String latitudeMax) {
+                          @RequestParam(value = "latitudeMax") String latitudeMax,
+                          @RequestParam(value = "huangpuCenter") String huangpuCenter) {
         //logger.debug("key1:" + key1);
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Map<String, Object> map = new HashMap<>();
@@ -343,10 +354,12 @@ public class AssetsController {
             map.put("title", "保存系统参数");
             configs.setProperty("amap_key1", key1.trim());
             configs.setProperty("amap_key2", key2.trim());
+            configs.setProperty("amap_key3", key3.trim());
             configs.setProperty("longitudeMin", longitudeMin.trim());
             configs.setProperty("longitudeMax", longitudeMax.trim());
             configs.setProperty("latitudeMin", latitudeMin.trim());
             configs.setProperty("latitudeMax", latitudeMax.trim());
+            configs.setProperty("huangpuCenter", huangpuCenter.trim());
             try {
                 OutputStream outputStream = new FileOutputStream(DeployRunning.getDir() + "WEB-INF" + File.separator + "classes" + File.separator + "config.properties");
                 configs.store(outputStream, "SAVE BY WEB");
