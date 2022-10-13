@@ -118,11 +118,11 @@
                          }
                      },*/
                     {
-                        "orderable": false, 'searchable': false, 'targets': 9, title: '操作', width: 100,
+                        "orderable": false, 'searchable': false, 'targets': 9, title: '操作', width: 80,
                         render: function (data, type, row, meta) {
                             let deleteHtml = row["deleted"] === 0 ? '<a class="hasLink" title="删除" href="#" data-Url="javascript:deleteCrowd({0},\'{1}\',\'{2}\',\'{3}\');">'
                                     .format(row["crowdID"], row["location"], row["address"], $('#crowd option:selected').text()) +
-                                '<i class="ace-icon glyphicon glyphicon-trash brown bigger-120"></i></a>' : "";
+                                '<i class="ace-icon glyphicon glyphicon-trash brown bigger-110"></i></a>' : "";
 
                             return '<div class="hidden-sm hidden-xs action-buttons">' +
                                 '<a class="hasLink" title="编辑" href="#" data-Url="javascript:editCrowd({0});">'.format(row["crowdID"]) +
@@ -132,7 +132,7 @@
                                 '<i class="ace-icon glyphicon glyphicon-map-marker blue bigger-120"></i>' +
                                 '</a> ' +*/
                                 '<a class="hasLink" title="新窗口定位" data-Url="javascript:drapWindow({0});">'.format(row["crowdID"]) +
-                                '<i class="ace-icon glyphicon glyphicon-new-window purple bigger-120"></i>' +
+                                '<i class="ace-icon glyphicon glyphicon-new-window purple bigger-110"></i>' +
                                 '</a> ' +
                                 deleteHtml +
                                 '</div>';

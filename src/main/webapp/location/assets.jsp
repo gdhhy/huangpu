@@ -127,7 +127,7 @@
                         render: function (data, type, row, meta) {
                             let deleteHtml = row["deleted"] === 0 ? '<a class="hasLink" title="删除" href="#" data-Url="javascript:deleteAssets(\'{0}\',{1},\'{2}\',\'{3}\',\'{4}\');">'
                                     .format($('#selectedAssetsType').val(), row["assetsID"], row["name"], row["address"], $('#assets option:selected').text()) +
-                                '<i class="ace-icon glyphicon glyphicon-trash brown bigger-120"></i></a>' : "";
+                                '<i class="ace-icon glyphicon glyphicon-trash brown bigger-110"></i></a>' : "";
 
                             return '<div class="hidden-sm hidden-xs action-buttons">' +
                                 '<a class="hasLink" title="编辑" href="#" data-Url="javascript:editAssets(\'{0}\',{1});">'.format($('#selectedAssetsType').val(), row["assetsID"]) +
@@ -136,8 +136,9 @@
                                 /* '<a target="_blank" title="定位" href="/map/drap.jspa?assetsID={0}">'.format(row["assetsID"]) +
                                  '<i class="ace-icon glyphicon glyphicon-map-marker blue bigger-120"></i>' +
                                  '</a> ' +*/
+
                                 '<a class="hasLink" title="新窗口定位" data-Url="javascript:drapWindow({0});">'.format(row["assetsID"]) +
-                                '<i class="ace-icon glyphicon glyphicon-new-window purple bigger-120"></i>' +
+                                '<i class="ace-icon glyphicon glyphicon-new-window purple bigger-110"></i>' +
                                 '</a> ' +
                                 '<a class="hasLink" title="扩展信息" href="#" data-Url="javascript:showExpandDialog(\'{0}\',{1},\'{2}\');">'.format($('#selectedAssetsType').val(), row["assetsID"], row["name"]) +
                                 '<i class="ace-icon glyphicon  glyphicon-equalizer maroon bigger-120"></i>' +

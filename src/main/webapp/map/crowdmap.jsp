@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>黄埔区新冠疫情流调地图</title>
     <link rel="stylesheet" href="https://a.amap.com/jsapi_demos/static/demo-center/css/demo-center.css"/>
+    <link rel="stylesheet" href="../assets/css/ace.min.css" class="ace-main-stylesheet" id="main-ace-style"/>
+    <link rel="stylesheet" href="../components/jquery-ui/jquery-ui.min.css"/>
     <style>
         html,
         body,
@@ -155,9 +157,16 @@
         <div class="input-item"><input id="knit" name="language" type="checkbox" checked="checked"><span class="input-text">密接(${knit})</span></div>
         <div class="input-item"><input id="subknit" name="language" type="checkbox" checked="checked"><span class="input-text">次密接(${subknit})</span></div>
         <div class="input-item"><input id="important" name="language" type="checkbox" checked="checked"><span class="input-text">重点人群(${important})</span></div>
+
+        <div class="input-item" id="spinner-opts">
+            <label class="inline" style="display: inline-block">
+                <small class="lighter">大小:</small>
+                <input class="hidden" id="pointSizeScale" type="text" data-min="5" data-max="50" data-step="5" value="15"/>
+            </label>
+        </div>
     </div>
 </div>
-<div class="input-card" style="width:31rem;left:10px;top:250px;bottom:auto;z-index: 100; "> <%--background: rgba(12,0,255,0.1)--%>
+<div class="input-card" style="width:31rem;left:10px;top:270px;bottom:auto;z-index: 100; "> <%--background: rgba(12,0,255,0.1)--%>
     <h4 style="font-weight: bold">街道</h4>
     <div id="coordinate2"></div>
 </div>
@@ -165,11 +174,13 @@
     <h1>黄埔区新冠疫情流调地图</h1>
 </div>
 <div id="map"></div>
+<script src="../js/jquery-3.5.1.js"></script>
+<script src="../components/jquery-ui/jquery-ui.min.js"></script>
 <script src="https://webapi.amap.com/maps?v=2.0&key=${key1}&plugin=AMap.Scale,AMap.ToolBar"></script>
 <script src="https://webapi.amap.com/loca?v=2.0.0&key=${key1}"></script>
 <script src="https://a.amap.com/jsapi_demos/static/demo-center/js/demoutils.js"></script>
 <script src="https://webapi.amap.com/ui/1.1/main.js?v=1.1.2"></script>
-<script src="/map/huangpu.js"></script>
+<script src="../map/huangpu.js"></script>
 
 <script>
     var map = new AMap.Map('map', {
@@ -243,7 +254,7 @@
             unit: 'px',
             //size: [50, 50],
             size: (index, f) => {
-                var n = Math.log(f.properties['highRisk'] + f.properties['knit'] + f.properties['subknit'] + f.properties['important']) * 10;
+                var n = Math.log(f.properties['highRisk'] + f.properties['knit'] + f.properties['subknit'] + f.properties['important']) * $("#pointSizeScale").val();
                 return [n, n];
             },
             texture: 'https://a.amap.com/Loca/static/loca-v2/demos/images/breath_yellow.png',
@@ -352,7 +363,11 @@
                 map.setCenter(filtMarker[0].position);
 
             /*massData.forEach(function (point) {
-                if (streetName === point.street && !(point.lnglat[0] > ${longitudeMax} || point.lnglat[0] < ${longitudeMin} || point.lnglat[1] > ${latitudeMax} || point.lnglat[1] < ${latitudeMin})) {
+                if (streetName === point.street && !(point.lnglat[0] >
+            ${longitudeMax} || point.lnglat[0] <
+            ${longitudeMin} || point.lnglat[1] >
+            ${latitudeMax} || point.lnglat[1] <
+            ${latitudeMin})) {
                     var hh = '<p>病人：<span style="color: #0288d1;font-weight:bold;">{patient}</span></p>' +
                         '<p>地址：<span style="color: #0288d1;font-weight:bold;">{address}</span></p>' +
                         '<p>停留时段：<span style="color: #0288d1;font-weight:bold;">{stayTime}</span></p>' +
@@ -370,8 +385,24 @@
             });*/
         }
 
+        $("#pointSizeScale").each(function () {
+            var $this = $(this);
+            $this.hide().after('<span />');
+            $this.next().addClass('ui-slider-small').addClass("inline ui-slider-red").css('width', '125px').slider({
+                value: parseInt($this.val()),
+                range: "min",
+                animate: true,
+                min: parseInt($this.attr('data-min')),
+                max: parseInt($this.attr('data-max')),
+                step: parseFloat($this.attr('data-step')) || 1,
+                slide: function (event, ui) {
+                    $this.val(ui.value);
+                    refreshCount();
+                }
+            });
+        });
         //绑定风险类型checkbox点击事件，重新累加风险人群数量
-        var radios2 = document.querySelectorAll("#coordinate input");
+        var radios2 = document.querySelectorAll("#coordinate input[type=checkbox]");
         radios2.forEach(function (ratio) {
             ratio.onclick = refreshCount;
         });
@@ -385,7 +416,7 @@
                     if ($('#knit').is(':checked')) ss += f.properties['knit'];
                     if ($('#subknit').is(':checked')) ss += f.properties['subknit'];
                     if ($('#important').is(':checked')) ss += f.properties['important'];
-                    let n = Math.log(ss) * 10;
+                    let n = Math.log(ss) * $("#pointSizeScale").val();
                     return [n, n];
                 },
                 texture: 'https://a.amap.com/Loca/static/loca-v2/demos/images/breath_red.png',
@@ -401,7 +432,7 @@
                     if ($('#knit').is(':checked')) ss += f.properties['knit'];
                     if ($('#subknit').is(':checked')) ss += f.properties['subknit'];
                     if ($('#important').is(':checked')) ss += f.properties['important'];
-                    let n = Math.log(ss) * 10;
+                    let n = Math.log(ss) * $("#pointSizeScale").val();
                     return [n, n];
                 },
                 texture: 'https://a.amap.com/Loca/static/loca-v2/demos/images/breath_yellow.png',
